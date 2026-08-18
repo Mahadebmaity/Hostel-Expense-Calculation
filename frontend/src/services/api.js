@@ -10,10 +10,17 @@ async function request(endpoint, options = {}) {
     ...options.headers,
   };
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
+  } catch (networkError) {
+    throw new Error(
+      'Unable to reach backend server. If running locally, make sure the Python FastAPI server is running (python -m uvicorn app.main:app --reload --port 8000). If on cloud (Render), please wait 30 seconds for the free instance to wake up.'
+    );
+  }
 
   if (response.status === 401) {
     localStorage.removeItem('access_token');
