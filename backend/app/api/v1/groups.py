@@ -49,6 +49,10 @@ def get_user_groups(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    # If admin, return all groups across the platform
+    if current_user.is_admin:
+        return db.query(Group).all()
+
     # Groups where user is a member
     memberships = db.query(GroupMember).filter(GroupMember.user_id == current_user.id).all()
     group_ids = [m.group_id for m in memberships]
@@ -65,13 +69,14 @@ def get_group_details(
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
     
-    # Check if member
-    is_member = db.query(GroupMember).filter(
-        GroupMember.group_id == group_id,
-        GroupMember.user_id == current_user.id
-    ).first()
-    if not is_member:
-        raise HTTPException(status_code=403, detail="Not a member of this group")
+    # Check if member or superadmin
+    if not current_user.is_admin:
+        is_member = db.query(GroupMember).filter(
+            GroupMember.group_id == group_id,
+            GroupMember.user_id == current_user.id
+        ).first()
+        if not is_member:
+            raise HTTPException(status_code=403, detail="Not a member of this group")
 
     return group
 
@@ -86,12 +91,13 @@ def update_group(
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
     
-    membership = db.query(GroupMember).filter(
-        GroupMember.group_id == group_id,
-        GroupMember.user_id == current_user.id
-    ).first()
-    if not membership or membership.role not in ["ADMIN", "MANAGER"]:
-        raise HTTPException(status_code=403, detail="Only Admins or Managers can update group settings")
+    if not current_user.is_admin:
+        membership = db.query(GroupMember).filter(
+            GroupMember.group_id == group_id,
+            GroupMember.user_id == current_user.id
+        ).first()
+        if not membership or membership.role not in ["ADMIN", "MANAGER"]:
+            raise HTTPException(status_code=403, detail="Only Admins or Managers can update group settings")
 
     if group_update.name is not None:
         group.name = group_update.name
@@ -146,12 +152,13 @@ def remove_group_member(
     db: Session = Depends(get_db)
 ):
     # Check permissions
-    membership = db.query(GroupMember).filter(
-        GroupMember.group_id == group_id,
-        GroupMember.user_id == current_user.id
-    ).first()
-    if not membership or membership.role != "ADMIN":
-        raise HTTPException(status_code=403, detail="Only Admins can remove members")
+    if not current_user.is_admin:
+        membership = db.query(GroupMember).filter(
+            GroupMember.group_id == group_id,
+            GroupMember.user_id == current_user.id
+        ).first()
+        if not membership or membership.role != "ADMIN":
+            raise HTTPException(status_code=403, detail="Only Admins can remove members")
 
     target_membership = db.query(GroupMember).filter(
         GroupMember.group_id == group_id,
@@ -172,12 +179,13 @@ def update_member_deposit(
     db: Session = Depends(get_db)
 ):
     # Admin or Manager can manage deposits
-    auth_member = db.query(GroupMember).filter(
-        GroupMember.group_id == group_id,
-        GroupMember.user_id == current_user.id
-    ).first()
-    if not auth_member or auth_member.role not in ["ADMIN", "MANAGER"]:
-        raise HTTPException(status_code=403, detail="Only Admins or Managers can update deposits")
+    if not current_user.is_admin:
+        auth_member = db.query(GroupMember).filter(
+            GroupMember.group_id == group_id,
+            GroupMember.user_id == current_user.id
+        ).first()
+        if not auth_member or auth_member.role not in ["ADMIN", "MANAGER"]:
+            raise HTTPException(status_code=403, detail="Only Admins or Managers can update deposits")
 
     target_member = db.query(GroupMember).filter(
         GroupMember.group_id == group_id,

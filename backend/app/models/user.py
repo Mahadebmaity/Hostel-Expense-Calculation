@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Column, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -12,6 +12,7 @@ class User(Base):
     email = Column(String(120), unique=True, index=True, nullable=False)
     phone = Column(String(20), nullable=True)
     upi_id = Column(String(100), nullable=True)  # For UPI QR code / instant settle
+    is_admin = Column(Boolean, default=False)
     password_hash = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 

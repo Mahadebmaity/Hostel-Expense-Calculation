@@ -78,5 +78,10 @@ export const api = {
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
-  }
+  },
+
+  // Admin
+  getAdminStats: () => request('/admin/stats'),
+  getAdminUsers: () => request('/admin/users'),
+  toggleAdminRole: (userId) => request(`/admin/users/${userId}/toggle-admin`, { method: 'POST' })
 };

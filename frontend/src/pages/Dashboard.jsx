@@ -9,6 +9,7 @@ import SettlementEngine from '../components/SettlementEngine';
 import AnalyticsCharts from '../components/AnalyticsCharts';
 import AddExpenseModal from '../components/AddExpenseModal';
 import GroupSettingsModal from '../components/GroupSettingsModal';
+import AdminPanel from '../components/AdminPanel';
 import { 
   Building2, 
   PlusCircle, 
@@ -17,7 +18,8 @@ import {
   Utensils, 
   Receipt, 
   PieChart, 
-  Sparkles 
+  Sparkles,
+  Crown
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -127,21 +129,38 @@ export default function Dashboard() {
         onSelectGroup={(g) => setSelectedGroup(g)}
         onOpenNewGroup={() => setShowNewGroupModal(true)}
         onOpenSettings={() => setShowGroupSettings(true)}
+        activeTab={activeTab}
+        onSwitchTab={(t) => setActiveTab(t)}
       />
 
       {/* Main Container */}
       <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', padding: '1.5rem 1.25rem', flex: 1 }}>
-        {/* If no groups exist yet */}
-        {!selectedGroup ? (
+        {/* If Admin tab is active */}
+        {activeTab === 'admin' ? (
+          <AdminPanel 
+            onSelectGroup={(g) => {
+              setSelectedGroup(g);
+              setActiveTab('overview');
+            }}
+            currentGroupId={selectedGroup?.id}
+          />
+        ) : !selectedGroup ? (
           <div className="glass-panel" style={{ padding: '3.5rem 2rem', textAlign: 'center', maxWidth: '500px', margin: '4rem auto' }}>
             <Building2 size={48} color="#3b82f6" style={{ marginBottom: '1rem' }} />
             <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.5rem' }}>No Groups Found</h2>
             <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1.5rem' }}>
               Create your first Hostel Mess, Flatmate group, or Trip Splitter to start managing expenses.
             </p>
-            <button onClick={() => setShowNewGroupModal(true)} className="btn btn-primary">
-              <PlusCircle size={16} /> Create New Group
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button onClick={() => setShowNewGroupModal(true)} className="btn btn-primary">
+                <PlusCircle size={16} /> Create New Group
+              </button>
+              {user?.is_admin && (
+                <button onClick={() => setActiveTab('admin')} className="btn btn-secondary">
+                  <Crown size={16} color="#ffd700" /> Open Admin Portal
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <>
@@ -198,6 +217,23 @@ export default function Dashboard() {
               >
                 <PieChart size={15} /> Analytics
               </button>
+
+              {user?.is_admin && (
+                <button
+                  onClick={() => setActiveTab('admin')}
+                  className={`btn ${activeTab === 'admin' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{
+                    padding: '0.45rem 0.95rem',
+                    fontSize: '0.82rem',
+                    background: activeTab === 'admin' ? 'linear-gradient(135deg, #8b5cf6, #ec4899)' : 'rgba(139, 92, 246, 0.12)',
+                    borderColor: 'rgba(139, 92, 246, 0.4)',
+                    color: '#f8fafc',
+                    marginLeft: 'auto'
+                  }}
+                >
+                  <Crown size={15} color="#ffd700" /> Admin & Users Directory
+                </button>
+              )}
             </div>
 
             {/* TAB CONTENT */}

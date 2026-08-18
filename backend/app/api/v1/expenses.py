@@ -74,14 +74,15 @@ def delete_expense(
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
 
-    # Check if user is payer or group admin
-    membership = db.query(GroupMember).filter(
-        GroupMember.group_id == expense.group_id,
-        GroupMember.user_id == current_user.id
-    ).first()
+    # Check if user is payer, group admin/manager, or system admin
+    if not current_user.is_admin:
+        membership = db.query(GroupMember).filter(
+            GroupMember.group_id == expense.group_id,
+            GroupMember.user_id == current_user.id
+        ).first()
 
-    if expense.paid_by != current_user.id and (not membership or membership.role not in ["ADMIN", "MANAGER"]):
-        raise HTTPException(status_code=403, detail="Not authorized to delete this expense")
+        if expense.paid_by != current_user.id and (not membership or membership.role not in ["ADMIN", "MANAGER"]):
+            raise HTTPException(status_code=403, detail="Not authorized to delete this expense")
 
     db.delete(expense)
     db.commit()

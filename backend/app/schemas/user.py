@@ -7,6 +7,7 @@ class UserBase(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
     upi_id: Optional[str] = None
+    is_admin: Optional[bool] = False
 
 class UserCreate(UserBase):
     password: str
@@ -22,6 +23,7 @@ class UserUpdate(BaseModel):
 
 class UserOut(UserBase):
     id: str
+    is_admin: bool = False
     created_at: datetime
 
     class Config:

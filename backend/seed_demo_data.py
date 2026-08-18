@@ -12,7 +12,14 @@ from app.models.settlement import Settlement
 from app.services.meal_engine import compute_meal_units
 
 def seed_data():
+    from sqlalchemy import text
     Base.metadata.create_all(bind=engine)
+    with engine.connect() as conn:
+        cols = [row[1] for row in conn.execute(text("PRAGMA table_info(users)")).fetchall()]
+        if cols and "is_admin" not in cols:
+            conn.execute(text("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT 0"))
+            conn.commit()
+
     db = SessionLocal()
 
     # Clear existing demo data
@@ -26,11 +33,12 @@ def seed_data():
 
     print("[*] Seeding Demo Users...")
     users = [
-        User(name="Mahadeb Maity", email="mahadeb@example.com", phone="9876543210", upi_id="mahadeb@oksbi", password_hash=get_password_hash("password123")),
-        User(name="Rahul Sharma", email="rahul@example.com", phone="9876543211", upi_id="rahul@okaxis", password_hash=get_password_hash("password123")),
-        User(name="Sourav Roy", email="sourav@example.com", phone="9876543212", upi_id="sourav@paytm", password_hash=get_password_hash("password123")),
-        User(name="Amit Das", email="amit@example.com", phone="9876543213", upi_id="amit@ybl", password_hash=get_password_hash("password123")),
-        User(name="Priya Sengupta", email="priya@example.com", phone="9876543214", upi_id="priya@ibl", password_hash=get_password_hash("password123")),
+        User(name="System Administrator", email="admin@hostel.com", phone="9876540000", upi_id="admin@okhdfc", is_admin=True, password_hash=get_password_hash("admin123")),
+        User(name="Mahadeb Maity", email="mahadeb@example.com", phone="9876543210", upi_id="mahadeb@oksbi", is_admin=True, password_hash=get_password_hash("password123")),
+        User(name="Rahul Sharma", email="rahul@example.com", phone="9876543211", upi_id="rahul@okaxis", is_admin=False, password_hash=get_password_hash("password123")),
+        User(name="Sourav Roy", email="sourav@example.com", phone="9876543212", upi_id="sourav@paytm", is_admin=False, password_hash=get_password_hash("password123")),
+        User(name="Amit Das", email="amit@example.com", phone="9876543213", upi_id="amit@ybl", is_admin=False, password_hash=get_password_hash("password123")),
+        User(name="Priya Sengupta", email="priya@example.com", phone="9876543214", upi_id="priya@ibl", is_admin=False, password_hash=get_password_hash("password123")),
     ]
     for u in users:
         db.add(u)
@@ -53,8 +61,8 @@ def seed_data():
     db.commit()
     db.refresh(mess_group)
 
-    deposits = [2500.0, 2000.0, 2000.0, 1500.0, 2000.0]
-    roles = ["ADMIN", "MANAGER", "MEMBER", "MEMBER", "MEMBER"]
+    deposits = [3000.0, 2500.0, 2000.0, 2000.0, 1500.0, 2000.0]
+    roles = ["ADMIN", "ADMIN", "MANAGER", "MEMBER", "MEMBER", "MEMBER"]
     for i, u in enumerate(users):
         member = GroupMember(
             group_id=mess_group.id,

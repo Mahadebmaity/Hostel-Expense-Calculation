@@ -11,7 +11,8 @@ import {
   PlusCircle, 
   Check, 
   Copy,
-  ChevronDown
+  ChevronDown,
+  Crown
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -19,7 +20,9 @@ export default function Navbar({
   selectedGroup, 
   onSelectGroup, 
   onOpenNewGroup, 
-  onOpenSettings 
+  onOpenSettings,
+  activeTab,
+  onSwitchTab
 }) {
   const { user, logout, updateProfileState } = useAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -152,6 +155,34 @@ export default function Navbar({
               style={{ cursor: 'pointer', border: 'none', padding: '0.35rem 0.75rem' }}
             >
               + Add UPI ID
+            </button>
+          )}
+
+          {/* Admin Badge / Switcher */}
+          {user?.is_admin && (
+            <button
+              onClick={() => onSwitchTab && onSwitchTab('admin')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                background: activeTab === 'admin' 
+                  ? 'linear-gradient(135deg, #8b5cf6, #ec4899)' 
+                  : 'rgba(139, 92, 246, 0.18)',
+                border: '1px solid rgba(139, 92, 246, 0.4)',
+                borderRadius: '10px',
+                padding: '0.35rem 0.75rem',
+                color: '#f8fafc',
+                cursor: 'pointer',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                boxShadow: activeTab === 'admin' ? '0 0 12px rgba(139, 92, 246, 0.5)' : 'none',
+                transition: 'all 0.2s'
+              }}
+              title="Open System Admin & Users Control Panel"
+            >
+              <Crown size={14} color="#ffd700" />
+              <span>ADMIN PORTAL</span>
             </button>
           )}
 

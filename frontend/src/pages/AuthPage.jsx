@@ -205,6 +205,56 @@ export default function AuthPage() {
               {loading ? 'Please wait...' : (isLogin ? 'Sign In to Dashboard' : 'Register Account')}
             </button>
           </form>
+
+          {isLogin && (
+            <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              <p style={{ fontSize: '0.72rem', color: '#94a3b8', marginBottom: '0.5rem', textAlign: 'center' }}>
+                Quick Fill Credentials:
+              </p>
+              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('admin@hostel.com');
+                    setPassword('admin123');
+                  }}
+                  style={{
+                    background: 'rgba(139, 92, 246, 0.15)',
+                    border: '1px solid rgba(139, 92, 246, 0.35)',
+                    color: '#c084fc',
+                    borderRadius: '20px',
+                    padding: '0.25rem 0.65rem',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                  title="Superadmin credentials"
+                >
+                  👑 Admin (admin@hostel.com)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('mahadeb@example.com');
+                    setPassword('password123');
+                  }}
+                  style={{
+                    background: 'rgba(59, 130, 246, 0.12)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    color: '#60a5fa',
+                    borderRadius: '20px',
+                    padding: '0.25rem 0.65rem',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                  title="Demo user credentials"
+                >
+                  👤 Demo User (mahadeb@example.com)
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
