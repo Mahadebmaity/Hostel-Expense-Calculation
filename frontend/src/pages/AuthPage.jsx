@@ -205,31 +205,6 @@ export default function AuthPage() {
               {loading ? 'Please wait...' : (isLogin ? 'Sign In to Dashboard' : 'Register Account')}
             </button>
           </form>
-
-          {/* Quick Demo Login Option */}
-          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <p style={{ fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center', marginBottom: '0.65rem' }}>
-              ⚡ Or test with pre-seeded demo profiles:
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('mahadeb@example.com')}
-                className="btn btn-secondary"
-                style={{ fontSize: '0.75rem', padding: '0.45rem' }}
-              >
-                Mahadeb (Admin)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('rahul@example.com')}
-                className="btn btn-secondary"
-                style={{ fontSize: '0.75rem', padding: '0.45rem' }}
-              >
-                Rahul (Manager)
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
