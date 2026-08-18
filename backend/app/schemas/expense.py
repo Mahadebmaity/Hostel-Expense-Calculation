@@ -26,6 +26,7 @@ class ExpenseBase(BaseModel):
     is_fixed_cost: bool = False
     receipt_url: Optional[str] = None
     expense_date: Optional[date] = None
+    paid_by: Optional[str] = None
 
 class ExpenseCreate(ExpenseBase):
     splits: Optional[List[ExpenseSplitCreate]] = []

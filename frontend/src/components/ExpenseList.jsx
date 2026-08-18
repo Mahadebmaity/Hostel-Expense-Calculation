@@ -10,8 +10,15 @@ import {
   Flame, 
   Home, 
   Coffee, 
-  Sparkles,
-  Layers
+  Sparkles, 
+  Layers,
+  ChevronDown,
+  ChevronUp,
+  Users,
+  Utensils,
+  Percent,
+  Sliders,
+  DollarSign
 } from 'lucide-react';
 
 const CATEGORY_ICONS = {
@@ -25,6 +32,62 @@ const CATEGORY_ICONS = {
   OTHER: <Receipt size={14} color="#94a3b8" />
 };
 
+function getSplitBadge(exp) {
+  if (exp.is_fixed_cost) {
+    return {
+      label: 'Fixed Shared Bill',
+      icon: <Home size={12} />,
+      style: { background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', borderColor: 'rgba(245, 158, 11, 0.3)' }
+    };
+  }
+
+  switch (exp.split_type) {
+    case 'MEAL_BASED':
+      return {
+        label: 'Meal-rate split',
+        icon: <Utensils size={12} />,
+        style: { background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }
+      };
+    case 'EQUAL_CUSTOM':
+      return {
+        label: `Selected subset (${exp.splits?.length || 'subset'} members)`,
+        icon: <Users size={12} />,
+        style: { background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }
+      };
+    case 'EXACT':
+      return {
+        label: 'Exact amounts split',
+        icon: <DollarSign size={12} />,
+        style: { background: 'rgba(139, 92, 246, 0.15)', color: '#c084fc', borderColor: 'rgba(139, 92, 246, 0.3)' }
+      };
+    case 'PERCENTAGE':
+      return {
+        label: 'Percentage split',
+        icon: <Percent size={12} />,
+        style: { background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }
+      };
+    case 'SHARES':
+      return {
+        label: 'Shares / Ratio split',
+        icon: <Sliders size={12} />,
+        style: { background: 'rgba(20, 184, 166, 0.15)', color: '#2dd4bf', borderColor: 'rgba(20, 184, 166, 0.3)' }
+      };
+    case 'ADJUSTMENT':
+      return {
+        label: 'Adjusted split',
+        icon: <Sliders size={12} />,
+        style: { background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', borderColor: 'rgba(99, 102, 241, 0.3)' }
+      };
+    case 'EQUAL':
+    default:
+      return {
+        label: 'Equally divided',
+        icon: <Users size={12} />,
+        style: { background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }
+      };
+  }
+}
+
 export default function ExpenseList({ 
   group, 
   expenses, 
@@ -34,6 +97,7 @@ export default function ExpenseList({
 }) {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [search, setSearch] = useState('');
+  const [expandedExpenseId, setExpandedExpenseId] = useState(null);
 
   const curr = group?.currency === 'INR' ? '₹' : (group?.currency || '₹');
 
@@ -130,72 +194,150 @@ export default function ExpenseList({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
           {filteredExpenses.map(exp => {
             const isPayer = exp.paid_by === currentUserId;
+            const badge = getSplitBadge(exp);
+            const isExpanded = expandedExpenseId === exp.id;
+            const hasCustomSplits = exp.splits && exp.splits.length > 0;
 
             return (
               <div
                 key={exp.id}
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '0.75rem',
-                  padding: '0.85rem 1.15rem',
+                  flexDirection: 'column',
                   background: 'rgba(15, 23, 42, 0.5)',
                   borderRadius: '12px',
-                  border: '1px solid rgba(255, 255, 255, 0.05)'
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  overflow: 'hidden'
                 }}
               >
-                {/* Left: Icon & Info */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                  <div style={{
-                    padding: '0.55rem',
-                    borderRadius: '10px',
-                    background: 'rgba(255, 255, 255, 0.05)',
+                {/* Main Row */}
+                <div
+                  style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    {CATEGORY_ICONS[exp.category] || <Receipt size={16} />}
-                  </div>
-
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f8fafc' }}>
-                        {exp.title}
-                      </h4>
-                      {exp.is_fixed_cost && (
-                        <span className="badge" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)', fontSize: '0.65rem' }}>
-                          Fixed Utility
-                        </span>
-                      )}
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '0.75rem',
+                    padding: '0.85rem 1.15rem'
+                  }}
+                >
+                  {/* Left: Icon & Info */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                    <div style={{
+                      padding: '0.55rem',
+                      borderRadius: '10px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {CATEGORY_ICONS[exp.category] || <Receipt size={16} />}
                     </div>
-                    <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.15rem' }}>
-                      Paid by <strong style={{ color: isPayer ? '#60a5fa' : '#cbd5e1' }}>{isPayer ? 'You' : exp.payer?.name}</strong> • {exp.expense_date} • <span style={{ textTransform: 'capitalize' }}>{exp.category.toLowerCase()}</span>
-                    </p>
+
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f8fafc' }}>
+                          {exp.title}
+                        </h4>
+                        
+                        {/* Split Badge */}
+                        <span 
+                          className="badge" 
+                          style={{ 
+                            ...badge.style, 
+                            border: '1px solid',
+                            fontSize: '0.65rem',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem'
+                          }}
+                        >
+                          {badge.icon} {badge.label}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.15rem' }}>
+                        Paid by <strong style={{ color: isPayer ? '#60a5fa' : '#cbd5e1' }}>{isPayer ? 'You' : exp.payer?.name}</strong> • {exp.expense_date} • <span style={{ textTransform: 'capitalize' }}>{exp.category.toLowerCase()}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right: Amount & Actions */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc' }}>
+                        {curr}{exp.amount.toFixed(2)}
+                      </span>
+                    </div>
+
+                    {/* Expand breakdown if custom splits exist */}
+                    {hasCustomSplits && (
+                      <button
+                        onClick={() => setExpandedExpenseId(isExpanded ? null : exp.id)}
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#94a3b8',
+                          borderRadius: '6px',
+                          padding: '0.35rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                        title={isExpanded ? "Hide split details" : "View split details"}
+                      >
+                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => handleDelete(exp.id)}
+                      className="btn btn-secondary"
+                      style={{ padding: '0.4rem', borderRadius: '8px', color: '#ef4444' }}
+                      title="Delete expense"
+                    >
+                      <Trash2 size={15} />
+                    </button>
                   </div>
                 </div>
 
-                {/* Right: Amount & Delete */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc' }}>
-                      {curr}{exp.amount.toFixed(2)}
+                {/* Expanded Split Details */}
+                {isExpanded && hasCustomSplits && (
+                  <div style={{
+                    padding: '0.75rem 1.15rem',
+                    background: 'rgba(10, 15, 26, 0.6)',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.35rem'
+                  }}>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>
+                      Individual Share Breakdown:
                     </span>
-                    <p style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                      {exp.split_type === 'MEAL_BASED' ? 'Meal-rate split' : 'Equally divided'}
-                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      {exp.splits.map(sp => (
+                        <div
+                          key={sp.id || sp.user_id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            padding: '0.3rem 0.6rem',
+                            borderRadius: '6px',
+                            background: 'rgba(255, 255, 255, 0.04)',
+                            border: '1px solid rgba(255, 255, 255, 0.06)',
+                            fontSize: '0.76rem'
+                          }}
+                        >
+                          <span style={{ color: '#cbd5e1' }}>{sp.user?.name || 'Member'}:</span>
+                          <strong style={{ color: '#60a5fa' }}>{curr}{sp.share_amount?.toFixed(2)}</strong>
+                          {sp.percentage > 0 && (
+                            <span style={{ color: '#94a3b8', fontSize: '0.68rem' }}>({sp.percentage}%)</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-
-                  <button
-                    onClick={() => handleDelete(exp.id)}
-                    className="btn btn-secondary"
-                    style={{ padding: '0.4rem', borderRadius: '8px', color: '#ef4444' }}
-                    title="Delete expense"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
+                )}
               </div>
             );
           })}

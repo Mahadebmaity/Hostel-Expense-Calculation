@@ -22,9 +22,19 @@ def create_expense(
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
 
+    payer_id = current_user.id
+    if expense_in.paid_by:
+        # Check if the specified payer is a member of the group or system admin
+        payer_member = db.query(GroupMember).filter(
+            GroupMember.group_id == group_id,
+            GroupMember.user_id == expense_in.paid_by
+        ).first()
+        if payer_member or current_user.is_admin:
+            payer_id = expense_in.paid_by
+
     new_expense = Expense(
         group_id=group_id,
-        paid_by=current_user.id,
+        paid_by=payer_id,
         title=expense_in.title,
         amount=expense_in.amount,
         category=expense_in.category,
