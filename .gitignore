@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Database
+*.sqlite3
+*.db
+*.sqlite
+
+# PDF Exports & Temp uploads
+uploads/
+generated_reports/
+*.pdf
+
+# Node / Frontend
+node_modules/
+dist/
+build/
+.next/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
