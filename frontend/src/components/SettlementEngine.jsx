@@ -103,7 +103,7 @@ export default function SettlementEngine({
             <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Nobody in this group owes anything right now.</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '0.85rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', gap: '0.85rem', marginBottom: '2rem' }}>
             {simplified.map((tx, idx) => {
               const isMyDebt = tx.payer_id === currentUserId;
               const isMyCredit = tx.payee_id === currentUserId;

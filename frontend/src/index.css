@@ -281,46 +281,112 @@ body {
   }
 
   nav > div {
+    display: flex !important;
     justify-content: space-between !important;
+    align-items: center !important;
     width: 100% !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  nav select {
+    max-width: 170px !important;
   }
 
   .glass-panel {
-    padding: 1.1rem !important;
+    padding: 1rem !important;
     border-radius: var(--radius-md) !important;
   }
 
   .modal-content {
     padding: 1.25rem !important;
-    width: 96% !important;
-    max-height: 92vh !important;
+    width: 95% !important;
+    max-height: 90vh !important;
+    margin: auto !important;
+  }
+
+  /* Prevent auto zoom on iOS Safari */
+  .form-input, .form-select, input, select {
+    font-size: 16px !important;
+  }
+
+  /* Metric cards 2-col or 1-col on mobile */
+  .metric-cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Daily meal tracker items on mobile */
+  .meal-member-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+
+  .meal-counters-container {
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+
+  /* Tab bar momentum scrolling on touch devices */
+  .tabs-nav-bar {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs-nav-bar::-webkit-scrollbar {
+    display: none;
   }
 
   h1 {
-    font-size: 1.85rem !important;
+    font-size: 1.65rem !important;
   }
 
   h2 {
-    font-size: 1.45rem !important;
+    font-size: 1.35rem !important;
   }
 }
 
 @media (max-width: 480px) {
+  body {
+    padding-bottom: 2rem;
+  }
+
   nav h1 {
-    font-size: 0.98rem !important;
+    font-size: 1rem !important;
+  }
+
+  nav select {
+    max-width: 130px !important;
+    font-size: 0.78rem !important;
   }
 
   .btn {
-    padding: 0.5rem 0.85rem !important;
-    font-size: 0.8rem !important;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.78rem !important;
   }
 
-  .form-input, .form-select {
-    padding: 0.6rem 0.75rem !important;
-    font-size: 0.85rem !important;
+  .badge {
+    font-size: 0.7rem !important;
+    padding: 0.18rem 0.45rem !important;
+  }
+
+  /* Make settlement cards and expense items full width on mobile */
+  .settlement-card, .expense-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  .settlement-action, .expense-action {
+    width: 100% !important;
+    justify-content: flex-end !important;
   }
 
   table {
     font-size: 0.75rem !important;
+  }
+
+  th, td {
+    padding: 0.5rem 0.6rem !important;
   }
 }

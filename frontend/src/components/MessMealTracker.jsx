@@ -207,12 +207,13 @@ export default function MessMealTracker({ group, onMealUpdated }) {
               return (
                 <div
                   key={member.user_id}
+                  className="meal-member-row"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     flexWrap: 'wrap',
-                    gap: '1rem',
+                    gap: '0.85rem',
                     background: 'rgba(15, 23, 42, 0.6)',
                     padding: '0.85rem 1.25rem',
                     borderRadius: '12px',
@@ -220,7 +221,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                   }}
                 >
                   {/* Member Info */}
-                  <div style={{ minWidth: '150px' }}>
+                  <div style={{ minWidth: '130px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>{member.user.name}</span>
                       <span className="badge badge-settled" style={{ fontSize: '0.68rem', padding: '0.15rem 0.45rem' }}>
@@ -233,26 +234,26 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                   </div>
 
                   {/* Meal Counters (Breakfast, Lunch, Dinner) */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+                  <div className="meal-counters-container" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                     {/* Breakfast */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                       <Coffee size={15} color="#60a5fa" />
                       <span style={{ fontSize: '0.78rem', color: '#94a3b8', width: '22px' }}>Brk</span>
                       <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(0, 0, 0, 0.3)', borderRadius: '6px', padding: '0.15rem' }}>
                         <button
                           type="button"
                           onClick={() => updateMealCount(member.user_id, 'breakfast', -1)}
-                          style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
+                          style={{ width: '26px', height: '26px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
                         >
                           -
                         </button>
-                        <span style={{ width: '28px', textAlign: 'center', fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
+                        <span style={{ width: '26px', textAlign: 'center', fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
                           {entry.breakfast_count}
                         </span>
                         <button
                           type="button"
                           onClick={() => updateMealCount(member.user_id, 'breakfast', 1)}
-                          style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
+                          style={{ width: '26px', height: '26px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
                         >
                           +
                         </button>
@@ -260,24 +261,24 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                     </div>
 
                     {/* Lunch */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                       <Sun size={15} color="#fbbf24" />
                       <span style={{ fontSize: '0.78rem', color: '#94a3b8', width: '22px' }}>Lun</span>
                       <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(0, 0, 0, 0.3)', borderRadius: '6px', padding: '0.15rem' }}>
                         <button
                           type="button"
                           onClick={() => updateMealCount(member.user_id, 'lunch', -1)}
-                          style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
+                          style={{ width: '26px', height: '26px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
                         >
                           -
                         </button>
-                        <span style={{ width: '28px', textAlign: 'center', fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
+                        <span style={{ width: '26px', textAlign: 'center', fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
                           {entry.lunch_count}
                         </span>
                         <button
                           type="button"
                           onClick={() => updateMealCount(member.user_id, 'lunch', 1)}
-                          style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
+                          style={{ width: '26px', height: '26px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
                         >
                           +
                         </button>
@@ -285,24 +286,24 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                     </div>
 
                     {/* Dinner */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                       <Moon size={15} color="#c084fc" />
                       <span style={{ fontSize: '0.78rem', color: '#94a3b8', width: '22px' }}>Din</span>
                       <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(0, 0, 0, 0.3)', borderRadius: '6px', padding: '0.15rem' }}>
                         <button
                           type="button"
                           onClick={() => updateMealCount(member.user_id, 'dinner', -1)}
-                          style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
+                          style={{ width: '26px', height: '26px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
                         >
                           -
                         </button>
-                        <span style={{ width: '28px', textAlign: 'center', fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
+                        <span style={{ width: '26px', textAlign: 'center', fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
                           {entry.dinner_count}
                         </span>
                         <button
                           type="button"
                           onClick={() => updateMealCount(member.user_id, 'dinner', 1)}
-                          style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
+                          style={{ width: '26px', height: '26px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
                         >
                           +
                         </button>

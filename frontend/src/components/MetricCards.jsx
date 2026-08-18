@@ -20,7 +20,7 @@ export default function MetricCards({ balances, currentUserId }) {
   const isMess = balances.group_type === 'MESS';
 
   return (
-    <div style={{
+    <div className="metric-cards-grid" style={{
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
       gap: '1rem',

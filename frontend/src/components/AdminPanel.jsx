@@ -92,10 +92,12 @@ export default function AdminPanel({ onSelectGroup, currentGroupId }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
       {/* Superadmin Header Banner */}
       <div className="glass-panel" style={{
-        padding: '1.5rem 1.75rem',
+        padding: '1.25rem 1.5rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '1rem',
         background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.95))',
         border: '1px solid rgba(139, 92, 246, 0.3)',
         borderRadius: '16px',

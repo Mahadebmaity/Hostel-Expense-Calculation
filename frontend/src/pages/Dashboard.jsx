@@ -168,13 +168,14 @@ export default function Dashboard() {
             <MetricCards balances={balances} currentUserId={user?.id} />
 
             {/* Navigation Tabs */}
-            <div style={{
+            <div className="tabs-nav-bar" style={{
               display: 'flex',
               gap: '0.5rem',
               overflowX: 'auto',
               marginBottom: '1.5rem',
               borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-              paddingBottom: '0.75rem'
+              paddingBottom: '0.75rem',
+              whiteSpace: 'nowrap'
             }}>
               <button
                 onClick={() => setActiveTab('overview')}
