@@ -14,16 +14,23 @@ def init_db_and_admin():
     from app.models.user import User
     from app.core.security import get_password_hash
 
+    # 1. Check and add is_admin column if missing (Works on PostgreSQL and SQLite)
+    try:
+        with engine.connect() as conn:
+            if engine.dialect.name == "sqlite":
+                columns = [row[1] for row in conn.execute(text("PRAGMA table_info(users)")).fetchall()]
+                if columns and "is_admin" not in columns:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT 0"))
+                    conn.commit()
+            elif engine.dialect.name == "postgresql":
+                conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE"))
+                conn.commit()
+    except Exception as e:
+        print(f"[!] Migration notice: {e}")
+
+    # 2. Ensure Admin and Demo accounts are configured
     db = SessionLocal()
     try:
-        # Check SQLite table columns
-        with engine.connect() as conn:
-            columns = [row[1] for row in conn.execute(text("PRAGMA table_info(users)")).fetchall()]
-            if columns and "is_admin" not in columns:
-                conn.execute(text("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT 0"))
-                conn.commit()
-
-        # Ensure default Admin account exists
         admin = db.query(User).filter(User.email == "admin@hostel.com").first()
         if not admin:
             admin = User(
@@ -41,13 +48,30 @@ def init_db_and_admin():
                 admin.is_admin = True
                 db.commit()
 
-        # Ensure mahadeb also has admin privileges
         mahadeb = db.query(User).filter(User.email == "mahadeb@example.com").first()
-        if mahadeb and not mahadeb.is_admin:
-            mahadeb.is_admin = True
+        if mahadeb:
+            if not mahadeb.is_admin:
+                mahadeb.is_admin = True
+                db.commit()
+        else:
+            mahadeb = User(
+                name="Mahadeb Maity",
+                email="mahadeb@example.com",
+                phone="9876543210",
+                upi_id="mahadeb@oksbi",
+                is_admin=True,
+                password_hash=get_password_hash("password123")
+            )
+            db.add(mahadeb)
             db.commit()
+
+        # If database has no groups, auto seed demo mess data
+        from app.models.group import Group
+        if db.query(Group).count() == 0:
+            from seed_demo_data import seed_data
+            seed_data()
     except Exception as e:
-        print(f"[!] Startup DB init error (non-fatal): {e}")
+        print(f"[!] Startup admin/seed error: {e}")
     finally:
         db.close()
 
