@@ -1,4 +1,6 @@
 import os
+from contextlib import asynccontextmanager
+import threading
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
@@ -6,16 +8,19 @@ from app.core.database import engine, Base
 import app.models  # Ensure all models are loaded before table creation
 from app.api.router import api_router
 
-# Auto-create tables on startup (works seamlessly for SQLite / PostgreSQL)
-Base.metadata.create_all(bind=engine)
-
 def init_db_and_admin():
+    # 1. Create tables if missing
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"[!] Table creation note: {e}")
+
     from sqlalchemy import text
     from app.core.database import SessionLocal
     from app.models.user import User
     from app.core.security import get_password_hash
 
-    # 1. Check and add columns if missing (Works on PostgreSQL and SQLite)
+    # 2. Check and add columns if missing (Works on PostgreSQL and SQLite)
     try:
         with engine.connect() as conn:
             if engine.dialect.name == "sqlite":
@@ -84,7 +89,7 @@ def init_db_and_admin():
     except Exception as e:
         print(f"[!] Migration notice: {e}")
 
-    # 2. Ensure Admin and Demo accounts are configured
+    # 3. Ensure Admin and Demo accounts are configured
     db = SessionLocal()
     try:
         admin = db.query(User).filter(User.email == "admin@hostel.com").first()
@@ -121,17 +126,22 @@ def init_db_and_admin():
             db.add(mahadeb)
             db.commit()
 
-        # If database has no groups, auto seed demo mess data
-        from app.models.group import Group
-        if db.query(Group).count() == 0:
-            from seed_demo_data import seed_data
-            seed_data()
+        # If SQLite and database has no groups, auto seed demo mess data
+        if engine.dialect.name == "sqlite":
+            from app.models.group import Group
+            if db.query(Group).count() == 0:
+                from seed_demo_data import seed_data
+                seed_data()
     except Exception as e:
         print(f"[!] Startup admin/seed error: {e}")
     finally:
         db.close()
 
-init_db_and_admin()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize DB in background thread so Uvicorn binds to port instantly
+    threading.Thread(target=init_db_and_admin, daemon=True).start()
+    yield
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -139,6 +149,7 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url=f"{settings.API_V1_STR}/docs",
     redoc_url=f"{settings.API_V1_STR}/redoc",
+    lifespan=lifespan,
 )
 
 # Enable CORS for frontend integration
