@@ -100,19 +100,25 @@ export default function Navbar({
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: '#f8fafc',
+                color: selectedGroup ? '#f8fafc' : '#94a3b8',
                 fontSize: '0.85rem',
                 fontWeight: 600,
                 outline: 'none',
                 padding: '0.35rem 0.5rem',
-                cursor: 'pointer'
+                cursor: groups && groups.length > 0 ? 'pointer' : 'default'
               }}
             >
-              {groups.map(g => (
-                <option key={g.id} value={g.id} style={{ background: '#111827', color: '#fff' }}>
-                  {g.group_type === 'MESS' ? '🏨 ' : g.group_type === 'TRIP' ? '✈️ ' : '🏠 '} {g.name}
+              {groups && groups.length > 0 ? (
+                groups.map(g => (
+                  <option key={g.id} value={g.id} style={{ background: '#111827', color: '#fff' }}>
+                    {g.group_type === 'MESS' ? '🏨 ' : g.group_type === 'TRIP' ? '✈️ ' : '🏠 '} {g.name}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled style={{ background: '#111827', color: '#94a3b8' }}>
+                  🚫 No Group
                 </option>
-              ))}
+              )}
             </select>
           </div>
 

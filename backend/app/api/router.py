@@ -11,3 +11,7 @@ api_router.include_router(settlements.router)
 api_router.include_router(reports.router)
 api_router.include_router(admin.router)
 
+@api_router.get("/health")
+def health_check():
+    return {"status": "ok", "healthy": True}
+

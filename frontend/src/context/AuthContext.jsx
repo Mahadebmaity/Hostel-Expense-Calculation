@@ -9,26 +9,40 @@ export function AuthProvider({ children }) {
     return saved ? JSON.parse(saved) : null;
   });
   const [token, setToken] = useState(() => localStorage.getItem('access_token'));
-  const [loading, setLoading] = useState(true);
+  // Fast instant boot: if no token or cached user exists, don't block the UI
+  const [loading, setLoading] = useState(() => {
+    const savedToken = localStorage.getItem('access_token');
+    const savedUser = localStorage.getItem('current_user');
+    return Boolean(savedToken && !savedUser);
+  });
 
   useEffect(() => {
+    let isMounted = true;
     async function loadUser() {
       if (token) {
         try {
           const profile = await api.getProfile();
-          setUser(profile);
-          localStorage.setItem('current_user', JSON.stringify(profile));
-        } catch {
-          logout();
+          if (isMounted) {
+            setUser(profile);
+            localStorage.setItem('current_user', JSON.stringify(profile));
+          }
+        } catch (err) {
+          // If explicitly unauthorized, log out; otherwise keep cached session
+          if (err.message && err.message.includes('401')) {
+            logout();
+          }
         }
       }
-      setLoading(false);
+      if (isMounted) setLoading(false);
     }
     loadUser();
 
     const handleLogout = () => logout();
     window.addEventListener('auth-logout', handleLogout);
-    return () => window.removeEventListener('auth-logout', handleLogout);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('auth-logout', handleLogout);
+    };
   }, [token]);
 
   const login = (authData) => {

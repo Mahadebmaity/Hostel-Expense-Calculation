@@ -34,9 +34,16 @@ async function request(endpoint, options = {}) {
   }
 
   // Handle binary PDF downloads
-  const contentType = response.headers.get('content-type');
-  if (contentType && contentType.includes('application/pdf')) {
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/pdf')) {
     return response.blob();
+  }
+
+  // Handle accidental HTML response (e.g., static server fallback when backend URL is missing)
+  if (contentType.includes('text/html')) {
+    throw new Error(
+      'Received HTML instead of JSON from API. Ensure your backend FastAPI service is running and VITE_API_URL is properly configured.'
+    );
   }
 
   return response.json();
@@ -101,5 +108,13 @@ export const api = {
   // Admin
   getAdminStats: () => request('/admin/stats'),
   getAdminUsers: () => request('/admin/users'),
-  toggleAdminRole: (userId) => request(`/admin/users/${userId}/toggle-admin`, { method: 'POST' })
+  toggleAdminRole: (userId) => request(`/admin/users/${userId}/toggle-admin`, { method: 'POST' }),
+
+  // Health / Warmup
+  warmup: () => fetch(`${API_BASE_URL}/health`).catch(() => {})
 };
+
+// Non-blocking warmup ping on initial frontend load
+try {
+  api.warmup();
+} catch (_) {}
