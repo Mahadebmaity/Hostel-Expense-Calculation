@@ -5,22 +5,31 @@ from app.schemas.user import UserOut
 
 class GroupMemberOut(BaseModel):
     id: str
-    user_id: str
+    user_id: Optional[str] = None
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    upi_id: Optional[str] = None
+    is_virtual: Optional[str] = "true"
     role: str
     initial_deposit: float
     joined_at: datetime
-    user: UserOut
+    user: Optional[UserOut] = None
 
     class Config:
         from_attributes = True
 
 class GroupMemberAdd(BaseModel):
-    email: str
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    upi_id: Optional[str] = None
     role: str = "MEMBER"  # ADMIN, MANAGER, MEMBER
     initial_deposit: float = 0.0
 
 class GroupDepositUpdate(BaseModel):
-    user_id: str
+    member_id: Optional[str] = None
+    user_id: Optional[str] = None
     amount: float  # Amount to add or set
     operation: str = "ADD"  # ADD or SET
 
@@ -32,7 +41,8 @@ class GroupBase(BaseModel):
     settings: Dict[str, Any] = Field(default_factory=lambda: {
         "breakfast_weight": 0.5,
         "lunch_weight": 1.0,
-        "dinner_weight": 1.0
+        "dinner_weight": 1.0,
+        "guest_rates": {"veg": 40.0, "fish": 50.0, "meat": 75.0}
     })
 
 class GroupCreate(GroupBase):
@@ -41,6 +51,7 @@ class GroupCreate(GroupBase):
 class GroupUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+    group_type: Optional[str] = None
     currency: Optional[str] = None
     settings: Optional[Dict[str, Any]] = None
 

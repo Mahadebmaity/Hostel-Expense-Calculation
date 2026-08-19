@@ -19,7 +19,13 @@ import {
   Receipt, 
   PieChart, 
   Sparkles,
-  Crown
+  Crown,
+  UserPlus,
+  BookOpen,
+  Plane,
+  Home,
+  Sliders,
+  Settings
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -36,6 +42,14 @@ export default function Dashboard() {
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showGroupSettings, setShowGroupSettings] = useState(false);
   const [showNewGroupModal, setShowNewGroupModal] = useState(false);
+  const [showQuickAddMemberModal, setShowQuickAddMemberModal] = useState(false);
+
+  // Quick Add Member Form
+  const [quickMemberName, setQuickMemberName] = useState('');
+  const [quickMemberDeposit, setQuickMemberDeposit] = useState('');
+  const [quickMemberRole, setQuickMemberRole] = useState('MEMBER');
+  const [quickMemberUpi, setQuickMemberUpi] = useState('');
+  const [addingMember, setAddingMember] = useState(false);
 
   // New Group Form
   const [newGroupName, setNewGroupName] = useState('');
@@ -110,6 +124,30 @@ export default function Dashboard() {
     }
   };
 
+  const handleQuickAddMember = async (e) => {
+    e.preventDefault();
+    if (!quickMemberName.trim()) return;
+    setAddingMember(true);
+    try {
+      await api.addMember(selectedGroup.id, {
+        name: quickMemberName.trim(),
+        role: quickMemberRole,
+        upi_id: quickMemberUpi.trim() || undefined,
+        initial_deposit: parseFloat(quickMemberDeposit) || 0.0
+      });
+      setQuickMemberName('');
+      setQuickMemberDeposit('');
+      setQuickMemberUpi('');
+      setShowQuickAddMemberModal(false);
+      await refreshGroupData();
+      alert('Member added successfully!');
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setAddingMember(false);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', flexDirection: 'column', gap: '1rem' }}>
@@ -119,6 +157,10 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  const isMess = selectedGroup?.group_type === 'MESS';
+  const isTrip = selectedGroup?.group_type === 'TRIP';
+  const isFlat = selectedGroup?.group_type === 'FLATMATES';
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -164,6 +206,59 @@ export default function Dashboard() {
           </div>
         ) : (
           <>
+            {/* Group Banner / Quick Actions Bar */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.85))',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '16px',
+              padding: '1.1rem 1.4rem',
+              marginBottom: '1.5rem'
+            }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#f8fafc' }}>
+                    {selectedGroup.name}
+                  </h2>
+                  <span className="badge badge-category" style={{ fontSize: '0.72rem' }}>
+                    {isMess ? '🏨 College/Hostel Mess' : (isTrip ? '✈️ Tour & Travel Split' : '🏠 Flatmate Living')}
+                  </span>
+                </div>
+                <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '0.2rem' }}>
+                  {selectedGroup.members?.length || 0} Members • Currency: {selectedGroup.currency || 'INR'}
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setShowQuickAddMemberModal(true)}
+                  className="btn btn-secondary"
+                  style={{ fontSize: '0.82rem', padding: '0.45rem 0.85rem' }}
+                >
+                  <UserPlus size={15} color="#38bdf8" /> + Add Member (No account needed)
+                </button>
+                <button
+                  onClick={() => setShowAddExpense(true)}
+                  className="btn btn-primary"
+                  style={{ fontSize: '0.82rem', padding: '0.45rem 0.95rem' }}
+                >
+                  <PlusCircle size={15} /> + Add Expense
+                </button>
+                <button
+                  onClick={() => setShowGroupSettings(true)}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.45rem 0.7rem' }}
+                  title="Group Settings"
+                >
+                  <Settings size={15} />
+                </button>
+              </div>
+            </div>
+
             {/* Top Metric Cards */}
             <MetricCards balances={balances} currentUserId={user?.id} />
 
@@ -182,16 +277,16 @@ export default function Dashboard() {
                 className={`btn ${activeTab === 'overview' ? 'btn-primary' : 'btn-secondary'}`}
                 style={{ padding: '0.45rem 0.95rem', fontSize: '0.82rem' }}
               >
-                <LayoutDashboard size={15} /> Overview & All
+                <LayoutDashboard size={15} /> Overview & Khatabook
               </button>
 
-              {selectedGroup.group_type === 'MESS' && (
+              {isMess && (
                 <button
                   onClick={() => setActiveTab('meals')}
                   className={`btn ${activeTab === 'meals' ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ padding: '0.45rem 0.95rem', fontSize: '0.82rem' }}
                 >
-                  <Utensils size={15} /> Daily Meal Tracker
+                  <Utensils size={15} /> Meal Attendance Chart
                 </button>
               )}
 
@@ -208,7 +303,7 @@ export default function Dashboard() {
                 className={`btn ${activeTab === 'settle' ? 'btn-primary' : 'btn-secondary'}`}
                 style={{ padding: '0.45rem 0.95rem', fontSize: '0.82rem' }}
               >
-                <Sparkles size={15} /> Settle-Up & Statement
+                <Sparkles size={15} /> {isMess ? 'Score Board & Khatabook' : 'Settle-Up Matrix'}
               </button>
 
               <button
@@ -240,15 +335,17 @@ export default function Dashboard() {
             {/* TAB CONTENT */}
             {activeTab === 'overview' && (
               <>
-                {selectedGroup.group_type === 'MESS' && (
-                  <MessMealTracker group={selectedGroup} onMealUpdated={refreshGroupData} />
-                )}
                 <SettlementEngine
                   group={selectedGroup}
                   balances={balances}
                   currentUserId={user?.id}
                   onSettlementCompleted={refreshGroupData}
                 />
+
+                {isMess && (
+                  <MessMealTracker group={selectedGroup} onMealUpdated={refreshGroupData} />
+                )}
+
                 <ExpenseList
                   group={selectedGroup}
                   expenses={expenses}
@@ -259,7 +356,7 @@ export default function Dashboard() {
               </>
             )}
 
-            {activeTab === 'meals' && selectedGroup.group_type === 'MESS' && (
+            {activeTab === 'meals' && isMess && (
               <MessMealTracker group={selectedGroup} onMealUpdated={refreshGroupData} />
             )}
 
@@ -289,7 +386,89 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* MODALS */}
+      {/* Quick Add Member Modal */}
+      {showQuickAddMemberModal && selectedGroup && (
+        <div className="modal-backdrop" onClick={() => setShowQuickAddMemberModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ padding: '0.4rem', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa' }}>
+                  <UserPlus size={18} />
+                </div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>Quick Add Member</h3>
+              </div>
+              <button onClick={() => setShowQuickAddMemberModal(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+            </div>
+
+            <form onSubmit={handleQuickAddMember}>
+              <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '1rem' }}>
+                Add flatmates or mess candidates instantly by name. They do not need an email or login account to be included in meal sheets, deposits, and score board calculations.
+              </p>
+
+              <div className="form-group">
+                <label className="form-label">Member / Candidate Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Biswajit Da, Atanu Da, Samar Da"
+                  className="form-input"
+                  value={quickMemberName}
+                  onChange={(e) => setQuickMemberName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Role</label>
+                  <select
+                    className="form-select"
+                    value={quickMemberRole}
+                    onChange={(e) => setQuickMemberRole(e.target.value)}
+                  >
+                    <option value="MEMBER">Member</option>
+                    <option value="MANAGER">Manager</option>
+                    <option value="ADMIN">Admin</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Advance Deposit ({selectedGroup.currency || '₹'})</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 1000"
+                    className="form-input"
+                    value={quickMemberDeposit}
+                    onChange={(e) => setQuickMemberDeposit(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">UPI ID for Settlements (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. name@okaxis / name@upi"
+                  className="form-input"
+                  value={quickMemberUpi}
+                  onChange={(e) => setQuickMemberUpi(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <button type="button" onClick={() => setShowQuickAddMemberModal(false)} className="btn btn-secondary">
+                  Cancel
+                </button>
+                <button type="submit" disabled={addingMember} className="btn btn-primary">
+                  {addingMember ? 'Adding...' : '+ Add Member'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Expense Modal */}
       {showAddExpense && selectedGroup && (
         <AddExpenseModal
           group={selectedGroup}
@@ -298,6 +477,7 @@ export default function Dashboard() {
         />
       )}
 
+      {/* Group Settings Modal */}
       {showGroupSettings && selectedGroup && (
         <GroupSettingsModal
           group={selectedGroup}
@@ -310,7 +490,7 @@ export default function Dashboard() {
       {/* Create New Group Modal */}
       {showNewGroupModal && (
         <div className="modal-backdrop" onClick={() => setShowNewGroupModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>🏠 Create New Group</h3>
               <button onClick={() => setShowNewGroupModal(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
@@ -320,7 +500,7 @@ export default function Dashboard() {
                 <label className="form-label">Group Name</label>
                 <input
                   type="text"
-                  placeholder="e.g. Royal Engineers Mess, Manali Trip 2026, Flat 402"
+                  placeholder="e.g. Vivekananda Mess 2026, Flat 402, Goa Trip 2026"
                   className="form-input"
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
@@ -329,16 +509,16 @@ export default function Dashboard() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Group Purpose / Type</label>
+                <label className="form-label">Group Type</label>
                 <select
                   className="form-select"
                   value={newGroupType}
                   onChange={(e) => setNewGroupType(e.target.value)}
                 >
-                  <option value="MESS">🏨 Hostel / Mess (Meal rate calculation & attendance)</option>
-                  <option value="TRIP">✈️ Tour / Trip (Split bills with friends)</option>
-                  <option value="FLATMATES">🏠 Flatmates / Roommates (Recurring bills & groceries)</option>
-                  <option value="PERSONAL">👥 Family / Personal Shared</option>
+                  <option value="MESS">🏨 College / Hostel Mess (Establishment, Meal Rate & Scoreboard)</option>
+                  <option value="FLATMATES">🏠 Flatmates / Roommates (Rent, Gas, WiFi, Water Split)</option>
+                  <option value="TRIP">✈️ Tour & Travel Plan (Hotel, Cab, Tickets Split)</option>
+                  <option value="PERSONAL">👥 Personal / Friends Shared</option>
                 </select>
               </div>
 
@@ -348,7 +528,7 @@ export default function Dashboard() {
                   type="number"
                   min="0"
                   step="1"
-                  placeholder="e.g. 2000"
+                  placeholder="e.g. 1000"
                   className="form-input"
                   value={newGroupDeposit}
                   onChange={(e) => setNewGroupDeposit(e.target.value)}

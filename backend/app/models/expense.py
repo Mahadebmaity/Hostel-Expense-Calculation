@@ -9,18 +9,22 @@ class Expense(Base):
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     group_id = Column(String(36), ForeignKey("groups.id", ondelete="CASCADE"), nullable=False)
-    paid_by = Column(String(36), ForeignKey("users.id"), nullable=False)
+    paid_by = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    paid_by_member_id = Column(String(36), ForeignKey("group_members.id", ondelete="SET NULL"), nullable=True)
     
     title = Column(String(200), nullable=False)
     amount = Column(Float, nullable=False)
     
-    # Category: GROCERY, RENT, GAS, ELECTRICITY, MAID, OUTING, SNACKS, OTHER
+    # Category: 
+    # Mess Establishment: MASI, GAS, EGG, MEAT, PAPER, ELECTRICITY, RENT, ESTABLISHMENT_OTHER
+    # Mess Meal Marketing: BAZAR, POTATO, RICE, GROCERY, OIL_SPICES, MARKETING_OTHER
+    # Flat / Tour: GROCERY, GAS, WATER, WIFI, RENT, CAB_TRANSPORT, HOTEL_STAY, TICKETS, OUTING, SNACKS, OTHER
     category = Column(String(50), default="GROCERY", nullable=False)
     
-    # Split Type: EQUAL, EXACT, PERCENTAGE, MEAL_BASED
+    # Split Type: MEAL_BASED, EQUAL, EXACT, PERCENTAGE
     split_type = Column(String(30), default="MEAL_BASED", nullable=False)
     
-    # If is_fixed_cost is True, it is divided equally among members instead of variable meal count
+    # If is_fixed_cost is True (e.g. Establishment / Fixed share), divided equally among all members
     is_fixed_cost = Column(Boolean, default=False, nullable=False)
     
     receipt_url = Column(String(255), nullable=True)
@@ -29,7 +33,8 @@ class Expense(Base):
 
     # Relationships
     group = relationship("Group", back_populates="expenses")
-    payer = relationship("User", back_populates="expenses_paid")
+    payer = relationship("User", back_populates="expenses_paid", foreign_keys=[paid_by])
+    payer_member = relationship("GroupMember", foreign_keys=[paid_by_member_id])
     splits = relationship("ExpenseSplit", back_populates="expense", cascade="all, delete-orphan")
 
 class ExpenseSplit(Base):
@@ -37,7 +42,8 @@ class ExpenseSplit(Base):
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     expense_id = Column(String(36), ForeignKey("expenses.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    member_id = Column(String(36), ForeignKey("group_members.id", ondelete="CASCADE"), nullable=True)
     
     # Exact amount or portion of debt this member owes
     share_amount = Column(Float, default=0.0, nullable=False)
@@ -45,4 +51,5 @@ class ExpenseSplit(Base):
 
     # Relationships
     expense = relationship("Expense", back_populates="splits")
-    user = relationship("User", back_populates="expense_splits")
+    user = relationship("User", back_populates="expense_splits", foreign_keys=[user_id])
+    member = relationship("GroupMember", foreign_keys=[member_id])

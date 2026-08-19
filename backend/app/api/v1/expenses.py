@@ -22,19 +22,41 @@ def create_expense(
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
 
-    payer_id = current_user.id
-    if expense_in.paid_by:
-        # Check if the specified payer is a member of the group or system admin
-        payer_member = db.query(GroupMember).filter(
+    # Resolve payer member
+    paid_by_uid = current_user.id
+    paid_by_mid = None
+
+    # Check if paid_by_member_id is supplied
+    if expense_in.paid_by_member_id:
+        target_gm = db.query(GroupMember).filter(
             GroupMember.group_id == group_id,
-            GroupMember.user_id == expense_in.paid_by
+            GroupMember.id == expense_in.paid_by_member_id
         ).first()
-        if payer_member or current_user.is_admin:
-            payer_id = expense_in.paid_by
+        if target_gm:
+            paid_by_mid = target_gm.id
+            paid_by_uid = target_gm.user_id
+    elif expense_in.paid_by:
+        target_gm = db.query(GroupMember).filter(
+            GroupMember.group_id == group_id,
+            (GroupMember.user_id == expense_in.paid_by) | (GroupMember.id == expense_in.paid_by)
+        ).first()
+        if target_gm:
+            paid_by_mid = target_gm.id
+            paid_by_uid = target_gm.user_id
+
+    # If payer_member wasn't explicitly assigned, find current user's membership
+    if not paid_by_mid:
+        current_membership = db.query(GroupMember).filter(
+            GroupMember.group_id == group_id,
+            GroupMember.user_id == current_user.id
+        ).first()
+        if current_membership:
+            paid_by_mid = current_membership.id
 
     new_expense = Expense(
         group_id=group_id,
-        paid_by=payer_id,
+        paid_by=paid_by_uid,
+        paid_by_member_id=paid_by_mid,
         title=expense_in.title,
         amount=expense_in.amount,
         category=expense_in.category,
@@ -53,6 +75,7 @@ def create_expense(
             split_obj = ExpenseSplit(
                 expense_id=new_expense.id,
                 user_id=sp.user_id,
+                member_id=sp.member_id,
                 share_amount=sp.share_amount or 0.0,
                 percentage=sp.percentage or 0.0
             )
@@ -60,6 +83,14 @@ def create_expense(
         db.commit()
         db.refresh(new_expense)
 
+    # Attach payer display name
+    payer_display = "Member"
+    if new_expense.payer_member:
+        payer_display = new_expense.payer_member.member_name
+    elif new_expense.payer:
+        payer_display = new_expense.payer.name
+
+    setattr(new_expense, "payer_name", payer_display)
     return new_expense
 
 @router.get("/{group_id}", response_model=List[ExpenseOut])
@@ -72,7 +103,26 @@ def list_group_expenses(
     query = db.query(Expense).filter(Expense.group_id == group_id)
     if category:
         query = query.filter(Expense.category == category)
-    return query.order_by(Expense.expense_date.desc(), Expense.created_at.desc()).all()
+    
+    expenses = query.order_by(Expense.expense_date.desc(), Expense.created_at.desc()).all()
+    for exp in expenses:
+        p_name = "Member"
+        if exp.payer_member:
+            p_name = exp.payer_member.member_name
+        elif exp.payer:
+            p_name = exp.payer.name
+        setattr(exp, "payer_name", p_name)
+
+        if exp.splits:
+            for sp in exp.splits:
+                m_name = "Member"
+                if sp.member:
+                    m_name = sp.member.member_name
+                elif sp.user:
+                    m_name = sp.user.name
+                setattr(sp, "member_name", m_name)
+
+    return expenses
 
 @router.delete("/{expense_id}")
 def delete_expense(
@@ -84,7 +134,6 @@ def delete_expense(
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
 
-    # Check if user is payer, group admin/manager, or system admin
     if not current_user.is_admin:
         membership = db.query(GroupMember).filter(
             GroupMember.group_id == expense.group_id,

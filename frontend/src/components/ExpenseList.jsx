@@ -23,12 +23,26 @@ import {
 
 const CATEGORY_ICONS = {
   GROCERY: <ShoppingBag size={14} color="#34d399" />,
+  BAZAR: <ShoppingBag size={14} color="#34d399" />,
+  RICE: <Utensils size={14} color="#f59e0b" />,
+  POTATO: <Utensils size={14} color="#fbbf24" />,
+  OIL_SPICES: <ShoppingBag size={14} color="#f97316" />,
   GAS: <Flame size={14} color="#f97316" />,
   ELECTRICITY: <Zap size={14} color="#eab308" />,
   RENT: <Home size={14} color="#38bdf8" />,
   MAID: <Sparkles size={14} color="#a855f7" />,
+  MASI: <Sparkles size={14} color="#a855f7" />,
+  EGG: <Utensils size={14} color="#fbbf24" />,
+  MEAT: <Utensils size={14} color="#f87171" />,
+  PAPER: <Receipt size={14} color="#94a3b8" />,
+  HOTEL_STAY: <Home size={14} color="#38bdf8" />,
+  TICKETS: <Layers size={14} color="#60a5fa" />,
+  CAB_TRANSPORT: <Layers size={14} color="#34d399" />,
+  WATER: <Zap size={14} color="#38bdf8" />,
+  WIFI: <Zap size={14} color="#a855f7" />,
   SNACKS: <Coffee size={14} color="#ec4899" />,
   OUTING: <Layers size={14} color="#60a5fa" />,
+  ESTABLISHMENT_OTHER: <Receipt size={14} color="#94a3b8" />,
   OTHER: <Receipt size={14} color="#94a3b8" />
 };
 
@@ -256,7 +270,7 @@ export default function ExpenseList({
                         </span>
                       </div>
                       <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.15rem' }}>
-                        Paid by <strong style={{ color: isPayer ? '#60a5fa' : '#cbd5e1' }}>{isPayer ? 'You' : exp.payer?.name}</strong> • {exp.expense_date} • <span style={{ textTransform: 'capitalize' }}>{exp.category.toLowerCase()}</span>
+                        Paid by <strong style={{ color: isPayer ? '#60a5fa' : '#cbd5e1' }}>{isPayer ? 'You' : (exp.payer_name || exp.payer?.name || 'Member')}</strong> • {exp.expense_date} • <span style={{ textTransform: 'capitalize' }}>{exp.category.toLowerCase().replace('_', ' ')}</span>
                       </p>
                     </div>
                   </div>

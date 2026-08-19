@@ -77,3 +77,49 @@ def test_pdf_generation():
     pdf_bytes = generate_mess_pdf_report(dummy_data, simplified)
     assert len(pdf_bytes) > 1000
     assert pdf_bytes.startswith(b"%PDF")
+
+def test_notebook_may_score_board_calculation():
+    """Validates the exact handwritten May Score Board calculations."""
+    from app.core.database import SessionLocal
+    from app.models.group import Group
+    from app.services.meal_engine import calculate_mess_balances
+
+    db = SessionLocal()
+    try:
+        group = db.query(Group).filter(Group.name == "Vivekananda Mess 2026").first()
+        assert group is not None
+
+        data = calculate_mess_balances(db, group)
+        
+        # 1. Establishment check: 9260 / 15 = 617.33
+        assert data["total_establishment"] == pytest.approx(9260.0, 1.0)
+        assert data["establishment_per_head"] == pytest.approx(617.33, 0.05)
+
+        # 2. Meal Pool check: 13991 gross - 465 guest = 13526 net
+        assert data["guest_deduction_total"] == pytest.approx(465.0, 0.5)
+        assert data["net_meal_pool"] == pytest.approx(13526.0, 1.0)
+        assert data["total_meals"] == pytest.approx(700.0, 0.5)
+        assert data["meal_rate"] == pytest.approx(19.32, 0.05)
+
+        # 3. Individual balance checks against notebook
+        mb_by_name = {m["name"]: m for m in data["member_balances"]}
+        
+        # Sankhadip: (19.32 * 41) + 617.33 = 1409.45, paid 2185 => 775 Refund
+        assert mb_by_name["Sankhadip"]["status"] == "REFUND"
+        assert mb_by_name["Sankhadip"]["refund_amount"] == pytest.approx(775.0, 2.0)
+
+        # Mahadeb: (19.32 * 40) + 617.33 = 1390.13, paid 860 => 530 Due
+        m_mahadeb = mb_by_name.get("Mahadeb") or mb_by_name.get("Mahadeb Maity")
+        assert m_mahadeb is not None
+        assert m_mahadeb["status"] == "DUE"
+        assert m_mahadeb["due_amount"] == pytest.approx(530.0, 2.0)
+
+        # Subhankar Da: (19.32 * 55) + 617.33 + 465 (guest) = 2145, paid 905 => 1240 Due
+        assert mb_by_name["Subhankar Da"]["guest_cost"] == pytest.approx(465.0, 0.5)
+        assert mb_by_name["Subhankar Da"]["due_amount"] == pytest.approx(1240.0, 2.0)
+
+        # Biswajit Da: (19.32 * 54) + 617.33 = 1661, paid 1270 => 391 Due
+        assert mb_by_name["Biswajit Da"]["due_amount"] == pytest.approx(391.0, 2.0)
+    finally:
+        db.close()
+

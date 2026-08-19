@@ -16,8 +16,8 @@ def simplify_debts(member_balances: List[Dict[str, Any]], currency: str = "INR")
     for mb in member_balances:
         bal = round(mb.get("net_balance", 0.0), 2)
         u_info = {
-            "id": mb["user_id"],
-            "name": mb["name"],
+            "id": mb.get("member_id") or mb.get("user_id") or "member",
+            "name": mb.get("name", "Member"),
             "upi_id": mb.get("upi_id")
         }
         if bal > 0.01:

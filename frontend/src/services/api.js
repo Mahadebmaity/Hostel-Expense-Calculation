@@ -55,9 +55,19 @@ export const api = {
   createGroup: (data) => request('/groups/', { method: 'POST', body: JSON.stringify(data) }),
   updateGroup: (id, data) => request(`/groups/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   addMember: (groupId, data) => request(`/groups/${groupId}/members`, { method: 'POST', body: JSON.stringify(data) }),
-  removeMember: (groupId, userId) => request(`/groups/${groupId}/members/${userId}`, { method: 'DELETE' }),
+  removeMember: (groupId, identifier) => request(`/groups/${groupId}/members/${identifier}`, { method: 'DELETE' }),
   updateDeposit: (groupId, data) => request(`/groups/${groupId}/deposit`, { method: 'POST', body: JSON.stringify(data) }),
-  getGroupBalances: (groupId) => request(`/groups/${groupId}/balances`),
+  getGroupBalances: (groupId, startDate, endDate) => {
+    let url = `/groups/${groupId}/balances`;
+    const params = [];
+    if (startDate) params.push(`start_date=${startDate}`);
+    if (endDate) params.push(`end_date=${endDate}`);
+    if (params.length) url += `?${params.join('&')}`;
+    return request(url);
+  },
+  saveScoreboard: (groupId, data) => request(`/groups/${groupId}/scoreboards`, { method: 'POST', body: JSON.stringify(data) }),
+  getScoreboards: (groupId) => request(`/groups/${groupId}/scoreboards`),
+  deleteScoreboard: (groupId, sbId) => request(`/groups/${groupId}/scoreboards/${sbId}`, { method: 'DELETE' }),
 
   // Expenses
   getExpenses: (groupId, category) => request(`/expenses/${groupId}${category ? `?category=${category}` : ''}`),
@@ -69,6 +79,7 @@ export const api = {
   getMealMatrix: (groupId) => request(`/meals/${groupId}/matrix`),
   recordSingleMeal: (groupId, data) => request(`/meals/${groupId}/single`, { method: 'POST', body: JSON.stringify(data) }),
   recordBulkMeals: (groupId, data) => request(`/meals/${groupId}/bulk`, { method: 'POST', body: JSON.stringify(data) }),
+  recordMonthlySummaryMeals: (groupId, data) => request(`/meals/${groupId}/monthly-summary`, { method: 'POST', body: JSON.stringify(data) }),
 
   // Settlements
   getSettlements: (groupId) => request(`/settlements/${groupId}`),
@@ -80,7 +91,7 @@ export const api = {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${groupName.replace(/\s+/g, '_')}_Audit_Report.pdf`;
+    a.download = `${groupName.replace(/\s+/g, '_')}_ScoreBoard_Audit_Report.pdf`;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
