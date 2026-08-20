@@ -1,6 +1,8 @@
+const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
 const API_BASE_URL = import.meta.env.VITE_API_URL 
   ? `${import.meta.env.VITE_API_URL.replace(/\/+$/, '')}/api/v1`
-  : 'https://hostel-expense-calculation.onrender.com/api/v1';
+  : (isLocal ? 'http://127.0.0.1:8000/api/v1' : 'https://hostel-expense-calculation.onrender.com/api/v1');
 
 async function request(endpoint, options = {}, retries = 3, delay = 2500) {
   const token = localStorage.getItem('access_token');
