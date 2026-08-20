@@ -160,7 +160,9 @@ def add_group_member(
             upi_id=target_user.upi_id or member_in.upi_id,
             is_virtual="false",
             role=member_in.role,
-            initial_deposit=member_in.initial_deposit
+            initial_deposit=member_in.initial_deposit,
+            marketing_amount=member_in.marketing_amount,
+            marketing_days=member_in.marketing_days
         )
     else:
         # Create Virtual Member (No forced registration!)
@@ -174,7 +176,9 @@ def add_group_member(
             upi_id=member_in.upi_id.strip() if member_in.upi_id else None,
             is_virtual="true",
             role=member_in.role,
-            initial_deposit=member_in.initial_deposit
+            initial_deposit=member_in.initial_deposit,
+            marketing_amount=member_in.marketing_amount,
+            marketing_days=member_in.marketing_days
         )
 
     db.add(new_member)
@@ -250,15 +254,25 @@ def update_member_deposit(
 
     if deposit_in.operation == "ADD":
         target_member.initial_deposit += deposit_in.amount
+        if deposit_in.marketing_amount is not None:
+            target_member.marketing_amount = (getattr(target_member, 'marketing_amount', 0.0) or 0.0) + deposit_in.marketing_amount
+        if deposit_in.marketing_days is not None:
+            target_member.marketing_days = (getattr(target_member, 'marketing_days', 0.0) or 0.0) + deposit_in.marketing_days
     else:
         target_member.initial_deposit = deposit_in.amount
+        if deposit_in.marketing_amount is not None:
+            target_member.marketing_amount = deposit_in.marketing_amount
+        if deposit_in.marketing_days is not None:
+            target_member.marketing_days = deposit_in.marketing_days
 
     db.commit()
     return {
-        "message": "Deposit updated",
+        "message": "Deposit and marketing updated",
         "member_id": target_member.id,
         "name": target_member.member_name,
-        "new_deposit": target_member.initial_deposit
+        "new_deposit": target_member.initial_deposit,
+        "marketing_amount": target_member.marketing_amount,
+        "marketing_days": target_member.marketing_days
     }
 
 @router.get("/{group_id}/balances")

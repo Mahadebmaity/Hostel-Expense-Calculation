@@ -13,6 +13,7 @@ class MealAttendanceBase(BaseModel):
     guest_veg_count: float = Field(ge=0, default=0.0)
     guest_fish_count: float = Field(ge=0, default=0.0)
     guest_meat_count: float = Field(ge=0, default=0.0)
+    guest_egg_count: float = Field(ge=0, default=0.0)
     guest_charge: float = Field(ge=0, default=0.0)
 
 class MealAttendanceCreate(MealAttendanceBase):

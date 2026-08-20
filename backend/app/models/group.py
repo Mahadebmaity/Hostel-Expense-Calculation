@@ -47,6 +47,8 @@ class GroupMember(Base):
     
     # Financial deposits paid in advance to the mess manager/fund
     initial_deposit = Column(Float, default=0.0, nullable=False)
+    marketing_amount = Column(Float, default=0.0, nullable=False)
+    marketing_days = Column(Float, default=0.0, nullable=False)
     
     joined_at = Column(DateTime, default=datetime.utcnow)
 

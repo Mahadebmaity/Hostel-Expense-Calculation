@@ -12,7 +12,9 @@ class GroupMemberOut(BaseModel):
     upi_id: Optional[str] = None
     is_virtual: Optional[str] = "true"
     role: str
-    initial_deposit: float
+    initial_deposit: float = 0.0
+    marketing_amount: float = 0.0
+    marketing_days: float = 0.0
     joined_at: datetime
     user: Optional[UserOut] = None
 
@@ -26,11 +28,15 @@ class GroupMemberAdd(BaseModel):
     upi_id: Optional[str] = None
     role: str = "MEMBER"  # ADMIN, MANAGER, MEMBER
     initial_deposit: float = 0.0
+    marketing_amount: float = 0.0
+    marketing_days: float = 0.0
 
 class GroupDepositUpdate(BaseModel):
     member_id: Optional[str] = None
     user_id: Optional[str] = None
     amount: float  # Amount to add or set
+    marketing_amount: Optional[float] = None
+    marketing_days: Optional[float] = None
     operation: str = "ADD"  # ADD or SET
 
 class GroupBase(BaseModel):

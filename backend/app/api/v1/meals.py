@@ -18,6 +18,7 @@ class MonthlyMealEntry(BaseModel):
     guest_veg: Optional[float] = 0.0
     guest_fish: Optional[float] = 0.0
     guest_meat: Optional[float] = 0.0
+    guest_egg: Optional[float] = 0.0
     guest_charge: Optional[float] = 0.0
     month_date: Optional[date] = None
 
@@ -63,12 +64,14 @@ def record_single_meal(
     )
 
     # Compute guest charge if not explicitly set
-    guest_rates = group.settings.get("guest_rates", {"veg": 40.0, "fish": 50.0, "meat": 75.0}) if group.settings else {"veg": 40.0, "fish": 50.0, "meat": 75.0}
+    guest_rates = group.settings.get("guest_rates", {"veg": 40.0, "fish": 50.0, "meat": 75.0, "egg": 35.0}) if group.settings else {"veg": 40.0, "fish": 50.0, "meat": 75.0, "egg": 35.0}
     g_charge = meal_in.guest_charge
-    if g_charge == 0.0 and (meal_in.guest_veg_count > 0 or meal_in.guest_fish_count > 0 or meal_in.guest_meat_count > 0):
+    g_egg_c = getattr(meal_in, 'guest_egg_count', 0.0) or 0.0
+    if g_charge == 0.0 and (meal_in.guest_veg_count > 0 or meal_in.guest_fish_count > 0 or meal_in.guest_meat_count > 0 or g_egg_c > 0):
         g_charge = (meal_in.guest_veg_count * float(guest_rates.get("veg", 40.0))) + \
                    (meal_in.guest_fish_count * float(guest_rates.get("fish", 50.0))) + \
-                   (meal_in.guest_meat_count * float(guest_rates.get("meat", 75.0)))
+                   (meal_in.guest_meat_count * float(guest_rates.get("meat", 75.0))) + \
+                   (g_egg_c * float(guest_rates.get("egg", 35.0)))
 
     # Find or create record for this date and member
     record = db.query(MealAttendance).filter(
@@ -125,7 +128,7 @@ def record_bulk_meals(
     member_by_id = {m.id: m for m in members}
     member_by_uid = {m.user_id: m for m in members if m.user_id}
 
-    guest_rates = group.settings.get("guest_rates", {"veg": 40.0, "fish": 50.0, "meat": 75.0}) if group.settings else {"veg": 40.0, "fish": 50.0, "meat": 75.0}
+    guest_rates = group.settings.get("guest_rates", {"veg": 40.0, "fish": 50.0, "meat": 75.0, "egg": 35.0}) if group.settings else {"veg": 40.0, "fish": 50.0, "meat": 75.0, "egg": 35.0}
 
     saved_count = 0
     for entry in bulk_in.entries:
@@ -141,10 +144,12 @@ def record_bulk_meals(
         )
 
         g_charge = entry.guest_charge
-        if g_charge == 0.0 and (entry.guest_veg_count > 0 or entry.guest_fish_count > 0 or entry.guest_meat_count > 0):
+        g_egg_c = getattr(entry, 'guest_egg_count', 0.0) or 0.0
+        if g_charge == 0.0 and (entry.guest_veg_count > 0 or entry.guest_fish_count > 0 or entry.guest_meat_count > 0 or g_egg_c > 0):
             g_charge = (entry.guest_veg_count * float(guest_rates.get("veg", 40.0))) + \
                        (entry.guest_fish_count * float(guest_rates.get("fish", 50.0))) + \
-                       (entry.guest_meat_count * float(guest_rates.get("meat", 75.0)))
+                       (entry.guest_meat_count * float(guest_rates.get("meat", 75.0))) + \
+                       (g_egg_c * float(guest_rates.get("egg", 35.0)))
 
         record = db.query(MealAttendance).filter(
             MealAttendance.group_id == group_id,
@@ -200,7 +205,7 @@ def record_monthly_summary_meals(
     member_by_id = {m.id: m for m in members}
     member_by_uid = {m.user_id: m for m in members if m.user_id}
 
-    guest_rates = group.settings.get("guest_rates", {"veg": 40.0, "fish": 50.0, "meat": 75.0}) if group.settings else {"veg": 40.0, "fish": 50.0, "meat": 75.0}
+    guest_rates = group.settings.get("guest_rates", {"veg": 40.0, "fish": 50.0, "meat": 75.0, "egg": 35.0}) if group.settings else {"veg": 40.0, "fish": 50.0, "meat": 75.0, "egg": 35.0}
 
     saved_count = 0
     for entry in bulk_in.entries:
@@ -209,10 +214,12 @@ def record_monthly_summary_meals(
             continue
 
         g_charge = entry.guest_charge or 0.0
-        if g_charge == 0.0 and ((entry.guest_veg or 0) > 0 or (entry.guest_fish or 0) > 0 or (entry.guest_meat or 0) > 0):
+        g_egg_val = getattr(entry, 'guest_egg', 0.0) or 0.0
+        if g_charge == 0.0 and ((entry.guest_veg or 0) > 0 or (entry.guest_fish or 0) > 0 or (entry.guest_meat or 0) > 0 or g_egg_val > 0):
             g_charge = ((entry.guest_veg or 0) * float(guest_rates.get("veg", 40.0))) + \
                        ((entry.guest_fish or 0) * float(guest_rates.get("fish", 50.0))) + \
-                       ((entry.guest_meat or 0) * float(guest_rates.get("meat", 75.0)))
+                       ((entry.guest_meat or 0) * float(guest_rates.get("meat", 75.0))) + \
+                       (g_egg_val * float(guest_rates.get("egg", 35.0)))
 
         record = db.query(MealAttendance).filter(
             MealAttendance.group_id == group_id,

@@ -6,12 +6,15 @@ import {
   ExternalLink, 
   CheckCircle2, 
   Smartphone,
-  ShieldCheck
+  ShieldCheck,
+  Share2,
+  Download
 } from 'lucide-react';
 
 export default function UPIModal({ transaction, onClose, onMarkSettled }) {
   const [copied, setCopied] = useState(false);
   const [marking, setMarking] = useState(false);
+  const [shareStatus, setShareStatus] = useState('idle'); // 'idle' | 'shared' | 'downloaded'
 
   const copyUpiId = () => {
     if (transaction.payee_upi_id) {
@@ -19,6 +22,70 @@ export default function UPIModal({ transaction, onClose, onMarkSettled }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  const handleShareQR = async () => {
+    if (!transaction.upi_qr_base64) return;
+
+    const payeeName = transaction.payee_name || 'Payee';
+    const amount = transaction.amount ? transaction.amount.toFixed(2) : '0';
+    const fileName = `UPI_QR_${payeeName.replace(/\s+/g, '_')}_${amount}.png`;
+    const shareTitle = `UPI Payment QR - ₹${amount}`;
+    const shareText = `Pay ₹${amount} to ${payeeName} via UPI${transaction.payee_upi_id ? ` (${transaction.payee_upi_id})` : ''}. Scan QR code or open UPI link.`;
+
+    try {
+      // Convert base64 data to Blob -> File
+      const res = await fetch(transaction.upi_qr_base64);
+      const blob = await res.blob();
+      const file = new File([blob], fileName, { type: 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          files: [file]
+        });
+        setShareStatus('shared');
+        setTimeout(() => setShareStatus('idle'), 3000);
+        return;
+      } else if (navigator.share) {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: transaction.upi_uri || undefined
+        });
+        setShareStatus('shared');
+        setTimeout(() => setShareStatus('idle'), 3000);
+        return;
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        // User closed native share sheet, ignore error
+        return;
+      }
+      console.warn('Web Share failed, falling back to download:', err);
+    }
+
+    // Fallback if Web Share is not supported or failed
+    handleDownloadQR();
+  };
+
+  const handleDownloadQR = () => {
+    if (!transaction.upi_qr_base64) return;
+
+    const payeeName = transaction.payee_name || 'Payee';
+    const amount = transaction.amount ? transaction.amount.toFixed(2) : '0';
+    const fileName = `UPI_QR_${payeeName.replace(/\s+/g, '_')}_${amount}.png`;
+
+    const link = document.createElement('a');
+    link.href = transaction.upi_qr_base64;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setShareStatus('downloaded');
+    setTimeout(() => setShareStatus('idle'), 3000);
   };
 
   const curr = transaction.currency === 'INR' ? '₹' : transaction.currency;
@@ -61,9 +128,75 @@ export default function UPIModal({ transaction, onClose, onMarkSettled }) {
                 style={{ width: '180px', height: '180px', display: 'block' }}
               />
             </div>
-            <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.65rem' }}>
+            <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.65rem', marginBottom: '0.75rem' }}>
               Scan using Google Pay, PhonePe, Paytm, or BHIM
             </p>
+
+            {/* Share & Download QR Buttons */}
+            <div style={{ display: 'flex', gap: '0.6rem', width: '100%', maxWidth: '300px' }}>
+              <button
+                onClick={handleShareQR}
+                className="btn"
+                style={{
+                  flex: 1,
+                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.35))',
+                  border: '1px solid rgba(59, 130, 246, 0.45)',
+                  color: '#93c5fd',
+                  padding: '0.55rem 0.85rem',
+                  borderRadius: '10px',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                }}
+              >
+                {shareStatus === 'shared' ? (
+                  <>
+                    <Check size={15} color="#34d399" /> Shared!
+                  </>
+                ) : (
+                  <>
+                    <Share2 size={15} /> Share QR
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={handleDownloadQR}
+                className="btn"
+                title="Download QR Image"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  color: '#cbd5e1',
+                  padding: '0.55rem 0.85rem',
+                  borderRadius: '10px',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {shareStatus === 'downloaded' ? (
+                  <>
+                    <Check size={15} color="#34d399" /> Saved!
+                  </>
+                ) : (
+                  <>
+                    <Download size={15} /> Download
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         ) : (
           <div style={{ padding: '1.5rem', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '12px', marginBottom: '1.25rem' }}>
@@ -135,3 +268,4 @@ export default function UPIModal({ transaction, onClose, onMarkSettled }) {
     </div>
   );
 }
+

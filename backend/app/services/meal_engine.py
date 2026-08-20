@@ -110,8 +110,16 @@ def calculate_mess_balances(
         if payer_member_id:
             direct_paid_by_member[payer_member_id] += exp.amount
 
-        # Check if Establishment / Fixed Cost
-        is_establishment = exp.is_fixed_cost or (exp.category and exp.category.upper() in establishment_cats)
+        # Check if Establishment / Fixed Cost:
+        # 1. If exp.is_fixed_cost is explicitly True -> Establishment (Fixed per candidate)
+        # 2. If exp.is_fixed_cost is explicitly False -> Meal Pool (Divided by meal count)
+        # 3. Fallback to category keyword matching if is_fixed_cost is None
+        if exp.is_fixed_cost is True:
+            is_establishment = True
+        elif exp.is_fixed_cost is False:
+            is_establishment = False
+        else:
+            is_establishment = bool(exp.category and exp.category.upper() in establishment_cats)
 
         if is_establishment:
             total_establishment += exp.amount
@@ -123,7 +131,7 @@ def calculate_mess_balances(
                 "date": str(exp.expense_date),
                 "payer_name": member_map[payer_member_id].member_name if payer_member_id else "Group Fund"
             })
-        elif exp.split_type == "MEAL_BASED" or exp.category.upper() in {"GROCERY", "BAZAR", "MARKETING", "POTATO", "RICE", "OIL_SPICES", "MARKETING_MEAL"}:
+        elif exp.split_type == "MEAL_BASED" or not exp.split_type or exp.split_type == "EQUAL":
             total_meal_expenses += exp.amount
             meal_pool_items.append({
                 "id": exp.id,
@@ -154,6 +162,21 @@ def calculate_mess_balances(
                 "date": str(exp.expense_date)
             })
 
+    # Add member individual marketing contributions to meal pool
+    for m in members:
+        mkt_amt = getattr(m, 'marketing_amount', 0.0) or 0.0
+        mkt_days = getattr(m, 'marketing_days', 0.0) or 0.0
+        if mkt_amt > 0:
+            total_meal_expenses += mkt_amt
+            meal_pool_items.append({
+                "id": f"mkt_{m.id}",
+                "title": f"{m.member_name} - Sabji & Fish Marketing ({mkt_days:.0f} days)",
+                "amount": mkt_amt,
+                "category": "MARKETING",
+                "date": str(date.today()),
+                "payer_name": m.member_name
+            })
+
     # 2. Compute Regular Meals & Guest Meals per member
     member_meals = {m.id: 0.0 for m in members}
     member_breakfast = {m.id: 0.0 for m in members}
@@ -164,7 +187,7 @@ def calculate_mess_balances(
     member_guest_charge = {m.id: 0.0 for m in members}
     member_guest_details = {m.id: [] for m in members}
 
-    guest_rates = group.settings.get("guest_rates", {"veg": 40.0, "fish": 50.0, "meat": 75.0}) if group.settings else {"veg": 40.0, "fish": 50.0, "meat": 75.0}
+    guest_rates = group.settings.get("guest_rates", {"veg": 40.0, "fish": 50.0, "meat": 75.0, "egg": 35.0}) if group.settings else {"veg": 40.0, "fish": 50.0, "meat": 75.0, "egg": 35.0}
 
     for ml in meals:
         target_mid = ml.member_id or (user_to_member[ml.user_id].id if ml.user_id in user_to_member else None)
@@ -180,21 +203,24 @@ def calculate_mess_balances(
         g_veg = ml.guest_veg_count or 0.0
         g_fish = ml.guest_fish_count or 0.0
         g_meat = ml.guest_meat_count or 0.0
+        g_egg = getattr(ml, "guest_egg_count", 0.0) or 0.0
         g_charge = ml.guest_charge or 0.0
 
-        if g_charge == 0.0 and (g_veg > 0 or g_fish > 0 or g_meat > 0):
+        if g_charge == 0.0 and (g_veg > 0 or g_fish > 0 or g_meat > 0 or g_egg > 0):
             g_charge = (g_veg * float(guest_rates.get("veg", 40.0))) + \
                        (g_fish * float(guest_rates.get("fish", 50.0))) + \
-                       (g_meat * float(guest_rates.get("meat", 75.0)))
+                       (g_meat * float(guest_rates.get("meat", 75.0))) + \
+                       (g_egg * float(guest_rates.get("egg", 35.0)))
 
-        if g_charge > 0 or (g_veg + g_fish + g_meat) > 0:
-            member_guest_meals[target_mid] += (g_veg + g_fish + g_meat)
+        if g_charge > 0 or (g_veg + g_fish + g_meat + g_egg) > 0:
+            member_guest_meals[target_mid] += (g_veg + g_fish + g_meat + g_egg)
             member_guest_charge[target_mid] += g_charge
             member_guest_details[target_mid].append({
                 "date": str(ml.record_date),
                 "veg": g_veg,
                 "fish": g_fish,
                 "meat": g_meat,
+                "egg": g_egg,
                 "charge": g_charge
             })
 
@@ -232,12 +258,14 @@ def calculate_mess_balances(
         m_est_cost = establishment_per_head
         m_guest_cost = round(member_guest_charge[m.id], 2)
         m_custom_cost = round(custom_split_dues[m.id], 2)
+        m_mkt_amt = getattr(m, 'marketing_amount', 0.0) or 0.0
+        m_mkt_days = getattr(m, 'marketing_days', 0.0) or 0.0
 
         # Total Bill for Candidate = (Meals * Meal Rate) + Establishment + Guest Charge + Custom Splits
         total_candidate_bill = round(m_meal_cost + m_est_cost + m_guest_cost + m_custom_cost, 2)
         
-        # Total Paid = Advance Deposit + Direct Bazar/Marketing paid + Settlements
-        total_paid_in = round(m.initial_deposit + direct_paid_by_member[m.id] + settlement_adjustments[m.id], 2)
+        # Total Paid = Advance Deposit + Marketing Amount + Direct Bazar/Marketing paid + Settlements
+        total_paid_in = round(m.initial_deposit + m_mkt_amt + direct_paid_by_member[m.id] + settlement_adjustments[m.id], 2)
         total_collected_pool += total_paid_in
 
         # Net Balance = Paid - Bill
@@ -267,6 +295,8 @@ def calculate_mess_balances(
             "is_virtual": m.is_virtual == "true" or m.user_id is None,
             "role": m.role,
             "initial_deposit": m.initial_deposit,
+            "marketing_amount": m_mkt_amt,
+            "marketing_days": m_mkt_days,
             "direct_expenses_paid": round(direct_paid_by_member[m.id], 2),
             "settlements_adjustment": round(settlement_adjustments[m.id], 2),
             "total_paid": total_paid_in,

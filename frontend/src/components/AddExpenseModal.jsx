@@ -374,8 +374,8 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
             />
           </div>
 
-          {/* Amount, Date, and Payer */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.5rem' }}>
+          {/* Amount and Expense Date */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.75rem' }}>
             <div className="form-group">
               <label className="form-label">Amount ({curr})</label>
               <input
@@ -403,31 +403,8 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
             </div>
           </div>
 
-          {/* Paid By & Category */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.75rem' }}>
-            <div className="form-group">
-              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <UserCheck size={14} color="#60a5fa" />
-                <span>Paid By (Payer)</span>
-              </label>
-              <select
-                className="form-select"
-                value={paidByMemberId}
-                onChange={(e) => setPaidByMemberId(e.target.value)}
-              >
-                <option value="">🏦 Mess Fund / Group Collective Fund</option>
-                {members.map(m => {
-                  const mName = m.name || m.user?.name || m.email;
-                  const isCur = m.user_id === currentUser?.id;
-                  return (
-                    <option key={m.id || m.user_id} value={m.id || m.user_id}>
-                      👤 {mName} {isCur ? '(You)' : ''}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
+          {/* Category & Optional Paid By */}
+          <div style={{ display: 'grid', gridTemplateColumns: isMess ? '1fr' : '1fr 1fr', gap: '0.85rem', marginBottom: '0.75rem' }}>
             <div className="form-group">
               <label className="form-label">Category</label>
               <select
@@ -483,39 +460,102 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                 )}
               </select>
             </div>
+
+            {!isMess && (
+              <div className="form-group">
+                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <UserCheck size={14} color="#60a5fa" />
+                  <span>Paid By (Payer)</span>
+                </label>
+                <select
+                  className="form-select"
+                  value={paidByMemberId}
+                  onChange={(e) => setPaidByMemberId(e.target.value)}
+                >
+                  <option value="">🏦 Mess Fund / Group Collective Fund</option>
+                  {members.map(m => {
+                    const mName = m.name || m.user?.name || m.email;
+                    const isCur = m.user_id === currentUser?.id;
+                    return (
+                      <option key={m.id || m.user_id} value={m.id || m.user_id}>
+                        👤 {mName} {isCur ? '(You)' : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            )}
           </div>
 
-          {/* Fixed Establishment Cost Checkbox (For Mess) */}
+          {/* Establishment Charges vs Meal Pool Explicit Selector (For Mess) */}
           {isMess && (
-            <div style={{
-              background: isFixedCost ? 'rgba(59, 130, 246, 0.12)' : 'rgba(15, 23, 42, 0.6)',
-              padding: '0.85rem 1rem',
-              borderRadius: '12px',
-              border: `1px solid ${isFixedCost ? 'rgba(59, 130, 246, 0.35)' : 'rgba(255, 255, 255, 0.08)'}`,
-              marginBottom: '1.25rem'
-            }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={isFixedCost}
-                  onChange={(e) => {
-                    setIsFixedCost(e.target.checked);
-                    if (e.target.checked) setSplitType('EQUAL');
-                    else setSplitType('MEAL_BASED');
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label className="form-label" style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.45rem', display: 'block' }}>
+                How should this expense be divided in Mess Khatabook?
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div 
+                  onClick={() => {
+                    setIsFixedCost(true);
+                    setSplitType('EQUAL');
                   }}
-                  style={{ width: '18px', height: '18px', accentColor: '#3b82f6' }}
-                />
-                <div>
-                  <span style={{ fontWeight: 700, fontSize: '0.88rem', color: isFixedCost ? '#93c5fd' : '#f8fafc' }}>
-                    Establishment Fixed Cost (Cook Masi, Gas, Meat, Egg, Paper)
-                  </span>
-                  <p style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                    {isFixedCost 
-                      ? '✓ Divided equally per candidate (Total Establishment ÷ 15 candidates = ₹Per Candidate).' 
-                      : '✓ Variable Bazar/Grocery pool divided dynamically by member meal counts.'}
+                  style={{
+                    padding: '0.85rem 1rem',
+                    borderRadius: '12px',
+                    border: `2px solid ${isFixedCost ? '#3b82f6' : 'rgba(255,255,255,0.08)'}`,
+                    background: isFixedCost ? 'rgba(59, 130, 246, 0.18)' : 'rgba(15, 23, 42, 0.6)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                    <span style={{ fontWeight: 800, fontSize: '0.85rem', color: isFixedCost ? '#93c5fd' : '#f8fafc' }}>
+                      🔥 Establishment Charge
+                    </span>
+                    <input
+                      type="radio"
+                      name="mess_expense_type"
+                      checked={isFixedCost}
+                      onChange={() => {}}
+                      style={{ accentColor: '#3b82f6' }}
+                    />
+                  </div>
+                  <p style={{ fontSize: '0.71rem', color: '#94a3b8', margin: 0, leading: '1.2' }}>
+                    Fixed cost divided equally per candidate (Cook Masi, Gas, Rent, Electricity, Egg, Feast).
                   </p>
                 </div>
-              </label>
+
+                <div 
+                  onClick={() => {
+                    setIsFixedCost(false);
+                    setSplitType('MEAL_BASED');
+                  }}
+                  style={{
+                    padding: '0.85rem 1rem',
+                    borderRadius: '12px',
+                    border: `2px solid ${!isFixedCost ? '#10b981' : 'rgba(255,255,255,0.08)'}`,
+                    background: !isFixedCost ? 'rgba(16, 185, 129, 0.18)' : 'rgba(15, 23, 42, 0.6)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                    <span style={{ fontWeight: 800, fontSize: '0.85rem', color: !isFixedCost ? '#6ee7b7' : '#f8fafc' }}>
+                      🥬 Meal & Marketing Pool
+                    </span>
+                    <input
+                      type="radio"
+                      name="mess_expense_type"
+                      checked={!isFixedCost}
+                      onChange={() => {}}
+                      style={{ accentColor: '#10b981' }}
+                    />
+                  </div>
+                  <p style={{ fontSize: '0.71rem', color: '#94a3b8', margin: 0, leading: '1.2' }}>
+                    Variable meal pool divided by meal counts (Sabji Marketing, Rice, Potato, Grocery).
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 

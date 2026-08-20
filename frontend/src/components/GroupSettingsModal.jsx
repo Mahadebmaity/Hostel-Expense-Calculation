@@ -12,11 +12,15 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
   const [memberUpi, setMemberUpi] = useState('');
   const [memberRole, setInviteRole] = useState('MEMBER');
   const [memberDeposit, setInviteDeposit] = useState('');
+  const [memberMktAmt, setMemberMktAmt] = useState('');
+  const [memberMktDays, setMemberMktDays] = useState('');
   const [addingMember, setAddingMember] = useState(false);
 
-  // Update deposits
+  // Update deposits & Marketing
   const [depositMemberId, setDepositMemberId] = useState(group?.members[0]?.id || group?.members[0]?.user_id || '');
   const [depositAmount, setDepositAmount] = useState('');
+  const [depositMktAmt, setDepositMktAmt] = useState('');
+  const [depositMktDays, setDepositMktDays] = useState('');
   const [depositOperation, setDepositOperation] = useState('ADD'); // 'ADD' or 'SET'
   const [updatingDeposit, setUpdatingDeposit] = useState(false);
 
@@ -27,6 +31,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
   const [vegRate, setVegRate] = useState(group?.settings?.guest_rates?.veg ?? 40.0);
   const [fishRate, setFishRate] = useState(group?.settings?.guest_rates?.fish ?? 50.0);
   const [meatRate, setMeatRate] = useState(group?.settings?.guest_rates?.meat ?? 75.0);
+  const [eggRate, setEggRate] = useState(group?.settings?.guest_rates?.egg ?? 35.0);
   const [savingWeights, setSavingWeights] = useState(false);
 
   const curr = group?.currency === 'INR' ? '₹' : (group?.currency || '₹');
@@ -45,13 +50,17 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
         phone: memberPhone.trim() || undefined,
         upi_id: memberUpi.trim() || undefined,
         role: memberRole,
-        initial_deposit: parseFloat(memberDeposit) || 0.0
+        initial_deposit: parseFloat(memberDeposit) || 0.0,
+        marketing_amount: parseFloat(memberMktAmt) || 0.0,
+        marketing_days: parseFloat(memberMktDays) || 0.0
       });
       setMemberName('');
       setMemberEmail('');
       setMemberPhone('');
       setMemberUpi('');
       setInviteDeposit('');
+      setMemberMktAmt('');
+      setMemberMktDays('');
       if (onGroupUpdated) onGroupUpdated();
       alert('Member added successfully!');
     } catch (err) {
@@ -63,18 +72,21 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
 
   const handleUpdateDeposit = async (e) => {
     e.preventDefault();
-    if (!depositAmount || parseFloat(depositAmount) < 0) return;
     setUpdatingDeposit(true);
     try {
       await api.updateDeposit(group.id, {
         member_id: depositMemberId,
         user_id: depositMemberId,
-        amount: parseFloat(depositAmount),
+        amount: parseFloat(depositAmount) || 0.0,
+        marketing_amount: depositMktAmt !== '' ? parseFloat(depositMktAmt) : undefined,
+        marketing_days: depositMktDays !== '' ? parseFloat(depositMktDays) : undefined,
         operation: depositOperation
       });
       setDepositAmount('');
+      setDepositMktAmt('');
+      setDepositMktDays('');
       if (onGroupUpdated) onGroupUpdated();
-      alert(`Deposit ${depositOperation === 'ADD' ? 'added' : 'updated'} successfully!`);
+      alert(`Deposit / Marketing ${depositOperation === 'ADD' ? 'added' : 'updated'} successfully!`);
     } catch (err) {
       alert(err.message);
     } finally {
@@ -95,7 +107,8 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
           guest_rates: {
             veg: parseFloat(vegRate),
             fish: parseFloat(fishRate),
-            meat: parseFloat(meatRate)
+            meat: parseFloat(meatRate),
+            egg: parseFloat(eggRate)
           }
         }
       });
@@ -119,34 +132,64 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '620px', maxHeight: '90vh', overflowY: 'auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>⚙️ {group.name} Settings</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+    <div className="modal-backdrop" onClick={onClose} style={{ zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.75rem' }}>
+      <div 
+        className="modal-content" 
+        onClick={(e) => e.stopPropagation()} 
+        style={{ 
+          maxWidth: '620px', 
+          width: '100%', 
+          maxHeight: '88vh', 
+          overflowY: 'auto',
+          boxSizing: 'border-box',
+          padding: '1.1rem',
+          borderRadius: '16px'
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc', margin: 0, wordBreak: 'break-word' }}>
+            ⚙️ {group.name} Settings
+          </h3>
+          <button 
+            onClick={onClose} 
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem', padding: '0.2rem' }}
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Tab Headers */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.5rem' }}>
+        {/* Tab Headers with Horizontal Scroll on Mobile */}
+        <div style={{ 
+          display: 'flex', 
+          gap: '0.5rem', 
+          marginBottom: '1.25rem', 
+          borderBottom: '1px solid rgba(255,255,255,0.08)', 
+          paddingBottom: '0.6rem',
+          overflowX: 'auto',
+          whiteSpace: 'nowrap',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none'
+        }}>
           <button
             onClick={() => setActiveTab('members')}
             className={`btn ${activeTab === 'members' ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+            style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0 }}
           >
             Members ({group.members?.length || 0})
           </button>
           <button
             onClick={() => setActiveTab('deposits')}
             className={`btn ${activeTab === 'deposits' ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+            style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0 }}
           >
-            Manage Deposits / Marketing
+            Manage Marketing & Deposits
           </button>
           {group.group_type === 'MESS' && (
             <button
               onClick={() => setActiveTab('rules')}
               className={`btn ${activeTab === 'rules' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+              style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0 }}
             >
               Meal & Guest Rates
             </button>
@@ -156,21 +199,21 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
         {/* 1. MEMBERS TAB */}
         {activeTab === 'members' && (
           <div>
-            {/* Quick Add Member Form (No mandatory registration!) */}
+            {/* Quick Add Member Form */}
             <form onSubmit={handleAddMember} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1rem', borderRadius: '12px', marginBottom: '1.25rem', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.4rem', margin: 0 }}>
                   <UserPlus size={16} color="#3b82f6" /> Quick Add Member (No account required)
                 </h4>
                 <span className="badge badge-settled" style={{ fontSize: '0.65rem' }}>Instant Calculation</span>
               </div>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr', gap: '0.65rem', marginBottom: '0.65rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.55rem', marginBottom: '0.65rem' }}>
                 <div>
                   <label style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>Member Name *</label>
                   <input
                     type="text"
-                    placeholder="e.g. Biswajit Da, Atanu Da"
+                    placeholder="e.g. Biswajit Da"
                     className="form-input"
                     value={memberName}
                     onChange={(e) => setMemberName(e.target.value)}
@@ -190,23 +233,43 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>Advance Deposit ({curr})</label>
+                  <label style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>Advance ({curr})</label>
                   <input
                     type="number"
-                    placeholder="e.g. 1000"
+                    placeholder="1000"
                     className="form-input"
                     value={memberDeposit}
                     onChange={(e) => setInviteDeposit(e.target.value)}
                   />
                 </div>
+                <div>
+                  <label style={{ fontSize: '0.72rem', color: '#34d399', display: 'block', marginBottom: '0.2rem' }}>Bazar Spent ({curr})</label>
+                  <input
+                    type="number"
+                    placeholder="1500"
+                    className="form-input"
+                    value={memberMktAmt}
+                    onChange={(e) => setMemberMktAmt(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.72rem', color: '#fbbf24', display: 'block', marginBottom: '0.2rem' }}>Mkt Days</label>
+                  <input
+                    type="number"
+                    placeholder="2"
+                    className="form-input"
+                    value={memberMktDays}
+                    onChange={(e) => setMemberMktDays(e.target.value)}
+                  />
+                </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem', marginBottom: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.65rem', marginBottom: '0.75rem' }}>
                 <div>
                   <label style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>UPI ID for Settlements (Optional)</label>
                   <input
                     type="text"
-                    placeholder="name@okaxis / name@upi"
+                    placeholder="name@upi"
                     className="form-input"
                     value={memberUpi}
                     onChange={(e) => setMemberUpi(e.target.value)}
@@ -216,7 +279,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
                   <label style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>Email / Phone (Optional)</label>
                   <input
                     type="text"
-                    placeholder="email@example.com or phone"
+                    placeholder="email / phone"
                     className="form-input"
                     value={memberEmail}
                     onChange={(e) => setMemberEmail(e.target.value)}
@@ -225,7 +288,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
               </div>
 
               <div style={{ textAlign: 'right' }}>
-                <button type="submit" disabled={addingMember} className="btn btn-primary" style={{ padding: '0.45rem 1rem', fontSize: '0.82rem' }}>
+                <button type="submit" disabled={addingMember} className="btn btn-primary" style={{ padding: '0.45rem 1rem', fontSize: '0.82rem', width: '100%' }}>
                   {addingMember ? 'Adding...' : '+ Add Member to Group'}
                 </button>
               </div>
@@ -235,23 +298,25 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
             <h5 style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
               Current Group Members ({group.members?.length || 0})
             </h5>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '240px', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '220px', overflowY: 'auto' }}>
               {group.members?.map(m => {
                 const displayName = m.name || m.user?.name || m.email || 'Member';
                 const isVirtual = m.is_virtual === 'true' || !m.user_id;
+                const mktAmt = m.marketing_amount || 0;
+                const mktDays = m.marketing_days || 0;
 
                 return (
-                  <div key={m.id || m.user_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15, 23, 42, 0.5)', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                  <div key={m.id || m.user_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15, 23, 42, 0.5)', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.04)', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
                         <strong style={{ fontSize: '0.88rem', color: '#f8fafc' }}>{displayName}</strong>
                         {isVirtual ? (
                           <span style={{ fontSize: '0.65rem', background: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
-                            Virtual Member
+                            Virtual
                           </span>
                         ) : (
                           <span style={{ fontSize: '0.65rem', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
-                            Registered User
+                            Registered
                           </span>
                         )}
                         <span className="badge badge-settled" style={{ fontSize: '0.65rem', padding: '0.1rem 0.35rem' }}>
@@ -259,7 +324,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
                         </span>
                       </div>
                       <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: '0.15rem' }}>
-                        Advance Deposit: {curr}{m.initial_deposit?.toFixed(0) || 0} {m.upi_id ? `• UPI: ${m.upi_id}` : ''}
+                        Deposit: {curr}{m.initial_deposit?.toFixed(0) || 0} {mktAmt > 0 ? `• Marketing: ${curr}${mktAmt.toFixed(0)} (${mktDays}d)` : ''} {m.upi_id ? `• UPI: ${m.upi_id}` : ''}
                       </div>
                     </div>
                     {m.user_id !== currentUserId && (
@@ -278,16 +343,18 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
           </div>
         )}
 
-        {/* 2. DEPOSITS TAB */}
+        {/* 2. DEPOSITS & MARKETING TAB */}
         {activeTab === 'deposits' && (
-          <form onSubmit={handleUpdateDeposit} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1.25rem', borderRadius: '12px' }}>
-            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.85rem' }}>
-              💰 Add Advance Deposit / Marketing Cash
+          <form onSubmit={handleUpdateDeposit} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1.1rem', borderRadius: '12px' }}>
+            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.4rem' }}>
+              💰 Manage Candidate Deposit & Marketing (Sabji / Fish)
             </h4>
-            <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '1rem' }}>
-              Record monthly advance money given to the manager (e.g. ₹500, ₹1000, ₹2000).
+            <p style={{ fontSize: '0.73rem', color: '#94a3b8', marginBottom: '1rem', lineHeight: '1.3' }}>
+              • <strong>Advance Deposit</strong>: Advance money given to Manager.<br/>
+              • <strong>Bazar Marketing</strong>: Money spent on Bazar by candidate (added directly to Meal Charge calculation).
             </p>
-            <div className="form-group">
+
+            <div className="form-group" style={{ marginBottom: '0.85rem' }}>
               <label className="form-label">Select Candidate / Member</label>
               <select
                 className="form-select"
@@ -296,13 +363,13 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
               >
                 {group.members?.map(m => (
                   <option key={m.id || m.user_id} value={m.id || m.user_id}>
-                    {m.name || m.user?.name || m.email} (Current deposit: {curr}{m.initial_deposit})
+                    {m.name || m.user?.name || m.email} (Deposit: {curr}{m.initial_deposit} | Marketing: {curr}{m.marketing_amount || 0})
                   </option>
                 ))}
               </select>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.65rem', marginBottom: '1rem' }}>
               <div className="form-group">
                 <label className="form-label">Action</label>
                 <select
@@ -310,42 +377,63 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
                   value={depositOperation}
                   onChange={(e) => setDepositOperation(e.target.value)}
                 >
-                  <option value="ADD">➕ Add to Existing Deposit</option>
-                  <option value="SET">📝 Set Exact Deposit Amount</option>
+                  <option value="ADD">➕ Add to Existing</option>
+                  <option value="SET">📝 Set Exact Amounts</option>
                 </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Amount ({curr})</label>
+                <label className="form-label">Advance Deposit ({curr})</label>
                 <input
                   type="number"
-                  min="1"
+                  min="0"
                   className="form-input"
                   placeholder="e.g. 1000"
                   value={depositAmount}
                   onChange={(e) => setDepositAmount(e.target.value)}
-                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ color: '#34d399' }}>Bazar Spent ({curr})</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="form-input"
+                  placeholder="e.g. 1500"
+                  value={depositMktAmt}
+                  onChange={(e) => setDepositMktAmt(e.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ color: '#fbbf24' }}>Mkt Days</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="form-input"
+                  placeholder="e.g. 2"
+                  value={depositMktDays}
+                  onChange={(e) => setDepositMktDays(e.target.value)}
                 />
               </div>
             </div>
 
             <button type="submit" disabled={updatingDeposit} className="btn btn-primary" style={{ width: '100%' }}>
-              {updatingDeposit ? 'Updating...' : 'Save Deposit'}
+              {updatingDeposit ? 'Updating...' : 'Save Deposit & Marketing Records'}
             </button>
           </form>
         )}
 
         {/* 3. RULES & WEIGHTS TAB */}
         {activeTab === 'rules' && (
-          <form onSubmit={handleSaveSettings} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1.25rem', borderRadius: '12px' }}>
-            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.85rem' }}>
+          <form onSubmit={handleSaveSettings} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1.1rem', borderRadius: '12px' }}>
+            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.4rem' }}>
               ⚖️ Mess Meal Rules & Guest Meal Rates
             </h4>
-            <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '1rem' }}>
-              Define meal weights for candidates and standard guest meal prices (Veg, Fish, Meat).
+            <p style={{ fontSize: '0.73rem', color: '#94a3b8', marginBottom: '1rem' }}>
+              Define meal weights for candidates and standard guest meal prices (Veg, Fish, Meat, Egg).
             </p>
 
             <h5 style={{ fontSize: '0.8rem', color: '#60a5fa', marginBottom: '0.5rem' }}>Meal Attendance Multipliers</h5>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '0.65rem', marginBottom: '1.25rem' }}>
               <div className="form-group">
                 <label className="form-label">Breakfast Unit</label>
                 <input
@@ -385,9 +473,9 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
             </div>
 
             <h5 style={{ fontSize: '0.8rem', color: '#fbbf24', marginBottom: '0.5rem' }}>Guest Meal Rates ({curr})</h5>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.65rem', marginBottom: '1.25rem' }}>
               <div className="form-group">
-                <label className="form-label">Veg Guest Meal</label>
+                <label className="form-label">Veg Guest</label>
                 <input
                   type="number"
                   step="1"
@@ -399,7 +487,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Fish Guest Meal</label>
+                <label className="form-label">Fish Guest</label>
                 <input
                   type="number"
                   step="1"
@@ -411,7 +499,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Meat Guest Meal</label>
+                <label className="form-label">Meat Guest</label>
                 <input
                   type="number"
                   step="1"
@@ -419,6 +507,18 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
                   className="form-input"
                   value={meatRate}
                   onChange={(e) => setMeatRate(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Egg Guest</label>
+                <input
+                  type="number"
+                  step="1"
+                  min="0"
+                  className="form-input"
+                  value={eggRate}
+                  onChange={(e) => setEggRate(e.target.value)}
                   required
                 />
               </div>

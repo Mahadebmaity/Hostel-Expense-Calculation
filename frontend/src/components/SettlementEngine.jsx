@@ -475,7 +475,7 @@ export default function SettlementEngine({
                         {isMyRecord && <span style={{ fontSize: '0.65rem', color: '#60a5fa' }}>(You)</span>}
                       </div>
                       <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                        {mb.role} {mb.is_virtual ? '• Virtual' : ''}
+                        {mb.role} {mb.is_virtual ? '• Virtual' : ''} {mb.marketing_amount > 0 ? `• Mkt: ${curr}${mb.marketing_amount.toFixed(0)} (${mb.marketing_days || 0}d)` : ''}
                       </div>
                     </td>
 
@@ -496,9 +496,14 @@ export default function SettlementEngine({
                           {curr}{mb.total_due?.toFixed(2) || '0.00'}
                         </td>
 
-                        {/* Total Paid */}
+                        {/* Total Paid (Deposit + Marketing) */}
                         <td style={{ padding: '0.75rem', textAlign: 'right', color: '#34d399', fontWeight: 700 }}>
-                          {curr}{mb.total_paid?.toFixed(2) || '0.00'}
+                          <div>{curr}{mb.total_paid?.toFixed(2) || '0.00'}</div>
+                          {mb.marketing_amount > 0 && (
+                            <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 400 }}>
+                              Dep: {curr}{mb.initial_deposit || 0} + Mkt: {curr}{mb.marketing_amount}
+                            </div>
+                          )}
                         </td>
                       </>
                     ) : (

@@ -43,6 +43,10 @@ def init_db_and_admin():
                         conn.execute(text("ALTER TABLE group_members ADD COLUMN upi_id VARCHAR(100)"))
                     if "is_virtual" not in gm_cols:
                         conn.execute(text("ALTER TABLE group_members ADD COLUMN is_virtual VARCHAR(10) DEFAULT 'true'"))
+                    if "marketing_amount" not in gm_cols:
+                        conn.execute(text("ALTER TABLE group_members ADD COLUMN marketing_amount FLOAT DEFAULT 0.0"))
+                    if "marketing_days" not in gm_cols:
+                        conn.execute(text("ALTER TABLE group_members ADD COLUMN marketing_days FLOAT DEFAULT 0.0"))
                     conn.commit()
 
                 # Expenses table
@@ -70,6 +74,8 @@ def init_db_and_admin():
                         conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN guest_fish_count FLOAT DEFAULT 0.0"))
                     if "guest_meat_count" not in meal_cols:
                         conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN guest_meat_count FLOAT DEFAULT 0.0"))
+                    if "guest_egg_count" not in meal_cols:
+                        conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN guest_egg_count FLOAT DEFAULT 0.0"))
                     if "guest_charge" not in meal_cols:
                         conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN guest_charge FLOAT DEFAULT 0.0"))
                     conn.commit()
