@@ -1,6 +1,6 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL 
   ? `${import.meta.env.VITE_API_URL.replace(/\/+$/, '')}/api/v1`
-  : '/api/v1';
+  : 'https://hostel-expense-calculation.onrender.com/api/v1';
 
 async function request(endpoint, options = {}, retries = 3, delay = 2500) {
   const token = localStorage.getItem('access_token');
