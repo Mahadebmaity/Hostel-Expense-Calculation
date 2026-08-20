@@ -2,7 +2,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL.replace(/\/+$/, '')}/api/v1`
   : '/api/v1';
 
-async function request(endpoint, options = {}) {
+async function request(endpoint, options = {}, retries = 3, delay = 2500) {
   const token = localStorage.getItem('access_token');
   const headers = {
     'Content-Type': 'application/json',
@@ -11,15 +11,27 @@ async function request(endpoint, options = {}) {
   };
 
   let response;
-  try {
-    response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
-  } catch (networkError) {
-    throw new Error(
-      'Unable to reach backend server. If running locally, make sure the Python FastAPI server is running (python -m uvicorn app.main:app --reload --port 8000). If on cloud (Render), please wait 30 seconds for the free instance to wake up.'
-    );
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+      });
+      // If server returns 502/503 (Render waking up / starting container), retry
+      if ((response.status === 502 || response.status === 503) && attempt < retries) {
+        await new Promise((res) => setTimeout(res, delay));
+        continue;
+      }
+      break; // Success or standard HTTP response
+    } catch (networkError) {
+      if (attempt < retries) {
+        await new Promise((res) => setTimeout(res, delay));
+        continue;
+      }
+      throw new Error(
+        'Unable to reach backend server. If running locally, make sure the Python FastAPI server is running (python -m uvicorn app.main:app --reload --port 8000). If on cloud (Render), please wait 15-20 seconds for the backend to complete its restart.'
+      );
+    }
   }
 
   if (response.status === 401) {
