@@ -56,17 +56,48 @@ def get_user_groups(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    if current_user.is_admin:
-        return db.query(Group).all()
+    from sqlalchemy import func
 
-    # Groups where user is a member or created the group
-    memberships = db.query(GroupMember).filter(GroupMember.user_id == current_user.id).all()
-    group_ids = set([m.group_id for m in memberships])
+    # Auto-link any unlinked GroupMember records matching current_user.email
+    if current_user.email:
+        unlinked = db.query(GroupMember).filter(
+            GroupMember.user_id.is_(None),
+            func.lower(GroupMember.email) == current_user.email.strip().lower()
+        ).all()
+        if unlinked:
+            for gm in unlinked:
+                gm.user_id = current_user.id
+                gm.is_virtual = "false"
+            db.commit()
+
+    if current_user.is_admin:
+        return db.query(Group).order_by(Group.created_at.desc()).all()
+
+    # Groups where user is a member, created the group, or email matches a member
+    group_ids = set()
+
+    # 1. Groups created by current user
     created_groups = db.query(Group).filter(Group.created_by == current_user.id).all()
     for cg in created_groups:
         group_ids.add(cg.id)
 
-    groups = db.query(Group).filter(Group.id.in_(list(group_ids))).all()
+    # 2. Groups where user is a member by user_id
+    memberships = db.query(GroupMember).filter(GroupMember.user_id == current_user.id).all()
+    for m in memberships:
+        group_ids.add(m.group_id)
+
+    # 3. Groups matching user email
+    if current_user.email:
+        email_memberships = db.query(GroupMember).filter(
+            func.lower(GroupMember.email) == current_user.email.strip().lower()
+        ).all()
+        for em in email_memberships:
+            group_ids.add(em.group_id)
+
+    if not group_ids:
+        return []
+
+    groups = db.query(Group).filter(Group.id.in_(list(group_ids))).order_by(Group.created_at.desc()).all()
     return groups
 
 @router.get("/{group_id}", response_model=GroupOut)

@@ -14,13 +14,12 @@ from app.models.scoreboard import MonthlyScoreBoard
 
 def seed_data():
     from sqlalchemy import text
-    # Drop and recreate tables to ensure all updated nullable constraints and new columns are freshly structured
-    Base.metadata.drop_all(bind=engine)
+    # Ensure all tables exist before seeding
     Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()
 
-    # Clear existing demo data
+    # Clear existing demo data if needed
     db.query(MonthlyScoreBoard).delete()
     db.query(MealAttendance).delete()
     db.query(Expense).delete()

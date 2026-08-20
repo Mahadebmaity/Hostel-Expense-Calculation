@@ -57,14 +57,19 @@ export default function Dashboard() {
   const [newGroupDeposit, setNewGroupDeposit] = useState('');
   const [creatingGroup, setCreatingGroup] = useState(false);
 
-  // 1. Fetch user groups
+  // 1. Fetch user groups & restore last active group per user account
   const loadGroups = async (selectGroupId = null) => {
     try {
       const list = await api.getGroups();
       setGroups(list);
       if (list.length > 0) {
-        const toSelect = selectGroupId ? list.find(g => g.id === selectGroupId) : (selectedGroup || list[0]);
-        setSelectedGroup(toSelect || list[0]);
+        const storageKey = user?.id ? `last_selected_group_${user.id}` : 'last_selected_group';
+        const savedGroupId = selectGroupId || localStorage.getItem(storageKey);
+        const toSelect = list.find(g => g.id === savedGroupId) || list[0];
+        setSelectedGroup(toSelect);
+        if (toSelect) {
+          localStorage.setItem(storageKey, toSelect.id);
+        }
       } else {
         setSelectedGroup(null);
       }
@@ -76,8 +81,10 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    loadGroups();
-  }, []);
+    if (user) {
+      loadGroups();
+    }
+  }, [user?.id]);
 
   // 2. Fetch data for selected group
   const refreshGroupData = async () => {
@@ -168,7 +175,12 @@ export default function Dashboard() {
       <Navbar
         groups={groups}
         selectedGroup={selectedGroup}
-        onSelectGroup={(g) => setSelectedGroup(g)}
+        onSelectGroup={(g) => {
+          setSelectedGroup(g);
+          if (user?.id && g?.id) {
+            localStorage.setItem(`last_selected_group_${user.id}`, g.id);
+          }
+        }}
         onOpenNewGroup={() => setShowNewGroupModal(true)}
         onOpenSettings={() => setShowGroupSettings(true)}
         activeTab={activeTab}
