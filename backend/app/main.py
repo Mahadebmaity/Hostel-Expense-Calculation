@@ -43,6 +43,10 @@ def init_db_and_admin():
                         conn.execute(text("ALTER TABLE group_members ADD COLUMN upi_id VARCHAR(100)"))
                     if "is_virtual" not in gm_cols:
                         conn.execute(text("ALTER TABLE group_members ADD COLUMN is_virtual VARCHAR(10) DEFAULT 'true'"))
+                    if "role" not in gm_cols:
+                        conn.execute(text("ALTER TABLE group_members ADD COLUMN role VARCHAR(20) DEFAULT 'MEMBER'"))
+                    if "initial_deposit" not in gm_cols:
+                        conn.execute(text("ALTER TABLE group_members ADD COLUMN initial_deposit FLOAT DEFAULT 0.0"))
                     if "marketing_amount" not in gm_cols:
                         conn.execute(text("ALTER TABLE group_members ADD COLUMN marketing_amount FLOAT DEFAULT 0.0"))
                     if "marketing_days" not in gm_cols:
@@ -96,6 +100,8 @@ def init_db_and_admin():
                 conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS phone VARCHAR(25)"))
                 conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS upi_id VARCHAR(100)"))
                 conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS is_virtual VARCHAR(10) DEFAULT 'true'"))
+                conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'MEMBER'"))
+                conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS initial_deposit FLOAT DEFAULT 0.0"))
                 conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS marketing_amount FLOAT DEFAULT 0.0"))
                 conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS marketing_days FLOAT DEFAULT 0.0"))
                 conn.execute(text("ALTER TABLE expenses ADD COLUMN IF NOT EXISTS paid_by_member_id VARCHAR(36)"))
@@ -162,8 +168,8 @@ def init_db_and_admin():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize DB in background thread so Uvicorn binds to port instantly
-    threading.Thread(target=init_db_and_admin, daemon=True).start()
+    # Initialize DB synchronously so migrations & tables are 100% ready on startup
+    init_db_and_admin()
     yield
 
 app = FastAPI(

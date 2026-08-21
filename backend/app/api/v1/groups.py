@@ -240,63 +240,69 @@ def add_group_member(
     Adds a member to the group. If the email corresponds to an existing registered user, links their account.
     If no registered user exists or only a name is provided, creates a seamless Virtual Member.
     """
-    group = db.query(Group).filter(Group.id == group_id).first()
-    if not group:
-        raise HTTPException(status_code=404, detail="Group not found")
+    try:
+        group = db.query(Group).filter(Group.id == group_id).first()
+        if not group:
+            raise HTTPException(status_code=404, detail="Group not found")
 
-    target_user = None
-    if member_in.email:
-        target_user = db.query(User).filter(User.email == member_in.email.strip().lower()).first()
+        target_user = None
+        if member_in.email:
+            target_user = db.query(User).filter(User.email == member_in.email.strip().lower()).first()
 
-    # Check for duplicate member
-    if target_user:
-        existing = db.query(GroupMember).filter(
-            GroupMember.group_id == group_id,
-            GroupMember.user_id == target_user.id
-        ).first()
-        if existing:
-            raise HTTPException(status_code=400, detail="This user is already a member of this group")
-        
-        new_member = GroupMember(
-            group_id=group_id,
-            user_id=target_user.id,
-            name=target_user.name,
-            email=target_user.email,
-            phone=target_user.phone or member_in.phone,
-            upi_id=target_user.upi_id or member_in.upi_id,
-            is_virtual="false",
-            role=member_in.role,
-            initial_deposit=member_in.initial_deposit,
-            marketing_amount=member_in.marketing_amount,
-            marketing_days=member_in.marketing_days
-        )
-    else:
-        # Create Virtual Member (No forced registration!)
-        member_name = (member_in.name or "").strip() or (member_in.email.split("@")[0] if member_in.email else "Member")
-        new_member = GroupMember(
-            group_id=group_id,
-            user_id=None,
-            name=member_name,
-            email=member_in.email.strip().lower() if member_in.email else None,
-            phone=member_in.phone.strip() if member_in.phone else None,
-            upi_id=member_in.upi_id.strip() if member_in.upi_id else None,
-            is_virtual="true",
-            role=member_in.role,
-            initial_deposit=member_in.initial_deposit,
-            marketing_amount=member_in.marketing_amount,
-            marketing_days=member_in.marketing_days
-        )
+        # Check for duplicate member
+        if target_user:
+            existing = db.query(GroupMember).filter(
+                GroupMember.group_id == group_id,
+                GroupMember.user_id == target_user.id
+            ).first()
+            if existing:
+                raise HTTPException(status_code=400, detail="This user is already a member of this group")
+            
+            new_member = GroupMember(
+                group_id=group_id,
+                user_id=target_user.id,
+                name=target_user.name,
+                email=target_user.email,
+                phone=target_user.phone or member_in.phone,
+                upi_id=target_user.upi_id or member_in.upi_id,
+                is_virtual="false",
+                role=member_in.role or "MEMBER",
+                initial_deposit=float(member_in.initial_deposit or 0.0),
+                marketing_amount=float(member_in.marketing_amount or 0.0),
+                marketing_days=float(member_in.marketing_days or 0.0)
+            )
+        else:
+            # Create Virtual Member (No forced registration!)
+            member_name = (member_in.name or "").strip() or (member_in.email.split("@")[0] if member_in.email else "Member")
+            new_member = GroupMember(
+                group_id=group_id,
+                user_id=None,
+                name=member_name,
+                email=member_in.email.strip().lower() if member_in.email else None,
+                phone=member_in.phone.strip() if member_in.phone else None,
+                upi_id=member_in.upi_id.strip() if member_in.upi_id else None,
+                is_virtual="true",
+                role=member_in.role or "MEMBER",
+                initial_deposit=float(member_in.initial_deposit or 0.0),
+                marketing_amount=float(member_in.marketing_amount or 0.0),
+                marketing_days=float(member_in.marketing_days or 0.0)
+            )
 
-    db.add(new_member)
-    db.commit()
-    db.refresh(new_member)
-    return {
-        "message": "Member added successfully",
-        "member_id": new_member.id,
-        "user_id": new_member.user_id,
-        "name": new_member.member_name,
-        "is_virtual": new_member.is_virtual == "true"
-    }
+        db.add(new_member)
+        db.commit()
+        db.refresh(new_member)
+        return {
+            "message": "Member added successfully",
+            "member_id": new_member.id,
+            "user_id": new_member.user_id,
+            "name": new_member.member_name,
+            "is_virtual": new_member.is_virtual == "true"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Failed to add member: {str(e)}")
 
 @router.delete("/{group_id}/members/{identifier}")
 def remove_group_member(
