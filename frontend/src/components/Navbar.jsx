@@ -131,15 +131,17 @@ export default function Navbar({
                   position: 'absolute',
                   top: '115%',
                   left: 0,
-                  width: '290px',
+                  width: 'min(300px, calc(100vw - 1.5rem))',
+                  maxWidth: 'calc(100vw - 1.5rem)',
                   maxHeight: '340px',
                   overflowY: 'auto',
                   background: '#111827',
                   border: '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '12px',
-                  boxShadow: '0 12px 30px rgba(0, 0, 0, 0.7)',
+                  boxShadow: '0 12px 30px rgba(0, 0, 0, 0.8)',
                   zIndex: 999,
-                  padding: '0.5rem'
+                  padding: '0.5rem',
+                  WebkitOverflowScrolling: 'touch'
                 }}
               >
                 <div style={{ padding: '0.35rem 0.5rem', fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>

@@ -175,7 +175,20 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
           </h3>
           <button 
             onClick={onClose} 
-            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem', padding: '0.2rem' }}
+            style={{ 
+              background: 'rgba(255, 255, 255, 0.06)', 
+              border: '1px solid rgba(255, 255, 255, 0.1)', 
+              color: '#94a3b8', 
+              cursor: 'pointer', 
+              fontSize: '1.1rem', 
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}
           >
             ✕
           </button>
