@@ -202,13 +202,14 @@ def delete_group(
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
 
+    # Allow system admins, creator, or any group member to delete the group
     if not current_user.is_admin and group.created_by != current_user.id:
         membership = db.query(GroupMember).filter(
             GroupMember.group_id == group_id,
             GroupMember.user_id == current_user.id
         ).first()
-        if not membership or membership.role != "ADMIN":
-            raise HTTPException(status_code=403, detail="Only the Group Creator or Admins can delete this group")
+        if not membership:
+            raise HTTPException(status_code=403, detail="You must be a member of this group to delete it")
 
     db.delete(group)
     db.commit()

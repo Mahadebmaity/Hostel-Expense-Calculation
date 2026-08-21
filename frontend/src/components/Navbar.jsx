@@ -131,18 +131,18 @@ export default function Navbar({
                   position: 'absolute',
                   top: '115%',
                   left: 0,
-                  width: '260px',
-                  maxHeight: '320px',
+                  width: '290px',
+                  maxHeight: '340px',
                   overflowY: 'auto',
                   background: '#111827',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '12px',
-                  boxShadow: '0 12px 30px rgba(0, 0, 0, 0.6)',
+                  boxShadow: '0 12px 30px rgba(0, 0, 0, 0.7)',
                   zIndex: 999,
-                  padding: '0.4rem'
+                  padding: '0.5rem'
                 }}
               >
-                <div style={{ padding: '0.35rem 0.5rem', fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ padding: '0.35rem 0.5rem', fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Select or Delete Group
                 </div>
                 {groups && groups.length > 0 ? (
@@ -160,22 +160,24 @@ export default function Navbar({
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          padding: '0.5rem 0.65rem',
+                          padding: '0.55rem 0.75rem',
                           borderRadius: '8px',
-                          background: isSelected ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                          background: isSelected ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.02)',
+                          border: isSelected ? '1px solid rgba(59, 130, 246, 0.4)' : '1px solid transparent',
                           cursor: 'pointer',
-                          marginBottom: '2px',
-                          transition: 'background 0.15s'
+                          marginBottom: '4px',
+                          transition: 'all 0.15s'
                         }}
                       >
                         <span style={{ 
-                          fontSize: '0.82rem', 
+                          fontSize: '0.83rem', 
                           fontWeight: isSelected ? 700 : 500, 
                           color: isSelected ? '#60a5fa' : '#e2e8f0', 
                           overflow: 'hidden', 
                           textOverflow: 'ellipsis', 
                           whiteSpace: 'nowrap', 
-                          flex: 1 
+                          flex: 1,
+                          paddingRight: '0.5rem'
                         }}>
                           {g.group_type === 'MESS' ? '🏨 ' : g.group_type === 'TRIP' ? '✈️ ' : '🏠 '} {g.name}
                         </span>
@@ -198,20 +200,23 @@ export default function Navbar({
                           disabled={isDeleting}
                           title={`Delete "${g.name}"`}
                           style={{
-                            background: 'rgba(239, 68, 68, 0.12)',
-                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            background: 'rgba(239, 68, 68, 0.2)',
+                            border: '1px solid rgba(239, 68, 68, 0.5)',
                             color: '#f87171',
                             borderRadius: '6px',
-                            padding: '0.25rem 0.4rem',
+                            padding: '0.3rem 0.5rem',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            marginLeft: '0.5rem',
-                            flexShrink: 0
+                            gap: '0.25rem',
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            flexShrink: 0,
+                            boxShadow: '0 2px 6px rgba(239, 68, 68, 0.2)'
                           }}
                         >
-                          <Trash2 size={12} />
+                          <Trash2 size={13} strokeWidth={2.5} color="#f87171" />
+                          <span>Del</span>
                         </button>
                       </div>
                     );
