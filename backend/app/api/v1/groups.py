@@ -202,18 +202,32 @@ def delete_group(
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
 
-    # Allow system admins, creator, or any group member to delete the group
-    if not current_user.is_admin and group.created_by != current_user.id:
-        membership = db.query(GroupMember).filter(
-            GroupMember.group_id == group_id,
-            GroupMember.user_id == current_user.id
-        ).first()
-        if not membership:
-            raise HTTPException(status_code=403, detail="You must be a member of this group to delete it")
+    # Check user membership
+    membership = db.query(GroupMember).filter(
+        GroupMember.group_id == group_id,
+        GroupMember.user_id == current_user.id
+    ).first()
 
-    db.delete(group)
-    db.commit()
-    return {"message": f"Group '{group.name}' deleted successfully"}
+    # Determine if user is Admin, Creator, or has ADMIN role in group
+    is_admin_or_creator = (
+        current_user.is_admin or
+        group.created_by == current_user.id or
+        (membership and membership.role == "ADMIN")
+    )
+
+    if is_admin_or_creator:
+        # Permanently delete group and all associated records for everyone
+        db.delete(group)
+        db.commit()
+        return {"message": f"Group '{group.name}' permanently deleted by Admin"}
+    else:
+        # Regular user: remove user's membership (leave group), keeping group intact for Admin
+        if not membership:
+            raise HTTPException(status_code=403, detail="You are not a member of this group")
+
+        db.delete(membership)
+        db.commit()
+        return {"message": f"You have left group '{group.name}'. The group remains intact for the Admin."}
 
 @router.post("/{group_id}/members", status_code=status.HTTP_201_CREATED)
 def add_group_member(

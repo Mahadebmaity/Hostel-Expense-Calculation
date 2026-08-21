@@ -187,7 +187,7 @@ export default function Navbar({
                         <button
                           onClick={async (e) => {
                             e.stopPropagation();
-                            if (window.confirm(`⚠️ ARE YOU SURE YOU WANT TO DELETE GROUP "${g.name}"?\n\nThis will permanently delete this group and all its expenses.`)) {
+                            if (window.confirm(`⚠️ ARE YOU SURE YOU WANT TO REMOVE/DELETE GROUP "${g.name}"?\n\n• If you are Admin: Permanently erases the group.\n• If you are User: Removes group from your account, keeping it intact for Admin.`)) {
                               setDeletingGroupId(g.id);
                               try {
                                 await api.deleteGroup(g.id);
