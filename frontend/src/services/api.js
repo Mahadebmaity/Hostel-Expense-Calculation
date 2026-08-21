@@ -95,6 +95,7 @@ export const api = {
   getGroup: (id) => request(`/groups/${id}`),
   createGroup: (data) => request('/groups/', { method: 'POST', body: JSON.stringify(data) }),
   updateGroup: (id, data) => request(`/groups/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteGroup: (id) => request(`/groups/${id}`, { method: 'DELETE' }),
   addMember: (groupId, data) => request(`/groups/${groupId}/members`, { method: 'POST', body: JSON.stringify(data) }),
   removeMember: (groupId, identifier) => request(`/groups/${groupId}/members/${identifier}`, { method: 'DELETE' }),
   updateDeposit: (groupId, data) => request(`/groups/${groupId}/deposit`, { method: 'POST', body: JSON.stringify(data) }),

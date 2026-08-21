@@ -13,6 +13,8 @@ from app.services.meal_engine import calculate_mess_balances
 from app.services.split_engine import simplify_debts
 from app.services.upi_service import get_upi_payment_payload
 
+from sqlalchemy import func
+
 router = APIRouter(prefix="/groups", tags=["Groups"])
 
 @router.post("/", response_model=GroupOut, status_code=status.HTTP_201_CREATED)
@@ -21,8 +23,30 @@ def create_group(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    clean_name = (group_in.name or "").strip()
+    if not clean_name:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Group name cannot be empty")
+
+    # Check if a group with the exact same name (case-insensitive) already exists for current user or user's memberships
+    existing = db.query(Group).filter(
+        Group.created_by == current_user.id,
+        func.lower(Group.name) == clean_name.lower()
+    ).first()
+
+    if not existing:
+        existing = db.query(Group).join(GroupMember, GroupMember.group_id == Group.id).filter(
+            GroupMember.user_id == current_user.id,
+            func.lower(Group.name) == clean_name.lower()
+        ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"A group named '{clean_name}' already exists. Please choose a different group name."
+        )
+
     new_group = Group(
-        name=group_in.name,
+        name=clean_name,
         description=group_in.description,
         group_type=group_in.group_type,
         currency=group_in.currency,
@@ -140,7 +164,20 @@ def update_group(
             raise HTTPException(status_code=403, detail="Only Admins or Managers can update group settings")
 
     if group_update.name is not None:
-        group.name = group_update.name
+        clean_name = group_update.name.strip()
+        if not clean_name:
+            raise HTTPException(status_code=400, detail="Group name cannot be empty")
+        existing = db.query(Group).filter(
+            Group.id != group_id,
+            Group.created_by == current_user.id,
+            func.lower(Group.name) == clean_name.lower()
+        ).first()
+        if existing:
+            raise HTTPException(
+                status_code=400,
+                detail=f"A group named '{clean_name}' already exists. Please choose a different group name."
+            )
+        group.name = clean_name
     if group_update.description is not None:
         group.description = group_update.description
     if group_update.group_type is not None:
@@ -153,6 +190,29 @@ def update_group(
     db.commit()
     db.refresh(group)
     return group
+
+@router.delete("/{group_id}")
+def delete_group(
+    group_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Deletes a group and all associated records (members, expenses, meal records, scoreboards)."""
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    if not current_user.is_admin and group.created_by != current_user.id:
+        membership = db.query(GroupMember).filter(
+            GroupMember.group_id == group_id,
+            GroupMember.user_id == current_user.id
+        ).first()
+        if not membership or membership.role != "ADMIN":
+            raise HTTPException(status_code=403, detail="Only the Group Creator or Admins can delete this group")
+
+    db.delete(group)
+    db.commit()
+    return {"message": f"Group '{group.name}' deleted successfully"}
 
 @router.post("/{group_id}/members", status_code=status.HTTP_201_CREATED)
 def add_group_member(

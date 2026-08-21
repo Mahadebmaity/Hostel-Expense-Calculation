@@ -113,10 +113,18 @@ export default function Dashboard() {
 
   const handleCreateGroup = async (e) => {
     e.preventDefault();
+    const cleanName = newGroupName.trim();
+    if (!cleanName) return;
+
+    if (groups.some(g => g.name.trim().toLowerCase() === cleanName.toLowerCase())) {
+      alert(`A group named "${cleanName}" already exists. Please choose a different group name.`);
+      return;
+    }
+
     setCreatingGroup(true);
     try {
       const created = await api.createGroup({
-        name: newGroupName,
+        name: cleanName,
         group_type: newGroupType,
         initial_deposit: parseFloat(newGroupDeposit) || 0.0
       });
@@ -197,6 +205,7 @@ export default function Dashboard() {
               setActiveTab('overview');
             }}
             currentGroupId={selectedGroup?.id}
+            onGroupDeleted={() => loadGroups()}
           />
         ) : !selectedGroup ? (
           <div className="glass-panel" style={{ padding: '3.5rem 2rem', textAlign: 'center', maxWidth: '500px', margin: '4rem auto' }}>
@@ -495,6 +504,7 @@ export default function Dashboard() {
           group={selectedGroup}
           onClose={() => setShowGroupSettings(false)}
           onGroupUpdated={refreshGroupData}
+          onGroupDeleted={() => loadGroups()}
           currentUserId={user?.id}
         />
       )}

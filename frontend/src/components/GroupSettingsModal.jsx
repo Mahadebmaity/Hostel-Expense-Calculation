@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { api } from '../services/api';
-import { Settings, UserPlus, Trash2, DollarSign, Sliders, Shield, UserCheck } from 'lucide-react';
+import { Settings, UserPlus, Trash2, DollarSign, Sliders, Shield, UserCheck, AlertTriangle } from 'lucide-react';
 
-export default function GroupSettingsModal({ group, onClose, onGroupUpdated, currentUserId }) {
+export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onGroupDeleted, currentUserId }) {
   const [activeTab, setActiveTab] = useState('members'); // 'members', 'deposits', 'rules'
   
   // Add member
@@ -33,8 +33,30 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
   const [meatRate, setMeatRate] = useState(group?.settings?.guest_rates?.meat ?? 75.0);
   const [eggRate, setEggRate] = useState(group?.settings?.guest_rates?.egg ?? 35.0);
   const [savingWeights, setSavingWeights] = useState(false);
+  const [deletingGroup, setDeletingGroup] = useState(false);
 
   const curr = group?.currency === 'INR' ? '₹' : (group?.currency || '₹');
+
+  const handleDeleteGroup = async () => {
+    const confirmName = window.prompt(`⚠️ ARE YOU SURE YOU WANT TO DELETE THIS GROUP?\n\nThis will permanently delete group '${group.name}' along with all expenses, meals, and member records.\n\nType the group name below to confirm:`);
+    if (confirmName === null) return;
+    if (confirmName.trim().toLowerCase() !== group.name.trim().toLowerCase()) {
+      alert("Group name did not match. Deletion cancelled.");
+      return;
+    }
+
+    setDeletingGroup(true);
+    try {
+      await api.deleteGroup(group.id);
+      alert(`Group '${group.name}' has been successfully deleted.`);
+      onClose();
+      if (onGroupDeleted) onGroupDeleted(group.id);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setDeletingGroup(false);
+    }
+  };
 
   const handleAddMember = async (e) => {
     e.preventDefault();
@@ -194,6 +216,20 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
               Meal & Guest Rates
             </button>
           )}
+          <button
+            onClick={() => setActiveTab('danger')}
+            className={`btn ${activeTab === 'danger' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{
+              padding: '0.4rem 0.85rem',
+              fontSize: '0.78rem',
+              flexShrink: 0,
+              color: '#f87171',
+              borderColor: 'rgba(239, 68, 68, 0.4)',
+              background: activeTab === 'danger' ? 'rgba(239, 68, 68, 0.2)' : 'transparent'
+            }}
+          >
+            ⚠️ Danger Zone
+          </button>
         </div>
 
         {/* 1. MEMBERS TAB */}
@@ -528,6 +564,43 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, cur
               {savingWeights ? 'Saving...' : 'Save Settings & Rates'}
             </button>
           </form>
+        )}
+
+        {/* 4. DANGER ZONE TAB */}
+        {activeTab === 'danger' && (
+          <div style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '1.25rem', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem', color: '#f87171' }}>
+              <AlertTriangle size={20} />
+              <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>Delete Group & Clean All Records</h4>
+            </div>
+            <p style={{ fontSize: '0.78rem', color: '#cbd5e1', marginBottom: '1rem', lineHeight: '1.4' }}>
+              Deleting <strong>{group.name}</strong> will permanently erase all candidate deposits, meal attendance sheets, expenses, settlement calculations, and monthly scoreboards linked to this group.
+            </p>
+
+            <button
+              onClick={handleDeleteGroup}
+              disabled={deletingGroup}
+              style={{
+                width: '100%',
+                background: '#ef4444',
+                color: '#ffffff',
+                border: 'none',
+                padding: '0.65rem 1rem',
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                cursor: deletingGroup ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 4px 14px rgba(239, 68, 68, 0.4)'
+              }}
+            >
+              <Trash2 size={16} />
+              {deletingGroup ? 'Deleting Group...' : `Delete Group "${group.name}"`}
+            </button>
+          </div>
         )}
       </div>
     </div>

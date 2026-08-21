@@ -14,10 +14,11 @@ import {
   RefreshCw, 
   ArrowUpRight,
   CheckCircle2,
-  Crown
+  Crown,
+  Trash2
 } from 'lucide-react';
 
-export default function AdminPanel({ onSelectGroup, currentGroupId }) {
+export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDeleted }) {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -25,6 +26,22 @@ export default function AdminPanel({ onSelectGroup, currentGroupId }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL'); // ALL, ADMIN, USER
   const [actionLoading, setActionLoading] = useState(false);
+
+  const handleDeleteGroup = async (grp) => {
+    if (!window.confirm(`Are you sure you want to permanently delete group "${grp.name}"? All associated data will be lost.`)) {
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await api.deleteGroup(grp.id);
+      await loadAdminData();
+      if (onGroupDeleted) onGroupDeleted(grp.id);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const loadAdminData = async () => {
     setLoading(true);
@@ -256,21 +273,40 @@ export default function AdminPanel({ onSelectGroup, currentGroupId }) {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => onSelectGroup(grp)}
-                  className={`btn ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                >
-                  {isSelected ? (
-                    <>
-                      <CheckCircle2 size={13} /> Active Group
-                    </>
-                  ) : (
-                    <>
-                      <ArrowUpRight size={13} /> View / Manage
-                    </>
-                  )}
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <button
+                    onClick={() => onSelectGroup(grp)}
+                    className={`btn ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                  >
+                    {isSelected ? (
+                      <>
+                        <CheckCircle2 size={13} /> Active Group
+                      </>
+                    ) : (
+                      <>
+                        <ArrowUpRight size={13} /> View / Manage
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteGroup(grp)}
+                    title="Delete this group"
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      color: '#f87171',
+                      borderRadius: '8px',
+                      padding: '0.4rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
             );
           })}
