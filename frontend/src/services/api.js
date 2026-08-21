@@ -7,7 +7,7 @@ const getFallbackApiUrl = () => {
   if (typeof window !== 'undefined' && window.location.origin) {
     return `${window.location.origin.replace(/\/+$/, '')}/api/v1`;
   }
-  return 'https://hostel-expense-calculation-manager.onrender.com/api/v1';
+  return 'https://hostel-expense-calculation-2.onrender.com/api/v1';
 };
 
 const API_BASE_URL = import.meta.env.VITE_API_URL 

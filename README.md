@@ -5,11 +5,11 @@ A modern, full-stack financial ledger, daily mess calculation, and expense split
 ---
 
 ## 🌐 Live Production Links
-- 💻 **Live Web Application**: [https://hostel-expense-calculation-manager.onrender.com](https://hostel-expense-calculation-manager.onrender.com)
-- ⚙️ **Live Backend API**: [https://hostel-expense-calculation.onrender.com](https://hostel-expense-calculation.onrender.com)
-- 📑 **Interactive API Docs (Swagger UI)**: [https://hostel-expense-calculation.onrender.com/api/v1/docs](https://hostel-expense-calculation.onrender.com/api/v1/docs)
-- 📜 **OpenAPI Specification (JSON)**: [https://hostel-expense-calculation.onrender.com/api/v1/openapi.json](https://hostel-expense-calculation.onrender.com/api/v1/openapi.json)
-- 📖 **Alternative API Docs (Redoc)**: [https://hostel-expense-calculation.onrender.com/api/v1/redoc](https://hostel-expense-calculation.onrender.com/api/v1/redoc)
+- 💻 **Live Web Application**: [https://hostel-expense-calculation-2.onrender.com](https://hostel-expense-calculation-2.onrender.com)
+- ⚙️ **Live Backend API**: [https://hostel-expense-calculation-2.onrender.com](https://hostel-expense-calculation-2.onrender.com)
+- 📑 **Interactive API Docs (Swagger UI)**: [https://hostel-expense-calculation-2.onrender.com/api/v1/docs](https://hostel-expense-calculation-2.onrender.com/api/v1/docs)
+- 📜 **OpenAPI Specification (JSON)**: [https://hostel-expense-calculation-2.onrender.com/api/v1/openapi.json](https://hostel-expense-calculation-2.onrender.com/api/v1/openapi.json)
+- 📖 **Alternative API Docs (Redoc)**: [https://hostel-expense-calculation-2.onrender.com/api/v1/redoc](https://hostel-expense-calculation-2.onrender.com/api/v1/redoc)
 
 ---
 
