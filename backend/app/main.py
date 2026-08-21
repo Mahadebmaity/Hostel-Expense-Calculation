@@ -196,7 +196,8 @@ if os.path.exists(frontend_dist) and os.path.isdir(frontend_dist):
     async def serve_spa_frontend(full_path: str):
         # Don't intercept API or Swagger docs
         if full_path.startswith("api") or full_path.startswith("docs") or full_path.startswith("redoc") or full_path.startswith("openapi.json"):
-            return None
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="API endpoint not found")
         file_path = os.path.join(frontend_dist, full_path)
         if full_path and os.path.exists(file_path) and os.path.isfile(file_path):
             return FileResponse(file_path)
