@@ -1,10 +1,21 @@
 const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
+const getFallbackApiUrl = () => {
+  if (isLocal) {
+    return 'http://127.0.0.1:8000/api/v1';
+  }
+  if (typeof window !== 'undefined' && window.location.origin) {
+    return `${window.location.origin.replace(/\/+$/, '')}/api/v1`;
+  }
+  return 'https://hostel-expense-calculation-manager.onrender.com/api/v1';
+};
+
 const API_BASE_URL = import.meta.env.VITE_API_URL 
   ? `${import.meta.env.VITE_API_URL.replace(/\/+$/, '')}/api/v1`
-  : (isLocal ? 'http://127.0.0.1:8000/api/v1' : 'https://hostel-expense-calculation.onrender.com/api/v1');
+  : getFallbackApiUrl();
 
-async function request(endpoint, options = {}, retries = 3, delay = 2500) {
+// Retries up to 12 attempts (12 x 3s = 36s) to allow Render free instances to wake up from sleep mode
+async function request(endpoint, options = {}, retries = 12, delay = 3000) {
   const token = localStorage.getItem('access_token');
   const headers = {
     'Content-Type': 'application/json',
@@ -19,8 +30,8 @@ async function request(endpoint, options = {}, retries = 3, delay = 2500) {
         ...options,
         headers,
       });
-      // If server returns 502/503 (Render waking up / starting container), retry
-      if ((response.status === 502 || response.status === 503) && attempt < retries) {
+      // If server returns 502/503/504 (Render waking up / starting container), retry
+      if ((response.status === 502 || response.status === 503 || response.status === 504) && attempt < retries) {
         await new Promise((res) => setTimeout(res, delay));
         continue;
       }
@@ -31,7 +42,7 @@ async function request(endpoint, options = {}, retries = 3, delay = 2500) {
         continue;
       }
       throw new Error(
-        'Unable to reach backend server. If running locally, make sure the Python FastAPI server is running (python -m uvicorn app.main:app --reload --port 8000). If on cloud (Render), please wait 15-20 seconds for the backend to complete its restart.'
+        'Unable to reach backend server. If running locally, ensure your FastAPI backend is running. If on cloud (Render), please wait 20-30 seconds for the free backend instance to wake up from sleep mode and try again.'
       );
     }
   }
