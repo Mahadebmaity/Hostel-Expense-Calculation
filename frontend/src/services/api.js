@@ -54,8 +54,17 @@ async function request(endpoint, options = {}, retries = 12, delay = 3000) {
   }
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ detail: 'Network request failed' }));
-    throw new Error(errorData.detail || 'An unexpected error occurred');
+    let errorMessage = 'An unexpected server error occurred';
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.detail || errorData.message || errorMessage;
+    } catch (_) {
+      const text = await response.text().catch(() => '');
+      if (text) {
+        errorMessage = `Server Error (${response.status}): ${text.slice(0, 150)}`;
+      }
+    }
+    throw new Error(errorMessage);
   }
 
   // Handle binary PDF downloads

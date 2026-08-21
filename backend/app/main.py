@@ -91,6 +91,23 @@ def init_db_and_admin():
 
             elif engine.dialect.name == "postgresql":
                 conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE"))
+                conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS name VARCHAR(120)"))
+                conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS email VARCHAR(150)"))
+                conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS phone VARCHAR(25)"))
+                conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS upi_id VARCHAR(100)"))
+                conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS is_virtual VARCHAR(10) DEFAULT 'true'"))
+                conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS marketing_amount FLOAT DEFAULT 0.0"))
+                conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS marketing_days FLOAT DEFAULT 0.0"))
+                conn.execute(text("ALTER TABLE expenses ADD COLUMN IF NOT EXISTS paid_by_member_id VARCHAR(36)"))
+                conn.execute(text("ALTER TABLE expense_splits ADD COLUMN IF NOT EXISTS member_id VARCHAR(36)"))
+                conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN IF NOT EXISTS member_id VARCHAR(36)"))
+                conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN IF NOT EXISTS guest_veg_count FLOAT DEFAULT 0.0"))
+                conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN IF NOT EXISTS guest_fish_count FLOAT DEFAULT 0.0"))
+                conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN IF NOT EXISTS guest_meat_count FLOAT DEFAULT 0.0"))
+                conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN IF NOT EXISTS guest_egg_count FLOAT DEFAULT 0.0"))
+                conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN IF NOT EXISTS guest_charge FLOAT DEFAULT 0.0"))
+                conn.execute(text("ALTER TABLE settlements ADD COLUMN IF NOT EXISTS payer_member_id VARCHAR(36)"))
+                conn.execute(text("ALTER TABLE settlements ADD COLUMN IF NOT EXISTS payee_member_id VARCHAR(36)"))
                 conn.commit()
     except Exception as e:
         print(f"[!] Migration notice: {e}")
