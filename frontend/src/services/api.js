@@ -54,10 +54,18 @@ async function request(endpoint, options = {}, retries = 12, delay = 3000) {
   }
 
   if (!response.ok) {
-    let errorMessage = 'An unexpected server error occurred';
+    let errorMessage = `Server Error (${response.status})`;
     try {
       const errorData = await response.json();
-      errorMessage = errorData.detail || errorData.message || errorMessage;
+      if (typeof errorData.detail === 'string') {
+        errorMessage = errorData.detail;
+      } else if (Array.isArray(errorData.detail)) {
+        errorMessage = errorData.detail.map(e => (typeof e === 'string' ? e : e.msg || JSON.stringify(e))).join(', ');
+      } else if (typeof errorData.detail === 'object' && errorData.detail !== null) {
+        errorMessage = JSON.stringify(errorData.detail);
+      } else if (errorData.message) {
+        errorMessage = errorData.message;
+      }
     } catch (_) {
       const text = await response.text().catch(() => '');
       if (text) {
