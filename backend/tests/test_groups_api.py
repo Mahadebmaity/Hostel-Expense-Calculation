@@ -72,3 +72,41 @@ def test_prevent_duplicate_group_creation(test_user):
         
         # Clean up second creation
         client.delete(f"/api/v1/groups/{res4.json()['id']}", headers=headers)
+
+def test_add_virtual_member(test_user):
+    token = create_access_token(data={"sub": test_user.id})
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 1. Create group
+    res = client.post("/api/v1/groups/", json={
+        "name": "Virtual Member Test Group",
+        "group_type": "MESS"
+    }, headers=headers)
+    assert res.status_code == 201
+    group_id = res.json()["id"]
+
+    try:
+        # 2. Add virtual member without email/user_id (Jayanta)
+        res_member = client.post(f"/api/v1/groups/{group_id}/members", json={
+            "name": "Jayanta",
+            "role": "MEMBER",
+            "initial_deposit": 7009.0
+        }, headers=headers)
+        assert res_member.status_code == 201
+        data = res_member.json()
+        assert data["name"] == "Jayanta"
+        assert data["user_id"] is None
+        assert data["is_virtual"] is True
+
+        # 3. Check group details has the virtual member
+        res_group = client.get(f"/api/v1/groups/{group_id}", headers=headers)
+        assert res_group.status_code == 200
+        members = res_group.json()["members"]
+        virtual_m = next((m for m in members if m["name"] == "Jayanta"), None)
+        assert virtual_m is not None
+        assert virtual_m["user_id"] is None
+        assert virtual_m["initial_deposit"] == 7009.0
+    finally:
+        # Clean up
+        client.delete(f"/api/v1/groups/{group_id}", headers=headers)
+

@@ -104,16 +104,32 @@ def init_db_and_admin():
                 conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS initial_deposit FLOAT DEFAULT 0.0"))
                 conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS marketing_amount FLOAT DEFAULT 0.0"))
                 conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS marketing_days FLOAT DEFAULT 0.0"))
+                
+                # Ensure foreign key / nullable columns allow NULL for virtual members
+                conn.execute(text("ALTER TABLE group_members ALTER COLUMN user_id DROP NOT NULL"))
+                conn.execute(text("ALTER TABLE group_members ALTER COLUMN name DROP NOT NULL"))
+                conn.execute(text("ALTER TABLE group_members ALTER COLUMN email DROP NOT NULL"))
+                conn.execute(text("ALTER TABLE group_members ALTER COLUMN phone DROP NOT NULL"))
+                conn.execute(text("ALTER TABLE group_members ALTER COLUMN upi_id DROP NOT NULL"))
+
                 conn.execute(text("ALTER TABLE expenses ADD COLUMN IF NOT EXISTS paid_by_member_id VARCHAR(36)"))
+                conn.execute(text("ALTER TABLE expenses ALTER COLUMN paid_by DROP NOT NULL"))
+                conn.execute(text("ALTER TABLE expenses ALTER COLUMN paid_by_member_id DROP NOT NULL"))
+
                 conn.execute(text("ALTER TABLE expense_splits ADD COLUMN IF NOT EXISTS member_id VARCHAR(36)"))
+                conn.execute(text("ALTER TABLE expense_splits ALTER COLUMN user_id DROP NOT NULL"))
+                conn.execute(text("ALTER TABLE expense_splits ALTER COLUMN member_id DROP NOT NULL"))
+
                 conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN IF NOT EXISTS member_id VARCHAR(36)"))
-                conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN IF NOT EXISTS guest_veg_count FLOAT DEFAULT 0.0"))
-                conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN IF NOT EXISTS guest_fish_count FLOAT DEFAULT 0.0"))
-                conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN IF NOT EXISTS guest_meat_count FLOAT DEFAULT 0.0"))
-                conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN IF NOT EXISTS guest_egg_count FLOAT DEFAULT 0.0"))
-                conn.execute(text("ALTER TABLE meal_attendance ADD COLUMN IF NOT EXISTS guest_charge FLOAT DEFAULT 0.0"))
+                conn.execute(text("ALTER TABLE meal_attendance ALTER COLUMN user_id DROP NOT NULL"))
+                conn.execute(text("ALTER TABLE meal_attendance ALTER COLUMN member_id DROP NOT NULL"))
+
                 conn.execute(text("ALTER TABLE settlements ADD COLUMN IF NOT EXISTS payer_member_id VARCHAR(36)"))
                 conn.execute(text("ALTER TABLE settlements ADD COLUMN IF NOT EXISTS payee_member_id VARCHAR(36)"))
+                conn.execute(text("ALTER TABLE settlements ALTER COLUMN payer_id DROP NOT NULL"))
+                conn.execute(text("ALTER TABLE settlements ALTER COLUMN payee_id DROP NOT NULL"))
+                conn.execute(text("ALTER TABLE settlements ALTER COLUMN payer_member_id DROP NOT NULL"))
+                conn.execute(text("ALTER TABLE settlements ALTER COLUMN payee_member_id DROP NOT NULL"))
                 conn.commit()
     except Exception as e:
         print(f"[!] Migration notice: {e}")
