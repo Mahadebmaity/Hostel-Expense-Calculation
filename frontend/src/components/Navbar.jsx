@@ -12,7 +12,8 @@ import {
   Check, 
   Copy,
   ChevronDown,
-  Crown
+  Crown,
+  Trash2
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -21,11 +22,14 @@ export default function Navbar({
   onSelectGroup, 
   onOpenNewGroup, 
   onOpenSettings,
+  onGroupDeleted,
   activeTab,
   onSwitchTab
 }) {
   const { user, logout, updateProfileState } = useAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showGroupDropdown, setShowGroupDropdown] = useState(false);
+  const [deletingGroupId, setDeletingGroupId] = useState(null);
   const [name, setName] = useState(user?.name || '');
   const [upiId, setUpiId] = useState(user?.upi_id || '');
   const [copied, setCopied] = useState(false);
@@ -88,39 +92,138 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Group Selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '10px', padding: '0.25rem 0.5rem' }}>
-            <select
-              value={selectedGroup?.id || ''}
-              onChange={(e) => {
-                const found = groups.find(g => g.id === e.target.value);
-                if (found) onSelectGroup(found);
-              }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: selectedGroup ? '#f8fafc' : '#94a3b8',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                outline: 'none',
-                padding: '0.35rem 0.5rem',
-                cursor: groups && groups.length > 0 ? 'pointer' : 'default'
-              }}
-            >
-              {groups && groups.length > 0 ? (
-                groups.map(g => (
-                  <option key={g.id} value={g.id} style={{ background: '#111827', color: '#fff' }}>
-                    {g.group_type === 'MESS' ? '🏨 ' : g.group_type === 'TRIP' ? '✈️ ' : '🏠 '} {g.name}
-                  </option>
-                ))
-              ) : (
-                <option value="" disabled style={{ background: '#111827', color: '#94a3b8' }}>
-                  🚫 No Group
-                </option>
-              )}
-            </select>
+        {/* Group Selector with Quick Delete */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }}>
+          <div 
+            onClick={() => setShowGroupDropdown(!showGroupDropdown)}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              background: 'rgba(15, 23, 42, 0.9)', 
+              border: '1px solid rgba(255, 255, 255, 0.15)', 
+              borderRadius: '10px', 
+              padding: '0.4rem 0.75rem',
+              cursor: 'pointer',
+              userSelect: 'none',
+              transition: 'border-color 0.2s'
+            }}
+          >
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: selectedGroup ? '#f8fafc' : '#94a3b8' }}>
+              {selectedGroup 
+                ? `${selectedGroup.group_type === 'MESS' ? '🏨 ' : selectedGroup.group_type === 'TRIP' ? '✈️ ' : '🏠 '} ${selectedGroup.name}`
+                : '🚫 Select Group'}
+            </span>
+            <ChevronDown size={14} color="#94a3b8" style={{ transform: showGroupDropdown ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
           </div>
+
+          {/* Custom Dropdown Menu with Quick Delete */}
+          {showGroupDropdown && (
+            <>
+              {/* Invisible Overlay Backdrop to close on click outside */}
+              <div 
+                onClick={() => setShowGroupDropdown(false)} 
+                style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 998 }} 
+              />
+              
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: '115%',
+                  left: 0,
+                  width: '260px',
+                  maxHeight: '320px',
+                  overflowY: 'auto',
+                  background: '#111827',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  borderRadius: '12px',
+                  boxShadow: '0 12px 30px rgba(0, 0, 0, 0.6)',
+                  zIndex: 999,
+                  padding: '0.4rem'
+                }}
+              >
+                <div style={{ padding: '0.35rem 0.5rem', fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Select or Delete Group
+                </div>
+                {groups && groups.length > 0 ? (
+                  groups.map((g) => {
+                    const isSelected = selectedGroup?.id === g.id;
+                    const isDeleting = deletingGroupId === g.id;
+                    return (
+                      <div
+                        key={g.id}
+                        onClick={() => {
+                          onSelectGroup(g);
+                          setShowGroupDropdown(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0.5rem 0.65rem',
+                          borderRadius: '8px',
+                          background: isSelected ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                          cursor: 'pointer',
+                          marginBottom: '2px',
+                          transition: 'background 0.15s'
+                        }}
+                      >
+                        <span style={{ 
+                          fontSize: '0.82rem', 
+                          fontWeight: isSelected ? 700 : 500, 
+                          color: isSelected ? '#60a5fa' : '#e2e8f0', 
+                          overflow: 'hidden', 
+                          textOverflow: 'ellipsis', 
+                          whiteSpace: 'nowrap', 
+                          flex: 1 
+                        }}>
+                          {g.group_type === 'MESS' ? '🏨 ' : g.group_type === 'TRIP' ? '✈️ ' : '🏠 '} {g.name}
+                        </span>
+
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`⚠️ ARE YOU SURE YOU WANT TO DELETE GROUP "${g.name}"?\n\nThis will permanently delete this group and all its expenses.`)) {
+                              setDeletingGroupId(g.id);
+                              try {
+                                await api.deleteGroup(g.id);
+                                if (onGroupDeleted) onGroupDeleted(g.id);
+                              } catch (err) {
+                                alert(err.message);
+                              } finally {
+                                setDeletingGroupId(null);
+                              }
+                            }
+                          }}
+                          disabled={isDeleting}
+                          title={`Delete "${g.name}"`}
+                          style={{
+                            background: 'rgba(239, 68, 68, 0.12)',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            color: '#f87171',
+                            borderRadius: '6px',
+                            padding: '0.25rem 0.4rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginLeft: '0.5rem',
+                            flexShrink: 0
+                          }}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div style={{ padding: '0.8rem', fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center' }}>
+                    No groups found
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
           <button onClick={onOpenNewGroup} className="btn btn-secondary" style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem' }} title="Create new group">
             <PlusCircle size={15} /> New Group

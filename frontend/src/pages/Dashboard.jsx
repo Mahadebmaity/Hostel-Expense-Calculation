@@ -191,6 +191,7 @@ export default function Dashboard() {
         }}
         onOpenNewGroup={() => setShowNewGroupModal(true)}
         onOpenSettings={() => setShowGroupSettings(true)}
+        onGroupDeleted={() => loadGroups()}
         activeTab={activeTab}
         onSwitchTab={(t) => setActiveTab(t)}
       />

@@ -181,17 +181,14 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
           </button>
         </div>
 
-        {/* Tab Headers with Horizontal Scroll on Mobile */}
+        {/* Tab Headers with Wrap to ensure Danger Zone is always visible */}
         <div style={{ 
           display: 'flex', 
           gap: '0.5rem', 
           marginBottom: '1.25rem', 
           borderBottom: '1px solid rgba(255,255,255,0.08)', 
           paddingBottom: '0.6rem',
-          overflowX: 'auto',
-          whiteSpace: 'nowrap',
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none'
+          flexWrap: 'wrap'
         }}>
           <button
             onClick={() => setActiveTab('members')}
