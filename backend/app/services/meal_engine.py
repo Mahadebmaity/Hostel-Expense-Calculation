@@ -97,7 +97,11 @@ def calculate_mess_balances(
     custom_split_dues = {m.id: 0.0 for m in members}
 
     # Common Establishment category keywords
-    establishment_cats = {"MASI", "COOK", "GAS", "EGG", "MEAT", "PAPER", "NEWSPAPER", "ELECTRICITY", "RENT", "ESTABLISHMENT", "ESTABLISHMENT_OTHER"}
+    establishment_cats = {
+        "MASI", "COOK", "GAS", "EGG", "MEAT", "PAPER", "NEWSPAPER", "ELECTRICITY",
+        "RENT", "MAINTENANCE", "CLEANING", "ESTABLISHMENT", "ESTABLISHMENT_OTHER",
+        "OTHER", "OTHER_CHARGES"
+    }
 
     for exp in expenses:
         # Determine who paid
@@ -119,7 +123,8 @@ def calculate_mess_balances(
         elif exp.is_fixed_cost is False:
             is_establishment = False
         else:
-            is_establishment = bool(exp.category and exp.category.upper() in establishment_cats)
+            cat_clean = exp.category.strip().upper() if exp.category else ""
+            is_establishment = bool(cat_clean in establishment_cats)
 
         if is_establishment:
             total_establishment += exp.amount
@@ -131,36 +136,44 @@ def calculate_mess_balances(
                 "date": str(exp.expense_date),
                 "payer_name": member_map[payer_member_id].member_name if payer_member_id else "Group Fund"
             })
-        elif exp.split_type == "MEAL_BASED" or not exp.split_type or exp.split_type == "EQUAL":
-            total_meal_expenses += exp.amount
-            meal_pool_items.append({
-                "id": exp.id,
-                "title": exp.title,
-                "amount": exp.amount,
-                "category": exp.category,
-                "date": str(exp.expense_date),
-                "payer_name": member_map[payer_member_id].member_name if payer_member_id else "Group Fund"
-            })
         else:
-            # Custom split (Equal or Exact splits)
+            # Check if this expense has explicit participant splits
             splits = db.query(ExpenseSplit).filter(ExpenseSplit.expense_id == exp.id).all()
             if splits:
                 for sp in splits:
                     target_mid = sp.member_id or (user_to_member[sp.user_id].id if sp.user_id in user_to_member else None)
                     if target_mid and target_mid in custom_split_dues:
                         custom_split_dues[target_mid] += sp.share_amount
+
+                custom_split_items.append({
+                    "id": exp.id,
+                    "title": exp.title,
+                    "amount": exp.amount,
+                    "category": exp.category,
+                    "date": str(exp.expense_date)
+                })
+            elif exp.split_type == "MEAL_BASED" or not exp.split_type:
+                total_meal_expenses += exp.amount
+                meal_pool_items.append({
+                    "id": exp.id,
+                    "title": exp.title,
+                    "amount": exp.amount,
+                    "category": exp.category,
+                    "date": str(exp.expense_date),
+                    "payer_name": member_map[payer_member_id].member_name if payer_member_id else "Group Fund"
+                })
             else:
                 equal_share = exp.amount / num_members
                 for m_id in custom_split_dues:
                     custom_split_dues[m_id] += equal_share
-            
-            custom_split_items.append({
-                "id": exp.id,
-                "title": exp.title,
-                "amount": exp.amount,
-                "category": exp.category,
-                "date": str(exp.expense_date)
-            })
+                
+                custom_split_items.append({
+                    "id": exp.id,
+                    "title": exp.title,
+                    "amount": exp.amount,
+                    "category": exp.category,
+                    "date": str(exp.expense_date)
+                })
 
     # Add member individual marketing contributions to meal pool
     for m in members:
@@ -194,10 +207,10 @@ def calculate_mess_balances(
         if not target_mid or target_mid not in member_map:
             continue
 
-        member_meals[target_mid] += ml.total_units
-        member_breakfast[target_mid] += ml.breakfast_count
-        member_lunch[target_mid] += ml.lunch_count
-        member_dinner[target_mid] += ml.dinner_count
+        member_meals[target_mid] += ml.total_units or 0.0
+        member_breakfast[target_mid] += ml.breakfast_count or 0.0
+        member_lunch[target_mid] += ml.lunch_count or 0.0
+        member_dinner[target_mid] += ml.dinner_count or 0.0
 
         # Guest meal calculation
         g_veg = ml.guest_veg_count or 0.0
@@ -253,35 +266,45 @@ def calculate_mess_balances(
     total_collected_pool = 0.0
 
     for idx, m in enumerate(members, start=1):
-        m_meals = member_meals[m.id]
+        m_meals = member_meals.get(m.id, 0.0)
         m_meal_cost = round(m_meals * meal_rate, 2)
         m_est_cost = establishment_per_head
-        m_guest_cost = round(member_guest_charge[m.id], 2)
-        m_custom_cost = round(custom_split_dues[m.id], 2)
+        m_guest_cost = round(member_guest_charge.get(m.id, 0.0), 2)
+        m_custom_cost = round(custom_split_dues.get(m.id, 0.0), 2)
+        m_prev_bal = round(getattr(m, 'previous_balance', 0.0) or 0.0, 2)
         m_mkt_amt = getattr(m, 'marketing_amount', 0.0) or 0.0
         m_mkt_days = getattr(m, 'marketing_days', 0.0) or 0.0
+        advance_payment = round(m.initial_deposit or 0.0, 2)
+        direct_paid = round(direct_paid_by_member.get(m.id, 0.0), 2)
+        settlement_adj = round(settlement_adjustments.get(m.id, 0.0), 2)
 
-        # Total Bill for Candidate = (Meals * Meal Rate) + Establishment + Guest Charge + Custom Splits
-        total_candidate_bill = round(m_meal_cost + m_est_cost + m_guest_cost + m_custom_cost, 2)
+        # Total Bill for Candidate = (Meals * Meal Rate) + Establishment + Guest Charge + Custom Splits + Previous Balance
+        total_candidate_bill = round(m_meal_cost + m_est_cost + m_guest_cost + m_custom_cost + m_prev_bal, 2)
         
         # Total Paid = Advance Deposit + Marketing Amount + Direct Bazar/Marketing paid + Settlements
-        total_paid_in = round(m.initial_deposit + m_mkt_amt + direct_paid_by_member[m.id] + settlement_adjustments[m.id], 2)
+        total_paid_in = round(advance_payment + m_mkt_amt + direct_paid + settlement_adj, 2)
         total_collected_pool += total_paid_in
 
         # Net Balance = Paid - Bill
         # If > 0: Refund (Manager returns to member)
-        # If < 0: Due (Member owes manager)
+        # If < 0: Due (Member owes manager / Final Payable Amount)
         net_balance = round(total_paid_in - total_candidate_bill, 2)
+        final_payable_amount = round(abs(net_balance), 2) if net_balance < 0 else 0.0
+        refund_amount = round(net_balance, 2) if net_balance > 0 else 0.0
 
         if net_balance < 0:
-            total_due_pool += abs(net_balance)
+            total_due_pool += final_payable_amount
         else:
-            total_refund_pool += net_balance
+            total_refund_pool += refund_amount
 
         # Formula text for display (like May Score Board notebook)
         formula_str = f"({meal_rate:.2f} × {m_meals:.1f}) + {m_est_cost:.2f}"
+        if m_prev_bal != 0:
+            formula_str += f" + {m_prev_bal:.0f} (Prev)"
         if m_guest_cost > 0:
             formula_str += f" + {m_guest_cost:.0f} (Guest)"
+        if m_custom_cost > 0:
+            formula_str += f" + {m_custom_cost:.0f} (Custom)"
         formula_str += f" = {total_candidate_bill:.0f} - {total_paid_in:.0f} = {abs(net_balance):.0f}"
 
         member_balances.append({
@@ -294,26 +317,33 @@ def calculate_mess_balances(
             "upi_id": m.member_upi_id,
             "is_virtual": m.is_virtual == "true" or m.user_id is None,
             "role": m.role,
-            "initial_deposit": m.initial_deposit,
+            "initial_deposit": advance_payment,
+            "advance_payment": advance_payment,
+            "previous_balance": m_prev_bal,
             "marketing_amount": m_mkt_amt,
             "marketing_days": m_mkt_days,
-            "direct_expenses_paid": round(direct_paid_by_member[m.id], 2),
-            "settlements_adjustment": round(settlement_adjustments[m.id], 2),
+            "direct_expenses_paid": direct_paid,
+            "settlements_adjustment": settlement_adj,
+            "amount_already_paid": total_paid_in,
             "total_paid": total_paid_in,
-            "breakfast_count": member_breakfast[m.id],
-            "lunch_count": member_lunch[m.id],
-            "dinner_count": member_dinner[m.id],
+            "breakfast_count": member_breakfast.get(m.id, 0.0),
+            "lunch_count": member_lunch.get(m.id, 0.0),
+            "dinner_count": member_dinner.get(m.id, 0.0),
+            "individual_meal_count": round(m_meals, 2),
             "total_meal_units": round(m_meals, 2),
+            "individual_food_cost": m_meal_cost,
             "meal_cost": m_meal_cost,
+            "other_charges": m_est_cost,
             "establishment_cost": m_est_cost,
-            "guest_meal_count": member_guest_meals[m.id],
+            "guest_meal_count": member_guest_meals.get(m.id, 0.0),
             "guest_cost": m_guest_cost,
-            "guest_breakdown": member_guest_details[m.id],
+            "guest_breakdown": member_guest_details.get(m.id, []),
             "custom_cost": m_custom_cost,
             "total_due": total_candidate_bill,
             "net_balance": net_balance,
-            "due_amount": abs(net_balance) if net_balance < 0 else 0.0,
-            "refund_amount": net_balance if net_balance > 0 else 0.0,
+            "final_payable_amount": final_payable_amount,
+            "due_amount": final_payable_amount,
+            "refund_amount": refund_amount,
             "status": "REFUND" if net_balance > 0 else ("DUE" if net_balance < 0 else "SETTLED"),
             "formula_display": formula_str
         })
@@ -325,9 +355,12 @@ def calculate_mess_balances(
         "group_name": group.name,
         "group_type": group.group_type,
         "currency": group.currency,
+        "total_mess_expense": total_gross_expenses,
         "total_expenses": total_gross_expenses,
         "total_establishment": round(total_establishment, 2),
+        "other_charges_total": round(total_establishment, 2),
         "establishment_per_head": establishment_per_head,
+        "other_charges_per_head": establishment_per_head,
         "total_meal_expenses": round(total_meal_expenses, 2),
         "guest_deduction_total": round(total_guest_revenue, 2),
         "net_meal_pool": round(net_meal_pool, 2),
@@ -338,5 +371,6 @@ def calculate_mess_balances(
         "total_refund": round(total_refund_pool, 2),
         "establishment_breakdown": establishment_items,
         "meal_pool_breakdown": meal_pool_items,
+        "custom_split_breakdown": custom_split_items,
         "member_balances": member_balances
     }

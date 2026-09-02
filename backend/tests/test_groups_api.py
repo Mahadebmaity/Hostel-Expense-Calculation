@@ -77,6 +77,14 @@ def test_add_virtual_member(test_user):
     token = create_access_token(data={"sub": test_user.id})
     headers = {"Authorization": f"Bearer {token}"}
 
+    # Clean up leftover group if exists
+    db = SessionLocal()
+    old_g = db.query(Group).filter(Group.name == "Virtual Member Test Group").first()
+    if old_g:
+        db.delete(old_g)
+        db.commit()
+    db.close()
+
     # 1. Create group
     res = client.post("/api/v1/groups/", json={
         "name": "Virtual Member Test Group",

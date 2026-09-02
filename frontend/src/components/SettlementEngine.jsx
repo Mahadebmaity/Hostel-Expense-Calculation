@@ -529,12 +529,18 @@ export default function SettlementEngine({
                       {!isRefund && (
                         <button
                           onClick={() => {
+                            const payerId = mb.member_id || mb.user_id;
+                            // Find a creditor with positive balance or group manager/admin
+                            const creditor = memberBalances.find(m => (m.member_id !== payerId && m.user_id !== payerId && m.net_balance > 0.01));
+                            const manager = group.members?.find(m => m.role === 'MANAGER' || m.role === 'ADMIN') || group.members?.[0];
+                            const targetPayee = creditor || manager;
+
                             setActiveUpiTx({
-                              payer_id: mb.member_id || mb.user_id,
+                              payer_id: payerId,
                               payer_name: mb.name,
-                              payee_id: currentUserId,
-                              payee_name: group.name,
-                              payee_upi_id: mb.upi_id || 'manager@upi',
+                              payee_id: targetPayee?.id || targetPayee?.user_id || 'manager',
+                              payee_name: targetPayee?.name || targetPayee?.member_name || group.name,
+                              payee_upi_id: targetPayee?.upi_id || 'manager@upi',
                               amount: Math.abs(bal),
                               currency: group.currency
                             });

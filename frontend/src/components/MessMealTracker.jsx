@@ -28,6 +28,8 @@ export default function MessMealTracker({ group, onMealUpdated }) {
     egg: group?.settings?.guest_rates?.egg ?? 35.0,
   }));
   const [savingRates, setSavingRates] = useState(false);
+  const [ratesSavedToast, setRatesSavedToast] = useState(false);
+  const [trackerError, setTrackerError] = useState(null);
 
   useEffect(() => {
     if (group?.settings?.guest_rates) {
@@ -88,6 +90,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
   const handleSaveGuestRates = async () => {
     if (!group?.id) return;
     setSavingRates(true);
+    setTrackerError(null);
     try {
       await api.updateGroup(group.id, {
         settings: {
@@ -116,9 +119,11 @@ export default function MessMealTracker({ group, onMealUpdated }) {
       });
 
       if (onMealUpdated) onMealUpdated();
-      alert('Guest meal prices saved successfully!');
+      setRatesSavedToast(true);
+      setTimeout(() => setRatesSavedToast(false), 2500);
     } catch (err) {
-      alert('Failed to save guest rates: ' + err.message);
+      setTrackerError('Failed to save guest rates: ' + (err.message || 'Error'));
+      setTimeout(() => setTrackerError(null), 4000);
     } finally {
       setSavingRates(false);
     }
@@ -212,7 +217,8 @@ export default function MessMealTracker({ group, onMealUpdated }) {
       setTimeout(() => setSavedMonthlySuccess(false), 2500);
       if (onMealUpdated) onMealUpdated();
     } catch (err) {
-      alert(err.message);
+      setTrackerError(err.message || 'Failed to save monthly meal counts');
+      setTimeout(() => setTrackerError(null), 4000);
     } finally {
       setLoadingMonthly(false);
     }
@@ -366,6 +372,9 @@ export default function MessMealTracker({ group, onMealUpdated }) {
             >
               {savingRates ? 'Saving...' : 'Save Prices'}
             </button>
+            {ratesSavedToast && (
+              <span style={{ color: '#34d399', fontSize: '0.75rem', fontWeight: 700 }}>✓ Saved!</span>
+            )}
           </div>
         </div>
 
@@ -540,6 +549,11 @@ export default function MessMealTracker({ group, onMealUpdated }) {
 
         {/* Action Bar */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem' }}>
+          {trackerError && (
+            <span style={{ color: '#f87171', fontSize: '0.82rem', fontWeight: 600 }}>
+              ⚠️ {trackerError}
+            </span>
+          )}
           {savedMonthlySuccess && (
             <span style={{ color: '#34d399', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
               <Check size={16} /> Monthly Meal Records Saved!

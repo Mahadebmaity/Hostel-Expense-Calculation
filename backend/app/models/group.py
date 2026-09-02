@@ -49,6 +49,7 @@ class GroupMember(Base):
     initial_deposit = Column(Float, default=0.0, nullable=False)
     marketing_amount = Column(Float, default=0.0, nullable=False)
     marketing_days = Column(Float, default=0.0, nullable=False)
+    previous_balance = Column(Float, default=0.0, nullable=False)
     
     joined_at = Column(DateTime, default=datetime.utcnow)
 

@@ -51,6 +51,8 @@ def init_db_and_admin():
                         conn.execute(text("ALTER TABLE group_members ADD COLUMN marketing_amount FLOAT DEFAULT 0.0"))
                     if "marketing_days" not in gm_cols:
                         conn.execute(text("ALTER TABLE group_members ADD COLUMN marketing_days FLOAT DEFAULT 0.0"))
+                    if "previous_balance" not in gm_cols:
+                        conn.execute(text("ALTER TABLE group_members ADD COLUMN previous_balance FLOAT DEFAULT 0.0"))
                     conn.commit()
 
                 # Expenses table
@@ -104,6 +106,7 @@ def init_db_and_admin():
                 conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS initial_deposit FLOAT DEFAULT 0.0"))
                 conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS marketing_amount FLOAT DEFAULT 0.0"))
                 conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS marketing_days FLOAT DEFAULT 0.0"))
+                conn.execute(text("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS previous_balance FLOAT DEFAULT 0.0"))
                 
                 # Ensure foreign key / nullable columns allow NULL for virtual members
                 conn.execute(text("ALTER TABLE group_members ALTER COLUMN user_id DROP NOT NULL"))

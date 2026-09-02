@@ -18,6 +18,7 @@ export default function MetricCards({ balances, currentUserId }) {
   const curr = balances.currency === 'INR' ? '₹' : balances.currency;
 
   const isMess = balances.group_type === 'MESS';
+  const isTrip = balances.group_type === 'TRIP';
 
   return (
     <div className="metric-cards-grid" style={{
@@ -61,21 +62,21 @@ export default function MetricCards({ balances, currentUserId }) {
       <div className="glass-panel" style={{ padding: '1.25rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
           <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' }}>
-            Total Group Spending
+            {isTrip ? 'Total Trip Spending' : 'Total Group Spending'}
           </span>
           <div style={{ padding: '0.4rem', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa' }}>
             <Wallet size={18} />
           </div>
         </div>
         <h2 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#f8fafc' }}>
-          {curr}{balances.total_expenses?.toFixed(2) || '0.00'}
+          {curr}{(balances.total_trip_expense || balances.total_expenses || 0).toFixed(2)}
         </h2>
         <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.35rem' }}>
-          {isMess ? `Fixed: ${curr}${balances.total_fixed_costs?.toFixed(0)} • Grocery: ${curr}${balances.total_variable_grocery?.toFixed(0)}` : 'All expenses combined'}
+          {isMess ? `Fixed: ${curr}${balances.total_fixed_costs?.toFixed(0)} • Grocery: ${curr}${balances.total_variable_grocery?.toFixed(0)}` : isTrip ? 'All travel expenses combined' : 'All expenses combined'}
         </p>
       </div>
 
-      {/* 3. Dynamic Meal Rate (If Mess) / Total Members */}
+      {/* 3. Dynamic Meal Rate (If Mess) / Trip Budget (If Trip) / Total Members */}
       {isMess ? (
         <div className="glass-panel" style={{ padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
@@ -91,6 +92,23 @@ export default function MetricCards({ balances, currentUserId }) {
           </h2>
           <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.35rem' }}>
             Total {balances.total_meals?.toFixed(1) || 0} meals consumed
+          </p>
+        </div>
+      ) : isTrip && balances.trip_budget > 0 ? (
+        <div className="glass-panel" style={{ padding: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' }}>
+              Remaining Trip Budget
+            </span>
+            <div style={{ padding: '0.4rem', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' }}>
+              <TrendingUp size={18} />
+            </div>
+          </div>
+          <h2 style={{ fontSize: '1.65rem', fontWeight: 800, color: (balances.remaining_budget ?? 0) >= 0 ? '#34d399' : '#f87171' }}>
+            {curr}{(balances.remaining_budget ?? 0).toFixed(2)}
+          </h2>
+          <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.35rem' }}>
+            Remaining of {curr}{balances.trip_budget?.toFixed(2)} budget
           </p>
         </div>
       ) : (

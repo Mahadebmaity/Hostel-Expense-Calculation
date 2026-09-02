@@ -40,6 +40,7 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
   const isMess = group?.group_type === 'MESS';
   const isFlat = group?.group_type === 'FLATMATES';
   const isTrip = group?.group_type === 'TRIP';
+  const isPersonal = group?.group_type === 'PERSONAL' || (!isMess && !isFlat && !isTrip);
 
   const [splitType, setSplitType] = useState(isMess ? 'MEAL_BASED' : 'EQUAL');
 
@@ -139,11 +140,23 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
     }
 
     if (splitType === 'EQUAL' || isFixedCost) {
-      const share = Number((total / members.length).toFixed(2));
+      const totalCents = Math.round(total * 100);
+      const baseCents = Math.floor(totalCents / members.length);
+      const remainderCents = totalCents % members.length;
+      const splits = members.map((m, i) => {
+        const cents = baseCents + (i < remainderCents ? 1 : 0);
+        return {
+          member_id: m.id,
+          user_id: m.user_id,
+          share_amount: Number((cents / 100).toFixed(2)),
+          percentage: Number((100 / members.length).toFixed(2))
+        };
+      });
+      const avgShare = (total / members.length).toFixed(2);
       return {
         isValid: true,
-        summary: `${curr}${share.toFixed(2)} each divided equally among ${members.length} members.`,
-        calculatedSplits: members.map(m => ({ member_id: m.id, user_id: m.user_id, share_amount: share }))
+        summary: `${curr}${avgShare} each divided equally among ${members.length} members.`,
+        calculatedSplits: splits
       };
     }
 
@@ -152,14 +165,24 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
       if (activeKeys.length === 0) {
         return { isValid: false, message: 'Select at least one member to share this expense.', calculatedSplits: [] };
       }
-      const share = Number((total / activeKeys.length).toFixed(2));
+      const totalCents = Math.round(total * 100);
+      const baseCents = Math.floor(totalCents / activeKeys.length);
+      const remainderCents = totalCents % activeKeys.length;
+      const splits = activeKeys.map((k, i) => {
+        const mObj = members.find(m => (m.id === k || m.user_id === k));
+        const cents = baseCents + (i < remainderCents ? 1 : 0);
+        return {
+          member_id: mObj?.id || k,
+          user_id: mObj?.user_id,
+          share_amount: Number((cents / 100).toFixed(2)),
+          percentage: Number((100 / activeKeys.length).toFixed(2))
+        };
+      });
+      const avgShare = (total / activeKeys.length).toFixed(2);
       return {
         isValid: true,
-        summary: `${curr}${share.toFixed(2)} each for ${activeKeys.length} selected members.`,
-        calculatedSplits: activeKeys.map(k => {
-          const mObj = members.find(m => (m.id === k || m.user_id === k));
-          return { member_id: mObj?.id || k, user_id: mObj?.user_id, share_amount: share };
-        })
+        summary: `${curr}${avgShare} each for ${activeKeys.length} selected members.`,
+        calculatedSplits: splits
       };
     }
 
@@ -174,7 +197,7 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
       });
 
       const remaining = Number((total - allocated).toFixed(2));
-      const isMatched = Math.abs(remaining) <= 0.05;
+      const isMatched = Math.abs(remaining) <= 0.01;
 
       return {
         isValid: isMatched,
@@ -183,25 +206,43 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
         message: isMatched
           ? `Exact allocations match total bill (${curr}${total.toFixed(2)})`
           : remaining > 0
-          ? `${curr}${remaining.toFixed(2)} remaining to allocate`
-          : `Allocated exceeds total by ${curr}${Math.abs(remaining).toFixed(2)}`,
+          ? `${curr}${remaining.toFixed(2)} is still unallocated.`
+          : `Allocated custom shares exceed expense amount by ${curr}${Math.abs(remaining).toFixed(2)}.`,
         calculatedSplits: isMatched ? splits : []
       };
     }
 
     if (splitType === 'PERCENTAGE') {
       let totalPct = 0;
-      const splits = [];
       members.forEach(m => {
         const key = m.id || m.user_id;
         const pct = parseFloat(percentages[key]) || 0;
         totalPct += pct;
-        const share = Number(((total * pct) / 100).toFixed(2));
-        splits.push({ member_id: m.id, user_id: m.user_id, share_amount: share, percentage: pct });
       });
 
-      const remainingPct = Number((100 - totalPct).toFixed(1));
-      const isMatched = Math.abs(remainingPct) <= 0.5;
+      const remainingPct = Number((100 - totalPct).toFixed(2));
+      const isMatched = Math.abs(remainingPct) <= 0.05;
+
+      const totalCents = Math.round(total * 100);
+      let allocatedCents = 0;
+      const splits = members.map(m => {
+        const key = m.id || m.user_id;
+        const pct = parseFloat(percentages[key]) || 0;
+        const cents = Math.round(totalCents * (pct / 100));
+        allocatedCents += cents;
+        return {
+          member_id: m.id,
+          user_id: m.user_id,
+          share_amount: Number((cents / 100).toFixed(2)),
+          percentage: pct
+        };
+      });
+
+      // Adjust rounding cents on first member if needed
+      const diffCents = totalCents - allocatedCents;
+      if (diffCents !== 0 && splits.length > 0) {
+        splits[0].share_amount = Number((splits[0].share_amount + diffCents / 100).toFixed(2));
+      }
 
       return {
         isValid: isMatched,
@@ -209,9 +250,7 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
         remainingPct,
         message: isMatched
           ? `Total percentages = 100%`
-          : remainingPct > 0
-          ? `${remainingPct}% remaining to reach 100%`
-          : `Total percentage exceeds 100% by ${Math.abs(remainingPct)}%`,
+          : `Percentages must total 100%.`,
         calculatedSplits: isMatched ? splits : []
       };
     }
@@ -227,12 +266,20 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
         return { isValid: false, message: 'Total shares must be greater than 0', calculatedSplits: [] };
       }
 
+      const totalCents = Math.round(total * 100);
+      let allocatedCents = 0;
       const splits = members.map(m => {
         const key = m.id || m.user_id;
         const s = parseFloat(shares[key]) || 0;
-        const share = Number(((total * s) / totalShares).toFixed(2));
-        return { member_id: m.id, user_id: m.user_id, share_amount: share };
+        const cents = Math.round((totalCents * s) / totalShares);
+        allocatedCents += cents;
+        return { member_id: m.id, user_id: m.user_id, share_amount: Number((cents / 100).toFixed(2)) };
       });
+
+      const diffCents = totalCents - allocatedCents;
+      if (diffCents !== 0 && splits.length > 0) {
+        splits[0].share_amount = Number((splits[0].share_amount + diffCents / 100).toFixed(2));
+      }
 
       return {
         isValid: true,
@@ -403,8 +450,8 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
             </div>
           </div>
 
-          {/* Category & Optional Paid By */}
-          <div style={{ display: 'grid', gridTemplateColumns: isMess ? '1fr' : '1fr 1fr', gap: '0.85rem', marginBottom: '0.75rem' }}>
+          {/* Category & Paid By */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.75rem' }}>
             <div className="form-group">
               <label className="form-label">Category</label>
               <select
@@ -440,51 +487,68 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                     <option value="RENT">🏠 Monthly Flat Rent</option>
                     <option value="GROCERY">🛒 Supermarket Groceries & Dairy</option>
                     <option value="GAS">🔥 Cooking Gas Cylinder</option>
-                    <option value="WATER">💧 20L Drinking Water Cans</option>
-                    <option value="WIFI">📶 High Speed WiFi Internet</option>
-                    <option value="MAID">🧹 Cook & House Cleaning Maid</option>
+                    <option value="WATER">💧 Drinking Water / Cans</option>
+                    <option value="WIFI">📶 High Speed Wi-Fi Internet</option>
                     <option value="ELECTRICITY">⚡ Electricity Bill</option>
-                    <option value="OTHER">📄 Flat Maintenance / Misc</option>
+                    <option value="MAINTENANCE">🛠️ Society / Flat Maintenance</option>
+                    <option value="HOUSEHOLD">🛋️ Household Expenses & Essentials</option>
+                    <option value="MAID">🧹 Cook & House Cleaning Maid</option>
+                    <option value="OTHER">📄 Other Expenses / Misc</option>
                   </optgroup>
                 )}
 
                 {isTrip && (
-                  <optgroup label="Tour / Trip Expenses">
-                    <option value="HOTEL_STAY">🏨 Hotel & Resort Stay</option>
-                    <option value="TICKETS">🚆 Flight / Train / Bus Tickets</option>
-                    <option value="CAB_TRANSPORT">🚖 Cab, Taxi, Fuel & Toll</option>
-                    <option value="OUTING">🍽️ Group Meals, Cafe & Drinks</option>
-                    <option value="SNACKS">🥤 Roadtrip Snacks & Refreshments</option>
-                    <option value="OTHER">🎟️ Sightseeing & Activity Passes</option>
+                  <optgroup label="Tour & Travel Plan Expenses">
+                    <option value="HOTEL">🏨 Hotel & Resort Stay</option>
+                    <option value="TRAIN">🚆 Train Tickets & IRCTC</option>
+                    <option value="FLIGHT">✈️ Flight Tickets & Airfare</option>
+                    <option value="BUS">🚌 Bus & Volvo Booking</option>
+                    <option value="CAB">🚕 Cab & Taxi (Rental / City)</option>
+                    <option value="FOOD">🍽️ Food & Group Dining</option>
+                    <option value="TICKETS">🎟️ Entry Tickets & Passes</option>
+                    <option value="ACTIVITIES">🏄 Activities & Adventure Sports</option>
+                    <option value="PARKING">🅿️ Parking & Toll Charges</option>
+                    <option value="FUEL">⛽ Fuel / Petrol / Diesel</option>
+                    <option value="OTHER">📄 Other Travel Expenses</option>
+                  </optgroup>
+                )}
+
+                {isPersonal && (
+                  <optgroup label="Personal / Friends Shared Expenses">
+                    <option value="FOOD">🍕 Dining, Cafe & Drinks</option>
+                    <option value="OUTING">🎬 Movies, Events & Hangouts</option>
+                    <option value="GROCERY">🛒 Groceries & Snacks</option>
+                    <option value="SHOPPING">🛍️ Shopping & Gifts</option>
+                    <option value="TRAVEL">🚕 Cab, Travel & Fuel</option>
+                    <option value="BILLS">📱 Bills, Subscriptions & Utilities</option>
+                    <option value="OTHER">📄 Other Shared Expense</option>
                   </optgroup>
                 )}
               </select>
             </div>
 
-            {!isMess && (
-              <div className="form-group">
-                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <UserCheck size={14} color="#60a5fa" />
-                  <span>Paid By (Payer)</span>
-                </label>
-                <select
-                  className="form-select"
-                  value={paidByMemberId}
-                  onChange={(e) => setPaidByMemberId(e.target.value)}
-                >
-                  <option value="">🏦 Mess Fund / Group Collective Fund</option>
-                  {members.map(m => {
-                    const mName = m.name || m.user?.name || m.email;
-                    const isCur = m.user_id === currentUser?.id;
-                    return (
-                      <option key={m.id || m.user_id} value={m.id || m.user_id}>
-                        👤 {mName} {isCur ? '(You)' : ''}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-            )}
+            <div className="form-group">
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <UserCheck size={14} color="#60a5fa" />
+                <span>Paid By (Payer)</span>
+              </label>
+              <select
+                className="form-select"
+                value={paidByMemberId}
+                onChange={(e) => setPaidByMemberId(e.target.value)}
+              >
+                <option value="">🏦 {isMess ? 'Mess Collective Fund' : 'Group Collective Fund'}</option>
+                {members.map(m => {
+                  const mName = m.name || m.user?.name || m.email;
+                  const isCur = m.user_id === currentUser?.id;
+                  return (
+                    <option key={m.id || m.user_id} value={m.id || m.user_id}>
+                      👤 {mName} {isCur ? '(You)' : ''}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
           </div>
 
           {/* Establishment Charges vs Meal Pool Explicit Selector (For Mess) */}
@@ -830,23 +894,29 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                         const key = m.id || m.user_id;
                         const pctVal = percentages[key] ?? '';
                         const mName = m.name || m.user?.name || m.email;
+                        const calcShare = numTotalAmount > 0 && pctVal ? ((numTotalAmount * (parseFloat(pctVal) || 0)) / 100).toFixed(2) : null;
 
                         return (
                           <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', padding: '0.35rem 0.5rem', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '8px' }}>
                             <span style={{ fontSize: '0.8rem', color: '#cbd5e1', flex: 1 }}>{mName}</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                              <input
-                                type="number"
-                                step="0.5"
-                                min="0"
-                                max="100"
-                                placeholder="0"
-                                value={pctVal}
-                                onChange={(e) => setPercentages(prev => ({ ...prev, [key]: e.target.value }))}
-                                className="form-input"
-                                style={{ width: '65px', padding: '0.25rem 0.4rem', fontSize: '0.8rem', textAlign: 'right' }}
-                              />
-                              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>%</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                <input
+                                  type="number"
+                                  step="0.5"
+                                  min="0"
+                                  max="100"
+                                  placeholder="0"
+                                  value={pctVal}
+                                  onChange={(e) => setPercentages(prev => ({ ...prev, [key]: e.target.value }))}
+                                  className="form-input"
+                                  style={{ width: '65px', padding: '0.25rem 0.4rem', fontSize: '0.8rem', textAlign: 'right' }}
+                                />
+                                <span style={{ fontSize: '0.78rem', color: '#64748b' }}>%</span>
+                              </div>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#60a5fa', minWidth: '70px', textAlign: 'right' }}>
+                                {calcShare ? `${curr}${calcShare}` : '—'}
+                              </span>
                             </div>
                           </div>
                         );

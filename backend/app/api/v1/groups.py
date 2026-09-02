@@ -10,7 +10,7 @@ from app.models.scoreboard import MonthlyScoreBoard
 from app.schemas.group import GroupCreate, GroupUpdate, GroupOut, GroupMemberAdd, GroupDepositUpdate
 from app.schemas.settlement import ScoreBoardCreate, ScoreBoardOut
 from app.services.meal_engine import calculate_mess_balances
-from app.services.split_engine import simplify_debts
+from app.services.split_engine import simplify_debts, calculate_common_balances
 from app.services.upi_service import get_upi_payment_payload
 
 from sqlalchemy import func
@@ -370,12 +370,16 @@ def update_member_deposit(
             target_member.marketing_amount = (getattr(target_member, 'marketing_amount', 0.0) or 0.0) + deposit_in.marketing_amount
         if deposit_in.marketing_days is not None:
             target_member.marketing_days = (getattr(target_member, 'marketing_days', 0.0) or 0.0) + deposit_in.marketing_days
+        if deposit_in.previous_balance is not None:
+            target_member.previous_balance = (getattr(target_member, 'previous_balance', 0.0) or 0.0) + deposit_in.previous_balance
     else:
         target_member.initial_deposit = deposit_in.amount
         if deposit_in.marketing_amount is not None:
             target_member.marketing_amount = deposit_in.marketing_amount
         if deposit_in.marketing_days is not None:
             target_member.marketing_days = deposit_in.marketing_days
+        if deposit_in.previous_balance is not None:
+            target_member.previous_balance = deposit_in.previous_balance
 
     db.commit()
     return {
@@ -384,7 +388,8 @@ def update_member_deposit(
         "name": target_member.member_name,
         "new_deposit": target_member.initial_deposit,
         "marketing_amount": target_member.marketing_amount,
-        "marketing_days": target_member.marketing_days
+        "marketing_days": target_member.marketing_days,
+        "previous_balance": target_member.previous_balance
     }
 
 @router.get("/{group_id}/balances")
@@ -399,8 +404,11 @@ def get_group_balances(
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
 
-    # 1. Run Mess / Group Calculation Engine
-    data = calculate_mess_balances(db, group, start_date=start_date, end_date=end_date)
+    # 1. Run Calculation Engine based on Group Type
+    if group.group_type == "MESS":
+        data = calculate_mess_balances(db, group, start_date=start_date, end_date=end_date)
+    else:
+        data = calculate_common_balances(db, group, start_date=start_date, end_date=end_date)
     
     # 2. Run Debt Simplification Graph Engine
     simplified = simplify_debts(data["member_balances"], currency=group.currency)

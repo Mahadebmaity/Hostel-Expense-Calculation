@@ -15,6 +15,7 @@ class GroupMemberOut(BaseModel):
     initial_deposit: float = 0.0
     marketing_amount: float = 0.0
     marketing_days: float = 0.0
+    previous_balance: float = 0.0
     joined_at: datetime
     user: Optional[UserOut] = None
 
@@ -30,13 +31,15 @@ class GroupMemberAdd(BaseModel):
     initial_deposit: float = 0.0
     marketing_amount: float = 0.0
     marketing_days: float = 0.0
+    previous_balance: float = 0.0
 
 class GroupDepositUpdate(BaseModel):
     member_id: Optional[str] = None
     user_id: Optional[str] = None
-    amount: float  # Amount to add or set
+    amount: float = 0.0  # Amount to add or set
     marketing_amount: Optional[float] = None
     marketing_days: Optional[float] = None
+    previous_balance: Optional[float] = None
     operation: str = "ADD"  # ADD or SET
 
 class GroupBase(BaseModel):
