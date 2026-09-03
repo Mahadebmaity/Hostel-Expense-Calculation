@@ -241,46 +241,38 @@ export default function Navbar({
             </>
           )}
 
-          <button onClick={onOpenNewGroup} className="btn btn-secondary" style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem' }} title="Create new group">
-            <PlusCircle size={15} /> New Group
+          <button onClick={onOpenNewGroup} className="btn btn-secondary" style={{ padding: '0.4rem 0.65rem', fontSize: '0.78rem' }} title="Create new group">
+            <PlusCircle size={14} /> <span>New</span>
           </button>
           
           {selectedGroup && (
-            <button onClick={onOpenSettings} className="btn btn-secondary" style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem' }} title="Group Settings & Members">
-              <Settings size={15} /> Settings
+            <button onClick={onOpenSettings} className="btn btn-secondary" style={{ padding: '0.4rem 0.65rem', fontSize: '0.78rem' }} title="Group Settings & Members">
+              <Settings size={14} /> <span>Settings</span>
             </button>
           )}
         </div>
 
-        {/* User Profile & Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          {/* UPI Badge */}
-          {user?.upi_id ? (
+        {/* Right Action Controls Toolbar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
+          {/* UPI Copy Badge (if available) */}
+          {user?.upi_id && (
             <div onClick={copyUpi} style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem',
+              gap: '0.35rem',
               background: 'rgba(59, 130, 246, 0.12)',
               border: '1px solid rgba(59, 130, 246, 0.3)',
               borderRadius: '20px',
-              padding: '0.3rem 0.75rem',
+              padding: '0.3rem 0.65rem',
               cursor: 'pointer',
-              fontSize: '0.75rem',
+              fontSize: '0.74rem',
               fontWeight: 600,
-              color: '#60a5fa'
+              color: 'var(--accent-primary)'
             }} title="Click to copy your UPI ID">
-              <QrCode size={13} />
+              <QrCode size={12} />
               <span>{user.upi_id}</span>
-              {copied ? <Check size={12} color="#34d399" /> : <Copy size={12} />}
+              {copied ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
             </div>
-          ) : (
-            <button 
-              onClick={() => setShowProfileModal(true)} 
-              className="badge badge-due" 
-              style={{ cursor: 'pointer', border: 'none', padding: '0.35rem 0.75rem' }}
-            >
-              + Add UPI ID
-            </button>
           )}
 
           {/* Live Demos & Sample PDF Button */}
@@ -289,33 +281,34 @@ export default function Navbar({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem',
+              gap: '0.35rem',
               background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.35))',
               border: '1px solid rgba(245, 158, 11, 0.5)',
               borderRadius: '10px',
-              padding: '0.35rem 0.75rem',
+              padding: '0.35rem 0.65rem',
               color: '#fef3c7',
               cursor: 'pointer',
-              fontSize: '0.78rem',
+              fontSize: '0.76rem',
               fontWeight: 700,
               boxShadow: '0 2px 8px rgba(245, 158, 11, 0.25)',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap'
             }}
             title="Open 4 Demo Calculations & Sample PDF Generator"
           >
-            <Sparkles size={14} color="#fbbf24" />
+            <Sparkles size={13} color="#fbbf24" />
             <span>✨ Demos & PDF</span>
           </button>
 
-          {/* 3-Theme Switcher (🌙 Night | ☀️ Light | 🕯️ Comfort) */}
+          {/* Compact 3-Theme Icon Switcher (🌙 Night | ☀️ Light | 🕯️ Comfort) */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            background: 'rgba(0, 0, 0, 0.35)',
+            background: 'var(--bg-surface-elevated)',
             border: '1px solid var(--border-glass)',
-            borderRadius: '12px',
-            padding: '0.2rem',
-            gap: '0.15rem'
+            borderRadius: '10px',
+            padding: '0.18rem',
+            gap: '0.1rem'
           }}>
             <button
               type="button"
@@ -323,22 +316,19 @@ export default function Navbar({
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.25rem',
+                justifyContent: 'center',
                 background: theme === 'night' ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' : 'transparent',
-                color: theme === 'night' ? '#ffffff' : 'var(--text-secondary)',
+                color: theme === 'night' ? '#ffffff' : 'var(--text-muted)',
                 border: 'none',
-                borderRadius: '8px',
-                padding: '0.3rem 0.5rem',
-                fontSize: '0.72rem',
-                fontWeight: theme === 'night' ? 700 : 500,
+                borderRadius: '7px',
+                padding: '0.3rem 0.45rem',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: theme === 'night' ? '0 2px 8px rgba(59, 130, 246, 0.4)' : 'none'
+                boxShadow: theme === 'night' ? '0 2px 6px rgba(59, 130, 246, 0.4)' : 'none'
               }}
-              title="Night Mode (Dark - Default)"
+              title="🌙 Night Mode (Dark - Default)"
             >
               <Moon size={13} />
-              <span>Night</span>
             </button>
 
             <button
@@ -347,22 +337,19 @@ export default function Navbar({
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.25rem',
+                justifyContent: 'center',
                 background: theme === 'light' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'transparent',
-                color: theme === 'light' ? '#ffffff' : 'var(--text-secondary)',
+                color: theme === 'light' ? '#ffffff' : 'var(--text-muted)',
                 border: 'none',
-                borderRadius: '8px',
-                padding: '0.3rem 0.5rem',
-                fontSize: '0.72rem',
-                fontWeight: theme === 'light' ? 700 : 500,
+                borderRadius: '7px',
+                padding: '0.3rem 0.45rem',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: theme === 'light' ? '0 2px 8px rgba(245, 158, 11, 0.4)' : 'none'
+                boxShadow: theme === 'light' ? '0 2px 6px rgba(245, 158, 11, 0.4)' : 'none'
               }}
-              title="Light Mode (Clean Crisp Studio)"
+              title="☀️ Light Mode (Clean Studio)"
             >
               <Sun size={13} />
-              <span>Light</span>
             </button>
 
             <button
@@ -371,84 +358,84 @@ export default function Navbar({
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.25rem',
+                justifyContent: 'center',
                 background: theme === 'comfort' ? 'linear-gradient(135deg, #d97706, #92400e)' : 'transparent',
-                color: theme === 'comfort' ? '#fef3c7' : 'var(--text-secondary)',
+                color: theme === 'comfort' ? '#fef3c7' : 'var(--text-muted)',
                 border: 'none',
-                borderRadius: '8px',
-                padding: '0.3rem 0.5rem',
-                fontSize: '0.72rem',
-                fontWeight: theme === 'comfort' ? 700 : 500,
+                borderRadius: '7px',
+                padding: '0.3rem 0.45rem',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: theme === 'comfort' ? '0 2px 8px rgba(217, 119, 6, 0.4)' : 'none'
+                boxShadow: theme === 'comfort' ? '0 2px 6px rgba(217, 119, 6, 0.4)' : 'none'
               }}
-              title="Eye Comfort Mode (Warm Amber / Anti-Blue Light)"
+              title="🕯️ Eye Comfort Mode (Warm Amber)"
             >
               <Eye size={13} />
-              <span>Comfort</span>
             </button>
           </div>
 
-          {/* Admin Badge / Switcher */}
+          {/* Admin Portal Switcher */}
           {user?.is_admin && (
             <button
               onClick={() => onSwitchTab && onSwitchTab('admin')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.4rem',
+                gap: '0.35rem',
                 background: activeTab === 'admin' 
                   ? 'linear-gradient(135deg, #8b5cf6, #ec4899)' 
-                  : 'rgba(139, 92, 246, 0.18)',
+                  : 'rgba(139, 92, 246, 0.16)',
                 border: '1px solid rgba(139, 92, 246, 0.4)',
                 borderRadius: '10px',
-                padding: '0.35rem 0.75rem',
-                color: '#f8fafc',
+                padding: '0.35rem 0.65rem',
+                color: activeTab === 'admin' ? '#ffffff' : 'var(--text-primary)',
                 cursor: 'pointer',
-                fontSize: '0.78rem',
+                fontSize: '0.76rem',
                 fontWeight: 700,
                 boxShadow: activeTab === 'admin' ? '0 0 12px rgba(139, 92, 246, 0.5)' : 'none',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap'
               }}
               title="Open System Admin & Users Control Panel"
             >
-              <Crown size={14} color="#ffd700" />
-              <span>ADMIN PORTAL</span>
+              <Crown size={13} color="#ffd700" />
+              <span>Admin</span>
             </button>
           )}
 
-          {/* Profile Button */}
+          {/* User Profile Pill */}
           <button
             onClick={() => setShowProfileModal(true)}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              background: 'rgba(255, 255, 255, 0.06)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              gap: '0.45rem',
+              background: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-glass)',
               borderRadius: '10px',
-              padding: '0.4rem 0.75rem',
-              color: '#f8fafc',
+              padding: '0.35rem 0.65rem',
+              color: 'var(--text-primary)',
               cursor: 'pointer',
-              fontSize: '0.82rem',
-              fontWeight: 600
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              transition: 'all 0.2s'
             }}
+            title="Edit profile & UPI ID"
           >
-            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700 }}>
+            <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700 }}>
               {user?.name ? user.name[0].toUpperCase() : 'U'}
             </div>
-            <span>{user?.name?.split(' ')[0]}</span>
+            <span>{user?.name?.split(' ')[0] || 'User'}</span>
           </button>
 
-          {/* Logout */}
+          {/* Logout Button */}
           <button 
             onClick={logout} 
             className="btn btn-secondary" 
-            style={{ padding: '0.45rem', borderRadius: '8px' }} 
-            title="Logout"
+            style={{ padding: '0.4rem 0.55rem', borderRadius: '8px' }} 
+            title="Sign out of account"
           >
-            <LogOut size={16} color="#94a3b8" />
+            <LogOut size={14} color="var(--text-muted)" />
           </button>
         </div>
       </nav>
