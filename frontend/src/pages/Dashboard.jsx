@@ -245,7 +245,15 @@ export default function Dashboard() {
             {/* Interactive Workflow Guide right below navbar */}
             <WorkflowGuide 
               group={selectedGroup}
-              onSwitchTab={(t) => setActiveTab(t)}
+              onSwitchTab={(t) => {
+                setActiveTab(t);
+                setTimeout(() => {
+                  const section = document.getElementById('dashboard-tabs-section');
+                  if (section) {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 60);
+              }}
               onOpenAddExpense={() => setShowAddExpense(true)}
               onOpenAddMember={() => setShowQuickAddMemberModal(true)}
               onOpenSettings={() => setShowGroupSettings(true)}
@@ -309,14 +317,15 @@ export default function Dashboard() {
             <MetricCards balances={balances} currentUserId={user?.id} />
 
             {/* Navigation Tabs */}
-            <div className="tabs-nav-bar" style={{
+            <div id="dashboard-tabs-section" className="tabs-nav-bar" style={{
               display: 'flex',
               gap: '0.5rem',
               overflowX: 'auto',
               marginBottom: '1.5rem',
               borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
               paddingBottom: '0.75rem',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              scrollMarginTop: '80px'
             }}>
               <button
                 onClick={() => setActiveTab('overview')}

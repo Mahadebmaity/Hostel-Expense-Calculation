@@ -16,7 +16,8 @@ import {
   ArrowRight,
   CheckCircle2,
   Languages,
-  Globe
+  Globe,
+  AlertCircle
 } from 'lucide-react';
 
 export default function WorkflowGuide({ 
@@ -34,6 +35,20 @@ export default function WorkflowGuide({
   const [lang, setLang] = useState(() => {
     return localStorage.getItem('app_workflow_lang') || 'BN'; // 'BN' | 'EN'
   });
+
+  const [showNoMembersAlert, setShowNoMembersAlert] = useState(false);
+
+  const handleStepAction = (stepNumber, originalAction) => {
+    const memberCount = group?.members?.length || 0;
+    // Step 1 is "Add Member" - always allowed
+    if (stepNumber > 1 && memberCount === 0) {
+      setShowNoMembersAlert(true);
+      return;
+    }
+    if (originalAction) {
+      originalAction();
+    }
+  };
   
   // Allow user to preview any workflow type even if current group is different
   const currentType = group?.group_type || 'MESS';
@@ -660,7 +675,7 @@ export default function WorkflowGuide({
                 {/* Direct Action Button */}
                 {st.onClick && (
                   <button
-                    onClick={st.onClick}
+                    onClick={() => handleStepAction(st.step, st.onClick)}
                     className="btn"
                     style={{
                       background: 'rgba(255, 255, 255, 0.05)',
@@ -694,6 +709,66 @@ export default function WorkflowGuide({
             ))}
           </div>
         </div>
+
+        {/* Step 1 Dependency Alert Modal if trying to calculate with 0 members */}
+        {showNoMembersAlert && (
+          <div className="modal-backdrop" onClick={() => setShowNoMembersAlert(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px', textAlign: 'center', padding: '1.75rem 1.5rem' }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                background: 'rgba(245, 158, 11, 0.15)',
+                border: '2px solid rgba(245, 158, 11, 0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1rem auto'
+              }}>
+                <AlertCircle size={28} color="#fbbf24" />
+              </div>
+
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.4rem' }}>
+                {lang === 'BN' ? '⚠️ আগে ১ম ধাপ (Step 1) সম্পন্ন করুন' : '⚠️ Please Complete Step 1 First'}
+              </h3>
+
+              <div style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5', marginBottom: '1.25rem' }}>
+                <div style={{ marginBottom: '0.5rem', color: '#93c5fd', fontWeight: 600 }}>
+                  {lang === 'BN' 
+                    ? 'আপনার এই গ্রুপে বর্তমানে কোনো মেম্বার/বর্ডার যোগ করা নেই।' 
+                    : 'There are currently no members in this group.'}
+                </div>
+                <div style={{ color: '#94a3b8' }}>
+                  {lang === 'BN'
+                    ? 'মিল রেকর্ড (Meal Tracker) বা ব্যালেন্স শিট (Scoreboard) দেখার আগে অনুগ্রহ করে মেম্বারদের নাম ও ডিপোজিট যোগ করুন।'
+                    : 'Before tracking daily meals or viewing the score board, please add members/boarders to the group roster.'}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNoMembersAlert(false);
+                    if (onOpenAddMember) onOpenAddMember();
+                  }}
+                  className="btn btn-primary"
+                  style={{ flex: 1, minWidth: '160px', padding: '0.6rem 1rem' }}
+                >
+                  <UserPlus size={16} /> {lang === 'BN' ? '+ মেম্বার যোগ করুন (Step 1)' : '+ Add Members (Step 1)'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowNoMembersAlert(false)}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.6rem 1rem' }}
+                >
+                  {lang === 'BN' ? 'বুঝেছি' : 'Got it'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
   );
 }
