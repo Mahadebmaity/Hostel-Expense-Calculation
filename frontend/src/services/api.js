@@ -105,6 +105,7 @@ export const api = {
   updateGroup: (id, data) => request(`/groups/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteGroup: (id) => request(`/groups/${id}`, { method: 'DELETE' }),
   addMember: (groupId, data) => request(`/groups/${groupId}/members`, { method: 'POST', body: JSON.stringify(data) }),
+  updateMember: (groupId, identifier, data) => request(`/groups/${groupId}/members/${identifier}`, { method: 'PUT', body: JSON.stringify(data) }),
   removeMember: (groupId, identifier) => request(`/groups/${groupId}/members/${identifier}`, { method: 'DELETE' }),
   updateDeposit: (groupId, data) => request(`/groups/${groupId}/deposit`, { method: 'POST', body: JSON.stringify(data) }),
   getGroupBalances: (groupId, startDate, endDate) => {
@@ -134,6 +135,8 @@ export const api = {
   // Settlements
   getSettlements: (groupId) => request(`/settlements/${groupId}`),
   recordSettlement: (groupId, data) => request(`/settlements/?group_id=${groupId}`, { method: 'POST', body: JSON.stringify(data) }),
+  generateUPI: (data) => request('/settlements/generate-upi', { method: 'POST', body: JSON.stringify(data) }),
+
 
   // Reports
   downloadPDF: async (groupId, groupName) => {

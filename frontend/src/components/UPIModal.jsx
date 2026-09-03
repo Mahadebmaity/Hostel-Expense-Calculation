@@ -8,34 +8,101 @@ import {
   Smartphone,
   ShieldCheck,
   Share2,
-  Download
+  Download,
+  Edit3,
+  Sparkles,
+  AlertCircle
 } from 'lucide-react';
+import { api } from '../services/api';
 
-export default function UPIModal({ transaction, onClose, onMarkSettled }) {
+export default function UPIModal({ transaction, group, onClose, onMarkSettled, onMemberUpdated }) {
   const [copied, setCopied] = useState(false);
   const [marking, setMarking] = useState(false);
   const [shareStatus, setShareStatus] = useState('idle'); // 'idle' | 'shared' | 'downloaded'
 
+  // Dynamic UPI states
+  const [currentUpiId, setCurrentUpiId] = useState(transaction.payee_upi_id || '');
+  const [currentQrBase64, setCurrentQrBase64] = useState(transaction.upi_qr_base64 || '');
+  const [currentUpiUri, setCurrentUpiUri] = useState(transaction.upi_uri || '');
+  const [isEditingUpi, setIsEditingUpi] = useState(!transaction.payee_upi_id);
+  const [upiInput, setUpiInput] = useState(transaction.payee_upi_id || '');
+  const [savingUpi, setSavingUpi] = useState(false);
+  const [upiError, setUpiError] = useState('');
+
+  const upiHandles = ['@oksbi', '@okhdfc', '@paytm', '@ybl', '@axl', '@ibl'];
+
   const copyUpiId = () => {
-    if (transaction.payee_upi_id) {
-      navigator.clipboard.writeText(transaction.payee_upi_id);
+    if (currentUpiId) {
+      navigator.clipboard.writeText(currentUpiId);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
+  const handleApplyHandle = (handle) => {
+    const raw = upiInput.split('@')[0].trim();
+    if (raw) {
+      setUpiInput(`${raw}${handle}`);
+    } else {
+      setUpiInput(handle);
+    }
+  };
+
+  const handleSaveAndGenerateUPI = async (e) => {
+    if (e) e.preventDefault();
+    const cleanUpi = upiInput.trim();
+    if (!cleanUpi || !cleanUpi.includes('@') || cleanUpi.startsWith('@') || cleanUpi.endsWith('@')) {
+      setUpiError('Please enter a valid UPI ID (e.g. 9876543210@paytm or name@oksbi)');
+      return;
+    }
+    setUpiError('');
+    setSavingUpi(true);
+
+    try {
+      // 1. Generate live QR & Deep Link from backend
+      const res = await api.generateUPI({
+        upi_id: cleanUpi,
+        payee_name: transaction.payee_name || 'Payee',
+        amount: transaction.amount || 0,
+        note: `${group?.name || 'Mess'} Settlement`
+      });
+
+      if (res.upi_qr_base64) {
+        setCurrentQrBase64(res.upi_qr_base64);
+        setCurrentUpiUri(res.upi_uri);
+        setCurrentUpiId(cleanUpi);
+      }
+
+      // 2. Persist to group member / payee profile if IDs available
+      if (group?.id && (transaction.payee_id || transaction.payee_member_id)) {
+        const targetId = transaction.payee_member_id || transaction.payee_id;
+        try {
+          await api.updateMember(group.id, targetId, { upi_id: cleanUpi });
+          if (onMemberUpdated) onMemberUpdated();
+        } catch (memberErr) {
+          console.warn('Could not auto-save UPI ID to member:', memberErr);
+        }
+      }
+
+      setIsEditingUpi(false);
+    } catch (err) {
+      setUpiError(err.message || 'Failed to generate UPI QR code');
+    } finally {
+      setSavingUpi(false);
+    }
+  };
+
   const handleShareQR = async () => {
-    if (!transaction.upi_qr_base64) return;
+    if (!currentQrBase64) return;
 
     const payeeName = transaction.payee_name || 'Payee';
     const amount = transaction.amount ? transaction.amount.toFixed(2) : '0';
     const fileName = `UPI_QR_${payeeName.replace(/\s+/g, '_')}_${amount}.png`;
     const shareTitle = `UPI Payment QR - ₹${amount}`;
-    const shareText = `Pay ₹${amount} to ${payeeName} via UPI${transaction.payee_upi_id ? ` (${transaction.payee_upi_id})` : ''}. Scan QR code or open UPI link.`;
+    const shareText = `Pay ₹${amount} to ${payeeName} via UPI${currentUpiId ? ` (${currentUpiId})` : ''}. Scan QR code or open UPI link.`;
 
     try {
-      // Convert base64 data to Blob -> File
-      const res = await fetch(transaction.upi_qr_base64);
+      const res = await fetch(currentQrBase64);
       const blob = await res.blob();
       const file = new File([blob], fileName, { type: 'image/png' });
 
@@ -52,33 +119,29 @@ export default function UPIModal({ transaction, onClose, onMarkSettled }) {
         await navigator.share({
           title: shareTitle,
           text: shareText,
-          url: transaction.upi_uri || undefined
+          url: currentUpiUri || undefined
         });
         setShareStatus('shared');
         setTimeout(() => setShareStatus('idle'), 3000);
         return;
       }
     } catch (err) {
-      if (err.name === 'AbortError') {
-        // User closed native share sheet, ignore error
-        return;
-      }
+      if (err.name === 'AbortError') return;
       console.warn('Web Share failed, falling back to download:', err);
     }
 
-    // Fallback if Web Share is not supported or failed
     handleDownloadQR();
   };
 
   const handleDownloadQR = () => {
-    if (!transaction.upi_qr_base64) return;
+    if (!currentQrBase64) return;
 
     const payeeName = transaction.payee_name || 'Payee';
     const amount = transaction.amount ? transaction.amount.toFixed(2) : '0';
     const fileName = `UPI_QR_${payeeName.replace(/\s+/g, '_')}_${amount}.png`;
 
     const link = document.createElement('a');
-    link.href = transaction.upi_qr_base64;
+    link.href = currentQrBase64;
     link.download = fileName;
     document.body.appendChild(link);
     link.click();
@@ -88,7 +151,7 @@ export default function UPIModal({ transaction, onClose, onMarkSettled }) {
     setTimeout(() => setShareStatus('idle'), 3000);
   };
 
-  const curr = transaction.currency === 'INR' ? '₹' : transaction.currency;
+  const curr = transaction.currency === 'INR' ? '₹' : (transaction.currency || '₹');
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -112,143 +175,261 @@ export default function UPIModal({ transaction, onClose, onMarkSettled }) {
           </p>
         </div>
 
-        {/* QR Code Container */}
-        {transaction.upi_qr_base64 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.25rem' }}>
-            <div style={{
-              background: '#ffffff',
-              padding: '0.85rem',
-              borderRadius: '16px',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-              display: 'inline-block'
-            }}>
-              <img
-                src={transaction.upi_qr_base64}
-                alt="UPI QR Code"
-                style={{ width: '180px', height: '180px', display: 'block' }}
-              />
+        {/* Inline UPI ID Entry / Edit Form */}
+        {isEditingUpi ? (
+          <div style={{
+            background: 'rgba(59, 130, 246, 0.08)',
+            border: '1px solid rgba(59, 130, 246, 0.25)',
+            borderRadius: '12px',
+            padding: '1.1rem',
+            marginBottom: '1.25rem',
+            textAlign: 'left'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.6rem' }}>
+              <Sparkles size={16} color="#60a5fa" />
+              <strong style={{ fontSize: '0.88rem', color: '#93c5fd' }}>
+                {currentUpiId ? `Update UPI ID for ${transaction.payee_name}` : `Add UPI ID for ${transaction.payee_name}`}
+              </strong>
             </div>
-            <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.65rem', marginBottom: '0.75rem' }}>
-              Scan using Google Pay, PhonePe, Paytm, or BHIM
+            <p style={{ fontSize: '0.75rem', color: '#cbd5e1', marginBottom: '0.75rem' }}>
+              Enter the payee/manager's UPI ID to generate an instant QR Code & direct UPI payment link:
             </p>
 
-            {/* Share & Download QR Buttons */}
-            <div style={{ display: 'flex', gap: '0.6rem', width: '100%', maxWidth: '300px' }}>
-              <button
-                onClick={handleShareQR}
-                className="btn"
-                style={{
-                  flex: 1,
-                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.35))',
-                  border: '1px solid rgba(59, 130, 246, 0.45)',
-                  color: '#93c5fd',
-                  padding: '0.55rem 0.85rem',
-                  borderRadius: '10px',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
-                }}
-              >
-                {shareStatus === 'shared' ? (
-                  <>
-                    <Check size={15} color="#34d399" /> Shared!
-                  </>
-                ) : (
-                  <>
-                    <Share2 size={15} /> Share QR
-                  </>
-                )}
-              </button>
+            <form onSubmit={handleSaveAndGenerateUPI}>
+              <div style={{ marginBottom: '0.6rem' }}>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="e.g. 9876543210@paytm or name@oksbi"
+                  value={upiInput}
+                  onChange={(e) => {
+                    setUpiInput(e.target.value);
+                    if (upiError) setUpiError('');
+                  }}
+                  style={{ fontSize: '0.85rem', width: '100%' }}
+                  autoFocus
+                />
+              </div>
 
-              <button
-                onClick={handleDownloadQR}
-                className="btn"
-                title="Download QR Image"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  color: '#cbd5e1',
-                  padding: '0.55rem 0.85rem',
-                  borderRadius: '10px',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                {shareStatus === 'downloaded' ? (
-                  <>
-                    <Check size={15} color="#34d399" /> Saved!
-                  </>
-                ) : (
-                  <>
-                    <Download size={15} /> Download
-                  </>
+              {/* Quick UPI Handle Pills */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.85rem' }}>
+                {upiHandles.map(h => (
+                  <button
+                    key={h}
+                    type="button"
+                    onClick={() => handleApplyHandle(h)}
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.06)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      color: '#94a3b8',
+                      borderRadius: '6px',
+                      padding: '0.2rem 0.45rem',
+                      fontSize: '0.72rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {h}
+                  </button>
+                ))}
+              </div>
+
+              {upiError && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#f87171', fontSize: '0.75rem', marginBottom: '0.65rem' }}>
+                  <AlertCircle size={14} /> {upiError}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {currentUpiId && (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingUpi(false)}
+                    className="btn btn-secondary"
+                    style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem' }}
+                  >
+                    Cancel
+                  </button>
                 )}
-              </button>
-            </div>
+                <button
+                  type="submit"
+                  disabled={savingUpi}
+                  className="btn btn-primary"
+                  style={{ flex: 2, padding: '0.5rem', fontSize: '0.8rem' }}
+                >
+                  <QrCode size={14} /> {savingUpi ? 'Generating...' : 'Save & Generate QR'}
+                </button>
+              </div>
+            </form>
           </div>
         ) : (
-          <div style={{ padding: '1.5rem', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '12px', marginBottom: '1.25rem' }}>
-            <p style={{ fontSize: '0.82rem', color: '#fbbf24' }}>
-              ⚠️ Payee has not added a UPI ID yet. You can pay via cash or ask them to add their UPI ID in profile.
-            </p>
-          </div>
-        )}
+          <>
+            {/* QR Code Container */}
+            {currentQrBase64 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.25rem' }}>
+                <div style={{
+                  background: '#ffffff',
+                  padding: '0.85rem',
+                  borderRadius: '16px',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                  display: 'inline-block'
+                }}>
+                  <img
+                    src={currentQrBase64}
+                    alt="UPI QR Code"
+                    style={{ width: '180px', height: '180px', display: 'block' }}
+                  />
+                </div>
+                <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.65rem', marginBottom: '0.75rem' }}>
+                  Scan using Google Pay, PhonePe, Paytm, or BHIM
+                </p>
 
-        {/* Payee UPI ID Copy Row */}
-        {transaction.payee_upi_id && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '10px',
-            padding: '0.6rem 0.85rem',
-            marginBottom: '1.25rem',
-            fontSize: '0.82rem'
-          }}>
-            <span style={{ color: '#cbd5e1', fontFamily: 'var(--font-mono)' }}>{transaction.payee_upi_id}</span>
-            <button
-              onClick={copyUpiId}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#60a5fa',
-                cursor: 'pointer',
+                {/* Share & Download QR Buttons */}
+                <div style={{ display: 'flex', gap: '0.6rem', width: '100%', maxWidth: '300px' }}>
+                  <button
+                    onClick={handleShareQR}
+                    className="btn"
+                    style={{
+                      flex: 1,
+                      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.35))',
+                      border: '1px solid rgba(59, 130, 246, 0.45)',
+                      color: '#93c5fd',
+                      padding: '0.55rem 0.85rem',
+                      borderRadius: '10px',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.4rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                    }}
+                  >
+                    {shareStatus === 'shared' ? (
+                      <>
+                        <Check size={15} color="#34d399" /> Shared!
+                      </>
+                    ) : (
+                      <>
+                        <Share2 size={15} /> Share QR
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={handleDownloadQR}
+                    className="btn"
+                    title="Download QR Image"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.06)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      color: '#cbd5e1',
+                      padding: '0.55rem 0.85rem',
+                      borderRadius: '10px',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.4rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {shareStatus === 'downloaded' ? (
+                      <>
+                        <Check size={15} color="#34d399" /> Saved!
+                      </>
+                    ) : (
+                      <>
+                        <Download size={15} /> Download
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ padding: '1.5rem', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '12px', marginBottom: '1.25rem' }}>
+                <p style={{ fontSize: '0.82rem', color: '#fbbf24', marginBottom: '0.75rem' }}>
+                  ⚠️ Payee has not added a UPI ID yet.
+                </p>
+                <button
+                  onClick={() => setIsEditingUpi(true)}
+                  className="btn btn-primary"
+                  style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem' }}
+                >
+                  <Sparkles size={14} /> Add Payee's UPI ID Now
+                </button>
+              </div>
+            )}
+
+            {/* Payee UPI ID Copy & Edit Row */}
+            {currentUpiId && (
+              <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.3rem',
-                fontSize: '0.78rem',
-                fontWeight: 600
-              }}
-            >
-              {copied ? <Check size={14} color="#34d399" /> : <Copy size={14} />}
-              {copied ? 'Copied' : 'Copy'}
-            </button>
-          </div>
-        )}
+                justifyContent: 'space-between',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '10px',
+                padding: '0.6rem 0.85rem',
+                marginBottom: '1.25rem',
+                fontSize: '0.82rem'
+              }}>
+                <span style={{ color: '#cbd5e1', fontFamily: 'var(--font-mono)' }}>{currentUpiId}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <button
+                    onClick={copyUpiId}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#60a5fa',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      fontSize: '0.78rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    {copied ? <Check size={14} color="#34d399" /> : <Copy size={14} />}
+                    {copied ? 'Copied' : 'Copy'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUpiInput(currentUpiId);
+                      setIsEditingUpi(true);
+                    }}
+                    title="Change or Edit UPI ID"
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#94a3b8',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.2rem',
+                      fontSize: '0.75rem'
+                    }}
+                  >
+                    <Edit3 size={13} /> Edit
+                  </button>
+                </div>
+              </div>
+            )}
 
-        {/* Direct Mobile UPI Deep Link */}
-        {transaction.upi_uri && (
-          <a
-            href={transaction.upi_uri}
-            className="btn btn-primary"
-            style={{ width: '100%', marginBottom: '0.75rem', padding: '0.75rem' }}
-          >
-            <ExternalLink size={16} /> Open in UPI App (PhonePe / GPay)
-          </a>
+            {/* Direct Mobile UPI Deep Link */}
+            {currentUpiUri && (
+              <a
+                href={currentUpiUri}
+                className="btn btn-primary"
+                style={{ width: '100%', marginBottom: '0.75rem', padding: '0.75rem' }}
+              >
+                <ExternalLink size={16} /> Open in UPI App (PhonePe / GPay)
+              </a>
+            )}
+          </>
         )}
 
         {/* Mark as Settled Button */}
@@ -268,4 +449,3 @@ export default function UPIModal({ transaction, onClose, onMarkSettled }) {
     </div>
   );
 }
-

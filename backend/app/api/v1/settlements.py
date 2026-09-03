@@ -8,8 +8,34 @@ from app.models.user import User
 from app.models.group import Group, GroupMember
 from app.models.settlement import Settlement
 from app.schemas.settlement import SettlementCreate, SettlementOut
+from app.services.upi_service import get_upi_payment_payload
+from pydantic import BaseModel
+
+class UPIRequest(BaseModel):
+    upi_id: str
+    payee_name: Optional[str] = "Payee"
+    amount: float
+    note: Optional[str] = "Expense Settlement"
 
 router = APIRouter(prefix="/settlements", tags=["Settlements"])
+
+@router.post("/generate-upi")
+def generate_custom_upi(
+    payload: UPIRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """Generates dynamic UPI URI and QR code base64 on-demand for any given UPI ID and amount."""
+    clean_upi = payload.upi_id.strip()
+    if not clean_upi:
+        raise HTTPException(status_code=400, detail="UPI ID is required")
+    data = get_upi_payment_payload(
+        upi_id=clean_upi,
+        payee_name=payload.payee_name or "Payee",
+        amount=payload.amount,
+        note=payload.note or "Expense Settlement"
+    )
+    return data
+
 
 @router.post("/", response_model=SettlementOut, status_code=status.HTTP_201_CREATED)
 def record_settlement(

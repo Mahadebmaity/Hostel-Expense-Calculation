@@ -18,7 +18,9 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  Trash2
+  Trash2,
+  Smartphone,
+  AlertTriangle
 } from 'lucide-react';
 import UPIModal from './UPIModal';
 
@@ -303,6 +305,76 @@ export default function SettlementEngine({
           </div>
         )}
 
+        {/* Manager UPI Requirement Alert */}
+        {(() => {
+          const managerMember = group?.members?.find(m => m.role === 'MANAGER' || m.role === 'ADMIN') || group?.members?.[0];
+          const managerHasUpi = !!(managerMember?.upi_id || managerMember?.user?.upi_id);
+          if (managerHasUpi || !managerMember) return null;
+
+          return (
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(15, 23, 42, 0.7))',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+              borderRadius: '12px',
+              padding: '0.9rem 1.15rem',
+              marginBottom: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '0.75rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div style={{
+                  background: 'rgba(245, 158, 11, 0.2)',
+                  padding: '0.5rem',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Smartphone size={18} color="#fbbf24" />
+                </div>
+                <div>
+                  <h5 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#fef3c7' }}>
+                    Manager UPI ID Missing ({managerMember.name || managerMember.user?.name || 'Mess Manager'})
+                  </h5>
+                  <p style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
+                    The mess manager must add their UPI ID so candidates can settle dues and pay mess funds instantly via QR.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setActiveUpiTx({
+                    payer_id: currentUserId,
+                    payer_name: 'Member',
+                    payee_id: managerMember.id || managerMember.user_id,
+                    payee_member_id: managerMember.id,
+                    payee_name: managerMember.name || managerMember.user?.name || 'Mess Manager',
+                    payee_upi_id: '',
+                    amount: 1.0,
+                    currency: group?.currency || 'INR'
+                  });
+                }}
+                className="btn"
+                style={{
+                  padding: '0.45rem 0.9rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer'
+                }}
+              >
+                ⚡ Add Manager UPI ID
+              </button>
+            </div>
+          );
+        })()}
+
         {/* 1. MESS FINANCIAL CALCULATION TILES (Establishment + Meal Pool) */}
         {isMess && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
@@ -534,13 +606,15 @@ export default function SettlementEngine({
                             const creditor = memberBalances.find(m => (m.member_id !== payerId && m.user_id !== payerId && m.net_balance > 0.01));
                             const manager = group.members?.find(m => m.role === 'MANAGER' || m.role === 'ADMIN') || group.members?.[0];
                             const targetPayee = creditor || manager;
+                            const payeeUpi = targetPayee?.upi_id || targetPayee?.user?.upi_id || '';
 
                             setActiveUpiTx({
                               payer_id: payerId,
                               payer_name: mb.name,
                               payee_id: targetPayee?.id || targetPayee?.user_id || 'manager',
+                              payee_member_id: targetPayee?.id,
                               payee_name: targetPayee?.name || targetPayee?.member_name || group.name,
-                              payee_upi_id: targetPayee?.upi_id || 'manager@upi',
+                              payee_upi_id: payeeUpi,
                               amount: Math.abs(bal),
                               currency: group.currency
                             });
@@ -672,8 +746,12 @@ export default function SettlementEngine({
       {activeUpiTx && (
         <UPIModal
           transaction={activeUpiTx}
+          group={group}
           onClose={() => setActiveUpiTx(null)}
           onMarkSettled={() => handleMarkSettled(activeUpiTx)}
+          onMemberUpdated={() => {
+            if (onSettlementCompleted) onSettlementCompleted();
+          }}
         />
       )}
     </>

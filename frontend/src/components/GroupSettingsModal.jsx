@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../services/api';
-import { Settings, UserPlus, Trash2, DollarSign, Sliders, Shield, UserCheck, AlertTriangle } from 'lucide-react';
+import { Settings, UserPlus, Trash2, DollarSign, Sliders, Shield, UserCheck, AlertTriangle, Edit3, Check, Smartphone } from 'lucide-react';
 
 export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onGroupDeleted, currentUserId }) {
   const [activeTab, setActiveTab] = useState('members'); // 'members', 'deposits', 'rules'
@@ -15,6 +15,12 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
   const [memberMktAmt, setMemberMktAmt] = useState('');
   const [memberMktDays, setMemberMktDays] = useState('');
   const [addingMember, setAddingMember] = useState(false);
+
+  // Inline Member Edit (UPI & Role)
+  const [editingMemberId, setEditingMemberId] = useState(null);
+  const [editingUpiValue, setEditingUpiValue] = useState('');
+  const [editingRoleValue, setEditingRoleValue] = useState('MEMBER');
+  const [savingMemberEdit, setSavingMemberEdit] = useState(false);
 
   // Update deposits & Marketing
   const [depositMemberId, setDepositMemberId] = useState(group?.members[0]?.id || group?.members[0]?.user_id || '');
@@ -89,6 +95,22 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
       alert(err.message);
     } finally {
       setAddingMember(false);
+    }
+  };
+
+  const handleSaveMemberEdit = async (memberId) => {
+    setSavingMemberEdit(true);
+    try {
+      await api.updateMember(group.id, memberId, {
+        upi_id: editingUpiValue.trim(),
+        role: editingRoleValue
+      });
+      setEditingMemberId(null);
+      if (onGroupUpdated) onGroupUpdated();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setSavingMemberEdit(false);
     }
   };
 
@@ -312,10 +334,12 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.65rem', marginBottom: '0.75rem' }}>
                 <div>
-                  <label style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>UPI ID for Settlements (Optional)</label>
+                  <label style={{ fontSize: '0.72rem', color: memberRole === 'MANAGER' ? '#f59e0b' : '#94a3b8', display: 'block', marginBottom: '0.2rem', fontWeight: memberRole === 'MANAGER' ? 700 : 400 }}>
+                    UPI ID for Settlements {memberRole === 'MANAGER' ? '(⭐ Manager UPI Required)' : '(Optional)'}
+                  </label>
                   <input
                     type="text"
-                    placeholder="name@upi"
+                    placeholder={memberRole === 'MANAGER' ? "e.g. manager@oksbi" : "name@upi"}
                     className="form-input"
                     value={memberUpi}
                     onChange={(e) => setMemberUpi(e.target.value)}
@@ -344,43 +368,124 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
             <h5 style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
               Current Group Members ({group.members?.length || 0})
             </h5>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '220px', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '250px', overflowY: 'auto' }}>
               {group.members?.map(m => {
                 const displayName = m.name || m.user?.name || m.email || 'Member';
                 const isVirtual = m.is_virtual === 'true' || !m.user_id;
                 const mktAmt = m.marketing_amount || 0;
                 const mktDays = m.marketing_days || 0;
+                const isEditing = editingMemberId === (m.id || m.user_id);
+                const hasUpi = !!(m.upi_id || m.user?.upi_id);
 
                 return (
-                  <div key={m.id || m.user_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15, 23, 42, 0.5)', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.04)', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
-                        <strong style={{ fontSize: '0.88rem', color: '#f8fafc' }}>{displayName}</strong>
-                        {isVirtual ? (
-                          <span style={{ fontSize: '0.65rem', background: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
-                            Virtual
+                  <div key={m.id || m.user_id} style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                          <strong style={{ fontSize: '0.88rem', color: '#f8fafc' }}>{displayName}</strong>
+                          {isVirtual ? (
+                            <span style={{ fontSize: '0.65rem', background: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                              Virtual
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '0.65rem', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                              Registered
+                            </span>
+                          )}
+                          <span className={`badge ${m.role === 'MANAGER' ? 'badge-primary' : 'badge-settled'}`} style={{ fontSize: '0.65rem', padding: '0.1rem 0.35rem' }}>
+                            {m.role}
                           </span>
-                        ) : (
-                          <span style={{ fontSize: '0.65rem', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
-                            Registered
-                          </span>
-                        )}
-                        <span className="badge badge-settled" style={{ fontSize: '0.65rem', padding: '0.1rem 0.35rem' }}>
-                          {m.role}
-                        </span>
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: '0.15rem' }}>
+                          Deposit: {curr}{m.initial_deposit?.toFixed(0) || 0} {mktAmt > 0 ? `• Marketing: ${curr}${mktAmt.toFixed(0)} (${mktDays}d)` : ''}
+                        </div>
                       </div>
-                      <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: '0.15rem' }}>
-                        Deposit: {curr}{m.initial_deposit?.toFixed(0) || 0} {mktAmt > 0 ? `• Marketing: ${curr}${mktAmt.toFixed(0)} (${mktDays}d)` : ''} {m.upi_id ? `• UPI: ${m.upi_id}` : ''}
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (isEditing) {
+                              setEditingMemberId(null);
+                            } else {
+                              setEditingMemberId(m.id || m.user_id);
+                              setEditingUpiValue(m.upi_id || m.user?.upi_id || '');
+                              setEditingRoleValue(m.role || 'MEMBER');
+                            }
+                          }}
+                          style={{
+                            background: hasUpi ? 'rgba(59, 130, 246, 0.12)' : 'rgba(245, 158, 11, 0.15)',
+                            border: `1px solid ${hasUpi ? 'rgba(59, 130, 246, 0.3)' : 'rgba(245, 158, 11, 0.4)'}`,
+                            color: hasUpi ? '#93c5fd' : '#fcd34d',
+                            borderRadius: '6px',
+                            padding: '0.2rem 0.5rem',
+                            fontSize: '0.72rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem'
+                          }}
+                        >
+                          <Edit3 size={11} /> {hasUpi ? (m.upi_id || m.user?.upi_id) : '+ Add UPI'}
+                        </button>
+
+                        {m.user_id !== currentUserId && (
+                          <button 
+                            onClick={() => handleRemoveMember(m.id || m.user_id)} 
+                            title="Remove member"
+                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.25rem' }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
                       </div>
                     </div>
-                    {m.user_id !== currentUserId && (
-                      <button 
-                        onClick={() => handleRemoveMember(m.id || m.user_id)} 
-                        title="Remove member"
-                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.35rem' }}
-                      >
-                        <Trash2 size={15} />
-                      </button>
+
+                    {/* Inline Edit Row */}
+                    {isEditing && (
+                      <div style={{
+                        marginTop: '0.35rem',
+                        padding: '0.55rem',
+                        background: 'rgba(0, 0, 0, 0.3)',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '0.45rem',
+                        alignItems: 'center'
+                      }}>
+                        <div style={{ flex: '1 1 140px' }}>
+                          <input
+                            type="text"
+                            placeholder="Enter UPI ID (e.g. 9876543210@paytm)"
+                            value={editingUpiValue}
+                            onChange={(e) => setEditingUpiValue(e.target.value)}
+                            className="form-input"
+                            style={{ fontSize: '0.75rem', padding: '0.3rem 0.5rem', width: '100%' }}
+                          />
+                        </div>
+                        <div style={{ width: '100px' }}>
+                          <select
+                            value={editingRoleValue}
+                            onChange={(e) => setEditingRoleValue(e.target.value)}
+                            className="form-select"
+                            style={{ fontSize: '0.75rem', padding: '0.3rem 0.4rem', width: '100%' }}
+                          >
+                            <option value="MEMBER">Member</option>
+                            <option value="MANAGER">Manager</option>
+                            <option value="ADMIN">Admin</option>
+                          </select>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={savingMemberEdit}
+                          onClick={() => handleSaveMemberEdit(m.id || m.user_id)}
+                          className="btn btn-primary"
+                          style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
+                        >
+                          <Check size={12} /> {savingMemberEdit ? 'Saving...' : 'Save'}
+                        </button>
+                      </div>
                     )}
                   </div>
                 );

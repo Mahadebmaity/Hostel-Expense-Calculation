@@ -7,7 +7,7 @@ from app.core.security import get_current_user
 from app.models.user import User
 from app.models.group import Group, GroupMember
 from app.models.scoreboard import MonthlyScoreBoard
-from app.schemas.group import GroupCreate, GroupUpdate, GroupOut, GroupMemberAdd, GroupDepositUpdate
+from app.schemas.group import GroupCreate, GroupUpdate, GroupOut, GroupMemberAdd, GroupMemberUpdate, GroupDepositUpdate
 from app.schemas.settlement import ScoreBoardCreate, ScoreBoardOut
 from app.services.meal_engine import calculate_mess_balances
 from app.services.split_engine import simplify_debts, calculate_common_balances
@@ -333,6 +333,64 @@ def remove_group_member(
     db.commit()
     return {"message": "Member removed successfully"}
 
+@router.put("/{group_id}/members/{identifier}")
+def update_group_member(
+    group_id: str,
+    identifier: str,
+    member_in: GroupMemberUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Updates a group member's profile details such as name, phone, UPI ID, role, or deposit."""
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    target_membership = db.query(GroupMember).filter(
+        GroupMember.group_id == group_id,
+        (GroupMember.id == identifier) | (GroupMember.user_id == identifier)
+    ).first()
+
+    if not target_membership:
+        raise HTTPException(status_code=404, detail="Member not found in group")
+
+    if member_in.name is not None:
+        clean_name = member_in.name.strip()
+        if clean_name:
+            target_membership.name = clean_name
+            if target_membership.user:
+                target_membership.user.name = clean_name
+    if member_in.email is not None:
+        target_membership.email = member_in.email.strip().lower() if member_in.email else None
+    if member_in.phone is not None:
+        target_membership.phone = member_in.phone.strip() if member_in.phone else None
+    if member_in.upi_id is not None:
+        clean_upi = member_in.upi_id.strip()
+        target_membership.upi_id = clean_upi
+        if target_membership.user and not target_membership.user.upi_id:
+            target_membership.user.upi_id = clean_upi
+    if member_in.role is not None:
+        target_membership.role = member_in.role
+    if member_in.initial_deposit is not None:
+        target_membership.initial_deposit = float(member_in.initial_deposit)
+    if member_in.marketing_amount is not None:
+        target_membership.marketing_amount = float(member_in.marketing_amount)
+    if member_in.marketing_days is not None:
+        target_membership.marketing_days = float(member_in.marketing_days)
+    if member_in.previous_balance is not None:
+        target_membership.previous_balance = float(member_in.previous_balance)
+
+    db.commit()
+    db.refresh(target_membership)
+    return {
+        "message": "Member updated successfully",
+        "member_id": target_membership.id,
+        "user_id": target_membership.user_id,
+        "name": target_membership.member_name,
+        "upi_id": target_membership.member_upi_id,
+        "role": target_membership.role
+    }
+
 @router.post("/{group_id}/deposit")
 def update_member_deposit(
     group_id: str,
@@ -414,9 +472,25 @@ def get_group_balances(
     simplified = simplify_debts(data["member_balances"], currency=group.currency)
 
     # 3. Attach dynamic UPI QR payload for each transaction
+    member_upi_map = {}
+    for m in group.members:
+        upi = m.member_upi_id or m.upi_id
+        if upi:
+            if m.id:
+                member_upi_map[m.id] = upi
+            if m.user_id:
+                member_upi_map[m.user_id] = upi
+            if m.name:
+                member_upi_map[m.name.strip().lower()] = upi
+
     for tx in simplified:
+        payee_upi = tx.get("payee_upi_id")
+        if not payee_upi:
+            payee_upi = member_upi_map.get(tx.get("payee_id")) or member_upi_map.get(tx.get("payee_name", "").strip().lower())
+            tx["payee_upi_id"] = payee_upi
+
         upi_data = get_upi_payment_payload(
-            upi_id=tx.get("payee_upi_id"),
+            upi_id=payee_upi,
             payee_name=tx.get("payee_name", "Mess Payee"),
             amount=tx.get("amount", 0.0),
             note=f"{group.name} Settlement"

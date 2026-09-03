@@ -33,6 +33,18 @@ class GroupMemberAdd(BaseModel):
     marketing_days: float = 0.0
     previous_balance: float = 0.0
 
+class GroupMemberUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    upi_id: Optional[str] = None
+    role: Optional[str] = None  # ADMIN, MANAGER, MEMBER
+    initial_deposit: Optional[float] = None
+    marketing_amount: Optional[float] = None
+    marketing_days: Optional[float] = None
+    previous_balance: Optional[float] = None
+
+
 class GroupDepositUpdate(BaseModel):
     member_id: Optional[str] = None
     user_id: Optional[str] = None
