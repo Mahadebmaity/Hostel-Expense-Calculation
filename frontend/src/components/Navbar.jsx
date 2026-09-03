@@ -13,8 +13,10 @@ import {
   Copy,
   ChevronDown,
   Crown,
-  Trash2
+  Trash2,
+  Sparkles
 } from 'lucide-react';
+import DemoCenterModal from './DemoCenterModal';
 
 export default function Navbar({ 
   groups, 
@@ -28,6 +30,7 @@ export default function Navbar({
 }) {
   const { user, logout, updateProfileState } = useAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showDemoModal, setShowDemoModal] = useState(false);
   const [showGroupDropdown, setShowGroupDropdown] = useState(false);
   const [deletingGroupId, setDeletingGroupId] = useState(null);
   const [name, setName] = useState(user?.name || '');
@@ -274,6 +277,30 @@ export default function Navbar({
             </button>
           )}
 
+          {/* Live Demos & Sample PDF Button */}
+          <button
+            onClick={() => setShowDemoModal(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.35))',
+              border: '1px solid rgba(245, 158, 11, 0.5)',
+              borderRadius: '10px',
+              padding: '0.35rem 0.75rem',
+              color: '#fef3c7',
+              cursor: 'pointer',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.25)',
+              transition: 'all 0.2s'
+            }}
+            title="Open 4 Demo Calculations & Sample PDF Generator"
+          >
+            <Sparkles size={14} color="#fbbf24" />
+            <span>✨ Live Demos & PDF</span>
+          </button>
+
           {/* Admin Badge / Switcher */}
           {user?.is_admin && (
             <button
@@ -381,6 +408,13 @@ export default function Navbar({
           </div>
         </div>
       )}
+
+      {/* 4-Scenario Live Demo & PDF Preview Modal */}
+      <DemoCenterModal 
+        isOpen={showDemoModal} 
+        onClose={() => setShowDemoModal(false)} 
+        initialType={selectedGroup?.group_type || 'MESS'}
+      />
     </>
   );
 }

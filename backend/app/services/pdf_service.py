@@ -465,3 +465,346 @@ def generate_group_pdf_report(data: Dict[str, Any], simplified_settlements: List
 # Backward compatibility alias
 def generate_mess_pdf_report(data: Dict[str, Any], simplified_settlements: List[Dict[str, Any]]) -> bytes:
     return generate_group_pdf_report(data, simplified_settlements)
+
+def get_demo_bundle(demo_type: str) -> tuple[Dict[str, Any], List[Dict[str, Any]]]:
+    """Provides realistic sample data for 4 group calculation types."""
+    dtype = (demo_type or "MESS").upper()
+
+    if dtype == "TRIP":
+        data = {
+            "group_id": "demo-trip-101",
+            "group_name": "Goa Beach & Dudhsagar Trip 🌴",
+            "group_type": "TRIP",
+            "currency": "INR",
+            "total_bazar": 0.0,
+            "total_establishment": 0.0,
+            "total_expenses": 58800.0,
+            "total_meals": 0.0,
+            "meal_rate": 0.0,
+            "establishment_per_head": 0.0,
+            "total_collected": 20000.0,
+            "total_due": 38800.0,
+            "member_balances": [
+                {
+                    "member_id": "m1",
+                    "name": "Rohan Sen (Flight & Cab)",
+                    "role": "MEMBER",
+                    "is_virtual": False,
+                    "total_meal_units": 0,
+                    "meal_cost": 0.0,
+                    "establishment_cost": 0.0,
+                    "guest_cost": 0.0,
+                    "total_due": 14700.0,
+                    "initial_deposit": 5000.0,
+                    "marketing_amount": 24000.0,
+                    "marketing_days": 0,
+                    "total_paid": 29000.0,
+                    "net_balance": 14300.0
+                },
+                {
+                    "member_id": "m2",
+                    "name": "Anik Mukherjee (Beach Resort)",
+                    "role": "MEMBER",
+                    "is_virtual": False,
+                    "total_meal_units": 0,
+                    "meal_cost": 0.0,
+                    "establishment_cost": 0.0,
+                    "guest_cost": 0.0,
+                    "total_due": 14700.0,
+                    "initial_deposit": 5000.0,
+                    "marketing_amount": 18000.0,
+                    "marketing_days": 0,
+                    "total_paid": 23000.0,
+                    "net_balance": 8300.0
+                },
+                {
+                    "member_id": "m3",
+                    "name": "Sayan Banerjee (Scuba & Sports)",
+                    "role": "MEMBER",
+                    "is_virtual": False,
+                    "total_meal_units": 0,
+                    "meal_cost": 0.0,
+                    "establishment_cost": 0.0,
+                    "guest_cost": 0.0,
+                    "total_due": 14700.0,
+                    "initial_deposit": 5000.0,
+                    "marketing_amount": 8800.0,
+                    "marketing_days": 0,
+                    "total_paid": 13800.0,
+                    "net_balance": -900.0
+                },
+                {
+                    "member_id": "m4",
+                    "name": "Pritam Dutta (Dinner & Drinks)",
+                    "role": "MEMBER",
+                    "is_virtual": False,
+                    "total_meal_units": 0,
+                    "meal_cost": 0.0,
+                    "establishment_cost": 0.0,
+                    "guest_cost": 0.0,
+                    "total_due": 14700.0,
+                    "initial_deposit": 5000.0,
+                    "marketing_amount": 8000.0,
+                    "marketing_days": 0,
+                    "total_paid": 13000.0,
+                    "net_balance": -21700.0
+                }
+            ]
+        }
+        settlements = [
+            {"payer_id": "m4", "payer_name": "Pritam Dutta", "payee_id": "m1", "payee_name": "Rohan Sen", "payee_upi_id": "rohan@okhdfcbank", "amount": 14300.0},
+            {"payer_id": "m4", "payer_name": "Pritam Dutta", "payee_id": "m2", "payee_name": "Anik Mukherjee", "payee_upi_id": "anik@icici", "amount": 7400.0},
+            {"payer_id": "m3", "payer_name": "Sayan Banerjee", "payee_id": "m2", "payee_name": "Anik Mukherjee", "payee_upi_id": "anik@icici", "amount": 900.0}
+        ]
+        return data, settlements
+
+    elif dtype == "FLATMATES":
+        data = {
+            "group_id": "demo-flat-102",
+            "group_name": "Palm Meadows 3BHK Flat (Flat 402)",
+            "group_type": "FLATMATES",
+            "currency": "INR",
+            "total_bazar": 0.0,
+            "total_establishment": 0.0,
+            "total_expenses": 36900.0,
+            "total_meals": 0.0,
+            "meal_rate": 0.0,
+            "establishment_per_head": 0.0,
+            "total_collected": 0.0,
+            "total_due": 36900.0,
+            "member_balances": [
+                {
+                    "member_id": "f1",
+                    "name": "Ayan Chatterjee (Flat Rent)",
+                    "role": "ADMIN",
+                    "is_virtual": False,
+                    "total_meal_units": 0,
+                    "meal_cost": 0.0,
+                    "establishment_cost": 0.0,
+                    "guest_cost": 0.0,
+                    "total_due": 12300.0,
+                    "initial_deposit": 0.0,
+                    "marketing_amount": 24000.0,
+                    "marketing_days": 0,
+                    "total_paid": 24000.0,
+                    "net_balance": 11700.0
+                },
+                {
+                    "member_id": "f2",
+                    "name": "Sourav Ganguly (Maid & WiFi)",
+                    "role": "MEMBER",
+                    "is_virtual": False,
+                    "total_meal_units": 0,
+                    "meal_cost": 0.0,
+                    "establishment_cost": 0.0,
+                    "guest_cost": 0.0,
+                    "total_due": 12300.0,
+                    "initial_deposit": 0.0,
+                    "marketing_amount": 6500.0,
+                    "marketing_days": 0,
+                    "total_paid": 6500.0,
+                    "net_balance": -5800.0
+                },
+                {
+                    "member_id": "f3",
+                    "name": "Debjit Paul (Electricity & Groceries)",
+                    "role": "MEMBER",
+                    "is_virtual": False,
+                    "total_meal_units": 0,
+                    "meal_cost": 0.0,
+                    "establishment_cost": 0.0,
+                    "guest_cost": 0.0,
+                    "total_due": 12300.0,
+                    "initial_deposit": 0.0,
+                    "marketing_amount": 6400.0,
+                    "marketing_days": 0,
+                    "total_paid": 6400.0,
+                    "net_balance": -5900.0
+                }
+            ]
+        }
+        settlements = [
+            {"payer_id": "f2", "payer_name": "Sourav Ganguly", "payee_id": "f1", "payee_name": "Ayan Chatterjee", "payee_upi_id": "ayan@paytm", "amount": 5800.0},
+            {"payer_id": "f3", "payer_name": "Debjit Paul", "payee_id": "f1", "payee_name": "Ayan Chatterjee", "payee_upi_id": "ayan@paytm", "amount": 5900.0}
+        ]
+        return data, settlements
+
+    elif dtype == "PERSONAL":
+        data = {
+            "group_id": "demo-personal-103",
+            "group_name": "College Friends Weekend Outing 🎉",
+            "group_type": "PERSONAL",
+            "currency": "INR",
+            "total_bazar": 0.0,
+            "total_establishment": 0.0,
+            "total_expenses": 8400.0,
+            "total_meals": 0.0,
+            "meal_rate": 0.0,
+            "establishment_per_head": 0.0,
+            "total_collected": 0.0,
+            "total_due": 8400.0,
+            "member_balances": [
+                {
+                    "member_id": "p1",
+                    "name": "Arnab Roy (Barbeque Dinner)",
+                    "role": "ADMIN",
+                    "is_virtual": False,
+                    "total_meal_units": 0,
+                    "meal_cost": 0.0,
+                    "establishment_cost": 0.0,
+                    "guest_cost": 0.0,
+                    "total_due": 2100.0,
+                    "initial_deposit": 0.0,
+                    "marketing_amount": 4800.0,
+                    "marketing_days": 0,
+                    "total_paid": 4800.0,
+                    "net_balance": 2700.0
+                },
+                {
+                    "member_id": "p2",
+                    "name": "Nilanjan Mitra (IMAX Tickets)",
+                    "role": "MEMBER",
+                    "is_virtual": False,
+                    "total_meal_units": 0,
+                    "meal_cost": 0.0,
+                    "establishment_cost": 0.0,
+                    "guest_cost": 0.0,
+                    "total_due": 2100.0,
+                    "initial_deposit": 0.0,
+                    "marketing_amount": 2000.0,
+                    "marketing_days": 0,
+                    "total_paid": 2000.0,
+                    "net_balance": -100.0
+                },
+                {
+                    "member_id": "p3",
+                    "name": "Tanmoy Paul (Coffee & Snacks)",
+                    "role": "MEMBER",
+                    "is_virtual": False,
+                    "total_meal_units": 0,
+                    "meal_cost": 0.0,
+                    "establishment_cost": 0.0,
+                    "guest_cost": 0.0,
+                    "total_due": 2100.0,
+                    "initial_deposit": 0.0,
+                    "marketing_amount": 1600.0,
+                    "marketing_days": 0,
+                    "total_paid": 1600.0,
+                    "net_balance": -500.0
+                },
+                {
+                    "member_id": "p4",
+                    "name": "Suman Roy",
+                    "role": "MEMBER",
+                    "is_virtual": False,
+                    "total_meal_units": 0,
+                    "meal_cost": 0.0,
+                    "establishment_cost": 0.0,
+                    "guest_cost": 0.0,
+                    "total_due": 2100.0,
+                    "initial_deposit": 0.0,
+                    "marketing_amount": 0.0,
+                    "marketing_days": 0,
+                    "total_paid": 0.0,
+                    "net_balance": -2100.0
+                }
+            ]
+        }
+        settlements = [
+            {"payer_id": "p4", "payer_name": "Suman Roy", "payee_id": "p1", "payee_name": "Arnab Roy", "payee_upi_id": "arnab@ybl", "amount": 2100.0},
+            {"payer_id": "p3", "payer_name": "Tanmoy Paul", "payee_id": "p1", "payee_name": "Arnab Roy", "payee_upi_id": "arnab@ybl", "amount": 500.0},
+            {"payer_id": "p2", "payer_name": "Nilanjan Mitra", "payee_id": "p1", "payee_name": "Arnab Roy", "payee_upi_id": "arnab@ybl", "amount": 100.0}
+        ]
+        return data, settlements
+
+    # Default: MESS
+    data = {
+        "group_id": "demo-mess-100",
+        "group_name": "Maa Tara Boys Hostel (March 2026)",
+        "group_type": "MESS",
+        "currency": "INR",
+        "total_bazar": 13850.0,
+        "total_establishment": 4200.0,
+        "total_expenses": 18050.0,
+        "total_meals": 210.0,
+        "meal_rate": 65.95,
+        "establishment_per_head": 1050.0,
+        "total_collected": 15500.0,
+        "total_due": 18495.0,
+        "member_balances": [
+            {
+                "member_id": "m1",
+                "name": "Subhadip Roy (Manager)",
+                "role": "MANAGER",
+                "is_virtual": False,
+                "total_meal_units": 56,
+                "meal_cost": 3693.2,
+                "establishment_cost": 1050.0,
+                "guest_cost": 150.0,
+                "total_due": 4893.2,
+                "initial_deposit": 4000.0,
+                "marketing_amount": 4500.0,
+                "marketing_days": 8,
+                "total_paid": 8500.0,
+                "net_balance": 3606.8
+            },
+            {
+                "member_id": "m2",
+                "name": "Rahul Karmakar",
+                "role": "MEMBER",
+                "is_virtual": False,
+                "total_meal_units": 52,
+                "meal_cost": 3429.4,
+                "establishment_cost": 1050.0,
+                "guest_cost": 0.0,
+                "total_due": 4479.4,
+                "initial_deposit": 3500.0,
+                "marketing_amount": 3200.0,
+                "marketing_days": 5,
+                "total_paid": 6700.0,
+                "net_balance": 2220.6
+            },
+            {
+                "member_id": "m3",
+                "name": "Biswajit Das",
+                "role": "MEMBER",
+                "is_virtual": False,
+                "total_meal_units": 58,
+                "meal_cost": 3825.1,
+                "establishment_cost": 1050.0,
+                "guest_cost": 220.0,
+                "total_due": 5095.1,
+                "initial_deposit": 4000.0,
+                "marketing_amount": 6150.0,
+                "marketing_days": 11,
+                "total_paid": 10150.0,
+                "net_balance": 5054.9
+            },
+            {
+                "member_id": "m4",
+                "name": "Joydeb Ghosh",
+                "role": "MEMBER",
+                "is_virtual": False,
+                "total_meal_units": 44,
+                "meal_cost": 2901.8,
+                "establishment_cost": 1050.0,
+                "guest_cost": 75.0,
+                "total_due": 4026.8,
+                "initial_deposit": 3000.0,
+                "marketing_amount": 0.0,
+                "marketing_days": 0,
+                "total_paid": 3000.0,
+                "net_balance": -1026.8
+            }
+        ]
+    }
+    settlements = [
+        {"payer_id": "m4", "payer_name": "Joydeb Ghosh", "payee_id": "m3", "payee_name": "Biswajit Das", "payee_upi_id": "biswajit@ybl", "amount": 1026.8}
+    ]
+    return data, settlements
+
+def generate_demo_pdf(demo_type: str) -> bytes:
+    """Generates an instant binary PDF for any of the 4 demo types."""
+    data, settlements = get_demo_bundle(demo_type)
+    return generate_group_pdf_report(data, settlements)
+

@@ -150,6 +150,18 @@ export const api = {
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
   },
+  downloadDemoPDF: async (demoType) => {
+    const blob = await request(`/reports/demo/${demoType}/pdf`);
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Demo_${demoType.toUpperCase()}_Audit_Statement.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  },
+  getDemoData: (demoType) => request(`/reports/demo/${demoType}/data`),
 
   // Admin
   getAdminStats: () => request('/admin/stats'),
