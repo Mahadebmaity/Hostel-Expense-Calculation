@@ -585,18 +585,27 @@ export default function WorkflowGuide({
         </div>
       </div>
 
-      {/* Expanded Step-by-Step Interactive Workflow */}
-      {isExpanded && (
-        <div style={{ marginTop: '1.15rem' }}>
-          <p style={{ fontSize: '0.78rem', color: '#cbd5e1', marginBottom: '1rem', lineHeight: '1.4' }}>
-            {activeContent.description}
-          </p>
+      {/* Smooth Collapsible Step-by-Step Interactive Workflow */}
+      <div
+        style={{
+          maxHeight: isExpanded ? '1200px' : '0px',
+          opacity: isExpanded ? 1 : 0,
+          transform: isExpanded ? 'translateY(0px)' : 'translateY(-8px)',
+          marginTop: isExpanded ? '1.15rem' : '0px',
+          overflow: 'hidden',
+          pointerEvents: isExpanded ? 'auto' : 'none',
+          transition: 'max-height 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
+        <p style={{ fontSize: '0.78rem', color: '#cbd5e1', marginBottom: '1rem', lineHeight: '1.4' }}>
+          {activeContent.description}
+        </p>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: '0.85rem'
-          }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: '0.85rem'
+        }}>
             {activeContent.steps.map((st) => (
               <div
                 key={st.step}
@@ -685,7 +694,8 @@ export default function WorkflowGuide({
             ))}
           </div>
         </div>
-      )}
-    </div>
+      </div>
   );
 }
+
+
