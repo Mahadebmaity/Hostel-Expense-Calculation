@@ -283,8 +283,8 @@ export default function MessMealTracker({ group, onMealUpdated }) {
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           gap: '0.75rem',
-          background: 'rgba(30, 41, 59, 0.8)',
-          border: '1px solid rgba(59, 130, 246, 0.3)',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-glass)',
           borderRadius: '12px',
           padding: '0.75rem 1rem',
           marginBottom: '1.25rem'

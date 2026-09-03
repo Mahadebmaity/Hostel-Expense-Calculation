@@ -75,7 +75,7 @@ export default function WorkflowGuide({
   const workflows = {
     MESS: {
       color: '#3b82f6',
-      bgGradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(15, 23, 42, 0.75))',
+      bgGradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.12), var(--bg-surface))',
       borderColor: 'rgba(59, 130, 246, 0.35)',
       BN: {
         badge: '🏨 মেস ও হোস্টেল ম্যানেজমেন্ট গাইড',
@@ -257,7 +257,7 @@ export default function WorkflowGuide({
     },
     FLATMATES: {
       color: '#10b981',
-      bgGradient: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.75))',
+      bgGradient: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), var(--bg-surface))',
       borderColor: 'rgba(16, 185, 129, 0.35)',
       BN: {
         badge: '🏠 ফ্ল্যাটমেট ও রুমমেট শেয়ারিং গাইড',
@@ -348,7 +348,7 @@ export default function WorkflowGuide({
     },
     PERSONAL: {
       color: '#a855f7',
-      bgGradient: 'linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(15, 23, 42, 0.75))',
+      bgGradient: 'linear-gradient(135deg, rgba(168, 85, 247, 0.12), var(--bg-surface))',
       borderColor: 'rgba(168, 85, 247, 0.35)',
       BN: {
         badge: '👥 ফ্রেন্ডস ও আউটিং স্প্লিট গাইড',
@@ -469,7 +469,7 @@ export default function WorkflowGuide({
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
                 {activeContent.badge}
               </h3>
               <span style={{ 
@@ -496,20 +496,20 @@ export default function WorkflowGuide({
           {/* Language Switcher Pill (বাংলা / English) */}
           <div style={{ 
             display: 'flex', 
-            background: 'rgba(0, 0, 0, 0.45)', 
+            background: 'var(--bg-secondary)', 
             borderRadius: '8px', 
             padding: '0.2rem', 
-            border: '1px solid rgba(255, 255, 255, 0.12)',
+            border: '1px solid var(--border-glass)',
             alignItems: 'center',
             gap: '0.15rem'
           }}>
-            <Globe size={13} style={{ marginLeft: '0.35rem', marginRight: '0.15rem', color: '#94a3b8' }} />
+            <Globe size={13} style={{ marginLeft: '0.35rem', marginRight: '0.15rem', color: 'var(--text-muted)' }} />
             <button
               type="button"
               onClick={() => handleLanguageChange('BN')}
               style={{
                 background: lang === 'BN' ? 'linear-gradient(135deg, #3b82f6, #2563eb)' : 'transparent',
-                color: lang === 'BN' ? '#ffffff' : '#94a3b8',
+                color: lang === 'BN' ? '#ffffff' : 'var(--text-secondary)',
                 border: 'none',
                 borderRadius: '6px',
                 padding: '0.2rem 0.5rem',
@@ -527,7 +527,7 @@ export default function WorkflowGuide({
               onClick={() => handleLanguageChange('EN')}
               style={{
                 background: lang === 'EN' ? 'linear-gradient(135deg, #3b82f6, #2563eb)' : 'transparent',
-                color: lang === 'EN' ? '#ffffff' : '#94a3b8',
+                color: lang === 'EN' ? '#ffffff' : 'var(--text-secondary)',
                 border: 'none',
                 borderRadius: '6px',
                 padding: '0.2rem 0.5rem',
@@ -543,7 +543,7 @@ export default function WorkflowGuide({
           </div>
 
           {/* Quick Workflow Type Selector */}
-          <div style={{ display: 'flex', background: 'rgba(0, 0, 0, 0.35)', borderRadius: '8px', padding: '0.2rem', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-secondary)', borderRadius: '8px', padding: '0.2rem', border: '1px solid var(--border-glass)' }}>
             {[
               { type: 'MESS', label: lang === 'BN' ? '🏨 মেস' : '🏨 Mess' },
               { type: 'TRIP', label: lang === 'BN' ? '✈️ ট্যুর' : '✈️ Tour' },
@@ -555,7 +555,7 @@ export default function WorkflowGuide({
                 onClick={() => setSelectedWorkflowType(tab.type)}
                 style={{
                   background: selectedWorkflowType === tab.type ? currentWorkflow.color : 'transparent',
-                  color: selectedWorkflowType === tab.type ? '#ffffff' : '#94a3b8',
+                  color: selectedWorkflowType === tab.type ? '#ffffff' : 'var(--text-secondary)',
                   border: 'none',
                   borderRadius: '6px',
                   padding: '0.25rem 0.55rem',
@@ -575,9 +575,9 @@ export default function WorkflowGuide({
             onClick={toggleExpand}
             className="btn"
             style={{
-              background: 'rgba(255, 255, 255, 0.06)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              color: '#cbd5e1',
+              background: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-glass)',
+              color: 'var(--text-primary)',
               padding: '0.35rem 0.65rem',
               borderRadius: '8px',
               fontSize: '0.75rem',
@@ -612,7 +612,7 @@ export default function WorkflowGuide({
           transition: 'max-height 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
-        <p style={{ fontSize: '0.78rem', color: '#cbd5e1', marginBottom: '1rem', lineHeight: '1.4' }}>
+        <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '1rem', lineHeight: '1.4' }}>
           {activeContent.description}
         </p>
 
@@ -625,8 +625,8 @@ export default function WorkflowGuide({
               <div
                 key={st.step}
                 style={{
-                  background: 'rgba(15, 23, 42, 0.65)',
-                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  background: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-glass)',
                   borderRadius: '12px',
                   padding: '1rem',
                   display: 'flex',
@@ -660,14 +660,14 @@ export default function WorkflowGuide({
                     </span>
                   </div>
 
-                  <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.15rem' }}>
+                  <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.15rem' }}>
                     {st.title}
                   </h4>
                   <span style={{ fontSize: '0.7rem', color: currentWorkflow.color, fontWeight: 600, display: 'block', marginBottom: '0.45rem' }}>
                     {st.sub}
                   </span>
 
-                  <p style={{ fontSize: '0.74rem', color: '#94a3b8', lineHeight: '1.35' }}>
+                  <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: '1.35' }}>
                     {st.desc}
                   </p>
                 </div>
@@ -678,9 +678,9 @@ export default function WorkflowGuide({
                     onClick={() => handleStepAction(st.step, st.onClick)}
                     className="btn"
                     style={{
-                      background: 'rgba(255, 255, 255, 0.05)',
+                      background: 'var(--bg-surface)',
                       border: `1px solid ${currentWorkflow.color}50`,
-                      color: '#f8fafc',
+                      color: 'var(--text-primary)',
                       padding: '0.4rem 0.75rem',
                       borderRadius: '8px',
                       fontSize: '0.75rem',

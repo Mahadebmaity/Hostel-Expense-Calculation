@@ -262,28 +262,25 @@ export default function Dashboard() {
             />
 
             {/* Group Banner / Quick Actions Bar */}
-            <div style={{
+            <div className="glass-panel" style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               flexWrap: 'wrap',
               gap: '1rem',
-              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.85))',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '16px',
               padding: '1.1rem 1.4rem',
               marginBottom: '1.5rem'
             }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#f8fafc' }}>
+                  <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                     {selectedGroup.name}
                   </h2>
                   <span className="badge badge-category" style={{ fontSize: '0.72rem' }}>
                     {isMess ? '🏨 College/Hostel Mess' : (isTrip ? '✈️ Tour & Travel Split' : '🏠 Flatmate Living')}
                   </span>
                 </div>
-                <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '0.2rem' }}>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                   {selectedGroup.members?.length || 0} Members • Currency: {selectedGroup.currency || 'INR'}
                 </p>
               </div>

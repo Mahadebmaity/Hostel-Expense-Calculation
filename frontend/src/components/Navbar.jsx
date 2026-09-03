@@ -72,12 +72,13 @@ export default function Navbar({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0.85rem 2rem',
-        background: 'rgba(17, 24, 39, 0.85)',
+        background: 'var(--bg-glass-card)',
         backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        borderBottom: '1px solid var(--border-glass)',
         position: 'sticky',
         top: 0,
-        zIndex: 100
+        zIndex: 100,
+        transition: 'background-color 0.3s ease, border-color 0.3s ease'
       }}>
         {/* Logo & Brand */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -93,10 +94,10 @@ export default function Navbar({
             <Building2 size={22} color="#ffffff" />
           </div>
           <div>
-            <h1 style={{ fontSize: '1.15rem', fontWeight: '800', letterSpacing: '-0.02em', background: 'linear-gradient(90deg, #60a5fa, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <h1 style={{ fontSize: '1.15rem', fontWeight: '800', letterSpacing: '-0.02em', background: 'linear-gradient(90deg, var(--accent-primary), var(--accent-purple))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Mess & Expense Splitter
             </h1>
-            <p style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 500 }}>Hostel • Trips • Flatmates</p>
+            <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>Hostel • Trips • Flatmates</p>
           </div>
         </div>
 
@@ -108,21 +109,21 @@ export default function Navbar({
               display: 'flex', 
               alignItems: 'center', 
               gap: '0.5rem',
-              background: 'rgba(15, 23, 42, 0.9)', 
-              border: '1px solid rgba(255, 255, 255, 0.15)', 
+              background: 'var(--bg-surface)', 
+              border: '1px solid var(--border-glass)', 
               borderRadius: '10px', 
               padding: '0.4rem 0.75rem',
               cursor: 'pointer',
               userSelect: 'none',
-              transition: 'border-color 0.2s'
+              transition: 'all 0.2s'
             }}
           >
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: selectedGroup ? '#f8fafc' : '#94a3b8' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: selectedGroup ? 'var(--text-primary)' : 'var(--text-muted)' }}>
               {selectedGroup 
                 ? `${selectedGroup.group_type === 'MESS' ? '🏨 ' : selectedGroup.group_type === 'TRIP' ? '✈️ ' : '🏠 '} ${selectedGroup.name}`
                 : '🚫 Select Group'}
             </span>
-            <ChevronDown size={14} color="#94a3b8" style={{ transform: showGroupDropdown ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+            <ChevronDown size={14} color="var(--text-secondary)" style={{ transform: showGroupDropdown ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
           </div>
 
           {/* Custom Dropdown Menu with Quick Delete */}
@@ -143,16 +144,16 @@ export default function Navbar({
                   maxWidth: 'calc(100vw - 1.5rem)',
                   maxHeight: '340px',
                   overflowY: 'auto',
-                  background: '#111827',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-glass)',
                   borderRadius: '12px',
-                  boxShadow: '0 12px 30px rgba(0, 0, 0, 0.8)',
+                  boxShadow: 'var(--shadow-subtle)',
                   zIndex: 999,
                   padding: '0.5rem',
                   WebkitOverflowScrolling: 'touch'
                 }}
               >
-                <div style={{ padding: '0.35rem 0.5rem', fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ padding: '0.35rem 0.5rem', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Select or Delete Group
                 </div>
                 {groups && groups.length > 0 ? (
@@ -182,7 +183,7 @@ export default function Navbar({
                         <span style={{ 
                           fontSize: '0.83rem', 
                           fontWeight: isSelected ? 700 : 500, 
-                          color: isSelected ? '#60a5fa' : '#e2e8f0', 
+                          color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)', 
                           overflow: 'hidden', 
                           textOverflow: 'ellipsis', 
                           whiteSpace: 'nowrap', 
