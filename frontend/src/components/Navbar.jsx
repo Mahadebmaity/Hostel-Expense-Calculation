@@ -14,9 +14,13 @@ import {
   ChevronDown,
   Crown,
   Trash2,
-  Sparkles
+  Sparkles,
+  Sun,
+  Moon,
+  Eye
 } from 'lucide-react';
 import DemoCenterModal from './DemoCenterModal';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Navbar({ 
   groups, 
@@ -29,6 +33,7 @@ export default function Navbar({
   onSwitchTab
 }) {
   const { user, logout, updateProfileState } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [showGroupDropdown, setShowGroupDropdown] = useState(false);
@@ -298,8 +303,91 @@ export default function Navbar({
             title="Open 4 Demo Calculations & Sample PDF Generator"
           >
             <Sparkles size={14} color="#fbbf24" />
-            <span>✨ Live Demos & PDF</span>
+            <span>✨ Demos & PDF</span>
           </button>
+
+          {/* 3-Theme Switcher (🌙 Night | ☀️ Light | 🕯️ Comfort) */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            background: 'rgba(0, 0, 0, 0.35)',
+            border: '1px solid var(--border-glass)',
+            borderRadius: '12px',
+            padding: '0.2rem',
+            gap: '0.15rem'
+          }}>
+            <button
+              type="button"
+              onClick={() => setTheme('night')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                background: theme === 'night' ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' : 'transparent',
+                color: theme === 'night' ? '#ffffff' : 'var(--text-secondary)',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '0.3rem 0.5rem',
+                fontSize: '0.72rem',
+                fontWeight: theme === 'night' ? 700 : 500,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: theme === 'night' ? '0 2px 8px rgba(59, 130, 246, 0.4)' : 'none'
+              }}
+              title="Night Mode (Dark - Default)"
+            >
+              <Moon size={13} />
+              <span>Night</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setTheme('light')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                background: theme === 'light' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'transparent',
+                color: theme === 'light' ? '#ffffff' : 'var(--text-secondary)',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '0.3rem 0.5rem',
+                fontSize: '0.72rem',
+                fontWeight: theme === 'light' ? 700 : 500,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: theme === 'light' ? '0 2px 8px rgba(245, 158, 11, 0.4)' : 'none'
+              }}
+              title="Light Mode (Clean Crisp Studio)"
+            >
+              <Sun size={13} />
+              <span>Light</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setTheme('comfort')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                background: theme === 'comfort' ? 'linear-gradient(135deg, #d97706, #92400e)' : 'transparent',
+                color: theme === 'comfort' ? '#fef3c7' : 'var(--text-secondary)',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '0.3rem 0.5rem',
+                fontSize: '0.72rem',
+                fontWeight: theme === 'comfort' ? 700 : 500,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: theme === 'comfort' ? '0 2px 8px rgba(217, 119, 6, 0.4)' : 'none'
+              }}
+              title="Eye Comfort Mode (Warm Amber / Anti-Blue Light)"
+            >
+              <Eye size={13} />
+              <span>Comfort</span>
+            </button>
+          </div>
 
           {/* Admin Badge / Switcher */}
           {user?.is_admin && (

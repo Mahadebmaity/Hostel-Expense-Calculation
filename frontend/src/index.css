@@ -1,8 +1,8 @@
-:root {
+:root, [data-theme="night"] {
   --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Color Palette - Vibrant Indigo & Emerald */
+  /* 🌙 NIGHT MODE (DEFAULT) - Deep Obsidian & Emerald */
   --bg-primary: #0b0f19;
   --bg-secondary: #111827;
   --bg-surface: rgba(17, 24, 39, 0.7);
@@ -33,6 +33,73 @@
 
   --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 0 25px var(--accent-primary-glow);
+  
+  --bg-gradient-1: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%);
+  --bg-gradient-2: radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.10) 0px, transparent 50%);
+}
+
+/* ☀️ LIGHT MODE - Clean Crisp Studio */
+[data-theme="light"] {
+  --bg-primary: #f1f5f9;
+  --bg-secondary: #ffffff;
+  --bg-surface: rgba(255, 255, 255, 0.9);
+  --bg-surface-elevated: #ffffff;
+  --bg-glass-card: rgba(255, 255, 255, 0.88);
+  --border-glass: rgba(0, 0, 0, 0.09);
+  --border-glass-hover: rgba(0, 0, 0, 0.18);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  --accent-primary: #2563eb;
+  --accent-primary-hover: #1d4ed8;
+  --accent-primary-glow: rgba(37, 99, 235, 0.2);
+
+  --accent-success: #059669;
+  --accent-success-glow: rgba(5, 150, 105, 0.18);
+  --accent-danger: #dc2626;
+  --accent-danger-glow: rgba(220, 38, 38, 0.18);
+  --accent-warning: #d97706;
+  --accent-purple: #7c3aed;
+
+  --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 0 25px rgba(37, 99, 235, 0.15);
+
+  --bg-gradient-1: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.08) 0px, transparent 50%);
+  --bg-gradient-2: radial-gradient(at 100% 100%, rgba(124, 58, 237, 0.06) 0px, transparent 50%);
+}
+
+/* 🕯️ EYE COMFORT MODE - Warm Amber / Sepia Filter */
+[data-theme="comfort"] {
+  --bg-primary: #191410;
+  --bg-secondary: #231c17;
+  --bg-surface: rgba(35, 28, 23, 0.85);
+  --bg-surface-elevated: rgba(46, 37, 30, 0.85);
+  --bg-glass-card: rgba(35, 28, 23, 0.8);
+  --border-glass: rgba(245, 158, 11, 0.15);
+  --border-glass-hover: rgba(245, 158, 11, 0.3);
+
+  --text-primary: #fef3c7;
+  --text-secondary: #d97706;
+  --text-muted: #92400e;
+
+  --accent-primary: #f59e0b;
+  --accent-primary-hover: #d97706;
+  --accent-primary-glow: rgba(245, 158, 11, 0.28);
+
+  --accent-success: #10b981;
+  --accent-success-glow: rgba(16, 185, 129, 0.2);
+  --accent-danger: #f87171;
+  --accent-danger-glow: rgba(248, 113, 113, 0.2);
+  --accent-warning: #fbbf24;
+  --accent-purple: #c084fc;
+
+  --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 25px rgba(245, 158, 11, 0.25);
+
+  --bg-gradient-1: radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.12) 0px, transparent 50%);
+  --bg-gradient-2: radial-gradient(at 100% 100%, rgba(217, 119, 6, 0.10) 0px, transparent 50%);
 }
 
 * {
@@ -51,11 +118,10 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.10) 0px, transparent 50%);
+  background-image: var(--bg-gradient-1), var(--bg-gradient-2);
   background-attachment: fixed;
   -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Glassmorphism Classes */
