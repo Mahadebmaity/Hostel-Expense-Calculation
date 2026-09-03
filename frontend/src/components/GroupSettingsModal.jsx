@@ -303,8 +303,13 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: '#fbbf24', fontWeight: 700, fontSize: '0.84rem' }}>
                     <Shield size={16} /> Managing as External Admin (Not in calculation roster)
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: '#cbd5e1', marginTop: '0.2rem', lineHeight: '1.35' }}>
-                    আপনি বর্তমানে মিল/খরচের হিসাবের বাইরে থেকে গ্রুপ পরিচালনা করছেন। প্রয়োজনে নিজেকে হিসাবে যুক্ত করতে পারেন।
+                  <div style={{ fontSize: '0.74rem', color: '#cbd5e1', marginTop: '0.25rem', lineHeight: '1.4' }}>
+                    <div style={{ color: '#e2e8f0' }}>
+                      • English: You are managing this group as an external Admin/Owner without participating in calculations.
+                    </div>
+                    <div style={{ color: '#94a3b8', marginTop: '0.15rem' }}>
+                      • বাংলা: আপনি বর্তমানে মিল/খরচের হিসাবের বাইরে থেকে গ্রুপ পরিচালনা করছেন। প্রয়োজনে নিজেকে হিসাবে যুক্ত করতে পারেন।
+                    </div>
                   </div>
                 </div>
                 <button

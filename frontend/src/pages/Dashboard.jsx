@@ -589,11 +589,26 @@ export default function Dashboard() {
                     <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', display: 'block' }}>
                       Include me ({user?.name || 'Admin'}) in calculation roster
                     </span>
-                    <span style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginTop: '0.2rem', lineHeight: '1.35' }}>
-                      {includeAdminInCalculation 
-                        ? '✓ আপনি এই গ্রুপের মিল/খরচের হিসাবে অংশ নেবেন (বর্ডার/মেম্বার হিসেবে আপনার নিজস্ব মিল ও ব্যালেন্স শিট থাকবে)।' 
-                        : '⚡ আপনি শুধু এক্সটারনাল অ্যাডমিন/ম্যানেজার/মালিক হিসেবে গ্রুপটি পরিচালনা করবেন (মিল বা খরচের হিসাবে আপনার নাম থাকবে না)।'}
-                    </span>
+                    
+                    {includeAdminInCalculation ? (
+                      <div style={{ fontSize: '0.74rem', color: '#cbd5e1', marginTop: '0.25rem', lineHeight: '1.4' }}>
+                        <div style={{ color: '#93c5fd', fontWeight: 600 }}>
+                          ✓ English: You will participate as an active member with your own meal & expense ledger.
+                        </div>
+                        <div style={{ color: '#94a3b8', marginTop: '0.15rem' }}>
+                          ✓ বাংলা: আপনি এই গ্রুপের মিল/খরচের হিসাবে অংশ নেবেন (বর্ডার হিসেবে নিজস্ব ব্যালেন্স শিট থাকবে)।
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '0.74rem', color: '#cbd5e1', marginTop: '0.25rem', lineHeight: '1.4' }}>
+                        <div style={{ color: '#fcd34d', fontWeight: 600 }}>
+                          ⚡ English: Manage as an External Admin / Warden / Owner without participating in meals or expenses.
+                        </div>
+                        <div style={{ color: '#94a3b8', marginTop: '0.15rem' }}>
+                          ⚡ বাংলা: আপনি শুধু এক্সটারনাল অ্যাডমিন/মালিক হিসেবে গ্রুপ পরিচালনা করবেন (হিসাবে আপনার নাম থাকবে না)।
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </label>
               </div>
