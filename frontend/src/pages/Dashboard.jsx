@@ -11,6 +11,7 @@ import AddExpenseModal from '../components/AddExpenseModal';
 import GroupSettingsModal from '../components/GroupSettingsModal';
 import AdminPanel from '../components/AdminPanel';
 import WorkflowGuide from '../components/WorkflowGuide';
+import Footer from '../components/Footer';
 import { 
   Building2, 
   PlusCircle, 
@@ -649,6 +650,9 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Developer & System Footer */}
+      <Footer />
     </div>
   );
 }

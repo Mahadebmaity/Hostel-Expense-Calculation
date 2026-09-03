@@ -108,3 +108,57 @@ def toggle_user_admin(
     db.commit()
     db.refresh(target)
     return {"message": f"User {target.email} is_admin set to {target.is_admin}", "is_admin": target.is_admin}
+
+import json
+import os
+
+FOOTER_CONFIG_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "footer_config.json")
+
+DEFAULT_FOOTER_CONFIG = {
+    "developer_name": "Mahadeb Maity",
+    "developer_title": "Full Stack Developer & Software Engineer",
+    "portfolio_url": "https://github.com/Mahadebmaity",
+    "github_url": "https://github.com/Mahadebmaity",
+    "linkedin_url": "https://linkedin.com/in/mahadebmaity",
+    "email": "mahadebmaity.dev@gmail.com",
+    "phone": "+91 9876543210",
+    "custom_tagline": "Crafted with passion for college students, mess managers, and roommates.",
+    "project_name": "Hostel & Group Expense Manager",
+    "copyright_year": "2026"
+}
+
+def load_footer_config() -> dict:
+    if os.path.exists(FOOTER_CONFIG_FILE):
+        try:
+            with open(FOOTER_CONFIG_FILE, "r", encoding="utf-8") as f:
+                return {**DEFAULT_FOOTER_CONFIG, **json.load(f)}
+        except Exception:
+            return DEFAULT_FOOTER_CONFIG
+    return DEFAULT_FOOTER_CONFIG
+
+def save_footer_config(data: dict):
+    try:
+        with open(FOOTER_CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error saving footer config: {e}")
+
+@router.get("/footer-config")
+def get_footer_config():
+    """Returns current developer & footer branding configuration."""
+    return load_footer_config()
+
+@router.put("/footer-config")
+def update_footer_config(
+    config_in: dict,
+    admin_user: User = Depends(require_admin)
+):
+    """Allows Admin/Developer to live customize developer branding, portfolio & contact info."""
+    current = load_footer_config()
+    updated = {**current, **config_in}
+    save_footer_config(updated)
+    return {
+        "message": "Footer and developer profile updated successfully",
+        "config": updated
+    }
+

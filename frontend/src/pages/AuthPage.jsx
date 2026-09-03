@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { Building2, ShieldCheck, Zap, Sparkles, ArrowRight } from 'lucide-react';
+import Footer from '../components/Footer';
 
 export default function AuthPage() {
   const { login } = useAuth();
@@ -56,19 +57,25 @@ export default function AuthPage() {
     <div style={{
       minHeight: '100vh',
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1.5rem',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
       background: 'radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%)'
     }}>
       <div style={{
-        maxWidth: '900px',
-        width: '100%',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '2rem',
-        alignItems: 'center'
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2.5rem 1.5rem'
       }}>
+        <div style={{
+          maxWidth: '900px',
+          width: '100%',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '2rem',
+          alignItems: 'center'
+        }}>
         {/* Left Side: Brand & Value Pitch */}
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.65rem', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '0.4rem 0.85rem', borderRadius: '20px', marginBottom: '1.25rem' }}>
@@ -204,10 +211,11 @@ export default function AuthPage() {
             >
               {loading ? 'Please wait...' : (isLogin ? 'Sign In to Dashboard' : 'Register Account')}
             </button>
-          </form>
-
+            </form>
+          </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

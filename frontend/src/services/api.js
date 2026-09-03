@@ -167,6 +167,8 @@ export const api = {
   getAdminStats: () => request('/admin/stats'),
   getAdminUsers: () => request('/admin/users'),
   toggleAdminRole: (userId) => request(`/admin/users/${userId}/toggle-admin`, { method: 'POST' }),
+  getFooterConfig: () => request('/admin/footer-config'),
+  updateFooterConfig: (data) => request('/admin/footer-config', { method: 'PUT', body: JSON.stringify(data) }),
 
   // Health / Warmup
   warmup: () => fetch(`${API_BASE_URL}/health`).catch(() => {})
