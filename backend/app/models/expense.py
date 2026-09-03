@@ -37,6 +37,20 @@ class Expense(Base):
     payer_member = relationship("GroupMember", foreign_keys=[paid_by_member_id])
     splits = relationship("ExpenseSplit", back_populates="expense", cascade="all, delete-orphan")
 
+    @property
+    def payer_name(self) -> str:
+        if getattr(self, '_payer_name', None):
+            return self._payer_name
+        if self.payer_member and self.payer_member.member_name:
+            return self.payer_member.member_name
+        if self.payer and self.payer.name:
+            return self.payer.name
+        return "Member"
+
+    @payer_name.setter
+    def payer_name(self, val: str):
+        self._payer_name = val
+
 class ExpenseSplit(Base):
     __tablename__ = "expense_splits"
 
@@ -53,3 +67,18 @@ class ExpenseSplit(Base):
     expense = relationship("Expense", back_populates="splits")
     user = relationship("User", back_populates="expense_splits", foreign_keys=[user_id])
     member = relationship("GroupMember", foreign_keys=[member_id])
+
+    @property
+    def member_name(self) -> str:
+        if getattr(self, '_member_name', None):
+            return self._member_name
+        if self.member and self.member.member_name:
+            return self.member.member_name
+        if self.user and self.user.name:
+            return self.user.name
+        return "Member"
+
+    @member_name.setter
+    def member_name(self, val: str):
+        self._member_name = val
+

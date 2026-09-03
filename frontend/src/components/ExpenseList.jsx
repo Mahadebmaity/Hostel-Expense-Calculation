@@ -115,9 +115,48 @@ export default function ExpenseList({
 
   const curr = group?.currency === 'INR' ? '₹' : (group?.currency || '₹');
 
+  const getMemberDisplayName = (spOrMid, defaultName = 'Member') => {
+    if (!spOrMid) return defaultName;
+    
+    // If passed a split object
+    if (typeof spOrMid === 'object') {
+      if (spOrMid.member_name && spOrMid.member_name !== 'Member') return spOrMid.member_name;
+      if (spOrMid.user?.name) return spOrMid.user.name;
+      if (spOrMid.name) return spOrMid.name;
+      
+      const targetMid = spOrMid.member_id || spOrMid.user_id || spOrMid.id;
+      if (group?.members && targetMid) {
+        const found = group.members.find(m => 
+          (spOrMid.member_id && m.id === spOrMid.member_id) ||
+          (spOrMid.user_id && (m.user_id === spOrMid.user_id || m.id === spOrMid.user_id)) ||
+          m.id === targetMid
+        );
+        if (found) return found.name || found.user?.name || found.email || defaultName;
+      }
+      return spOrMid.member_name || defaultName;
+    }
+
+    // If passed an ID string
+    if (group?.members) {
+      const found = group.members.find(m => m.id === spOrMid || m.user_id === spOrMid);
+      if (found) return found.name || found.user?.name || found.email || defaultName;
+    }
+
+    return defaultName;
+  };
+
+  const getPayerName = (exp) => {
+    if (exp.payer_name && exp.payer_name !== 'Member') return exp.payer_name;
+    if (exp.payer?.name) return exp.payer.name;
+    if (exp.paid_by_member_id || exp.paid_by) {
+      return getMemberDisplayName(exp.paid_by_member_id || exp.paid_by, 'Member');
+    }
+    return 'Member';
+  };
+
   const filteredExpenses = expenses.filter(exp => {
     const matchesCat = selectedCategory === 'ALL' || exp.category === selectedCategory;
-    const payerDisplayName = exp.payer_name || exp.payer?.name || '';
+    const payerDisplayName = getPayerName(exp);
     const matchesSearch = exp.title.toLowerCase().includes(search.toLowerCase()) || 
                           payerDisplayName.toLowerCase().includes(search.toLowerCase());
     return matchesCat && matchesSearch;
@@ -271,7 +310,7 @@ export default function ExpenseList({
                         </span>
                       </div>
                       <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.15rem' }}>
-                        Paid by <strong style={{ color: isPayer ? '#60a5fa' : '#cbd5e1' }}>{isPayer ? 'You' : (exp.payer_name || exp.payer?.name || 'Member')}</strong> • {exp.expense_date} • <span style={{ textTransform: 'capitalize' }}>{exp.category.toLowerCase().replace('_', ' ')}</span>
+                        Paid by <strong style={{ color: isPayer ? '#60a5fa' : '#cbd5e1' }}>{isPayer ? 'You' : getPayerName(exp)}</strong> • {exp.expense_date} • <span style={{ textTransform: 'capitalize' }}>{exp.category.toLowerCase().replace('_', ' ')}</span>
                       </p>
                     </div>
                   </div>
@@ -331,7 +370,7 @@ export default function ExpenseList({
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                       {exp.splits.map(sp => (
                         <div
-                          key={sp.id || sp.user_id}
+                          key={sp.id || sp.user_id || sp.member_id}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -343,7 +382,7 @@ export default function ExpenseList({
                             fontSize: '0.76rem'
                           }}
                         >
-                          <span style={{ color: '#cbd5e1' }}>{sp.user?.name || 'Member'}:</span>
+                          <span style={{ color: '#cbd5e1' }}>{getMemberDisplayName(sp)}:</span>
                           <strong style={{ color: '#60a5fa' }}>{curr}{sp.share_amount?.toFixed(2)}</strong>
                           {sp.percentage > 0 && (
                             <span style={{ color: '#94a3b8', fontSize: '0.68rem' }}>({sp.percentage}%)</span>
