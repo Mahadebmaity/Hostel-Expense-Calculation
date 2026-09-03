@@ -116,6 +116,7 @@ export default function ExpenseList({
   const curr = group?.currency === 'INR' ? '₹' : (group?.currency || '₹');
 
   const filteredExpenses = expenses.filter(exp => {
+    const matchesCat = selectedCategory === 'ALL' || exp.category === selectedCategory;
     const payerDisplayName = exp.payer_name || exp.payer?.name || '';
     const matchesSearch = exp.title.toLowerCase().includes(search.toLowerCase()) || 
                           payerDisplayName.toLowerCase().includes(search.toLowerCase());
