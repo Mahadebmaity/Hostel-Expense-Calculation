@@ -637,22 +637,10 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
               Define meal weights for candidates and standard guest meal prices (Veg, Fish, Meat, Egg).
             </p>
 
-            <h5 style={{ fontSize: '0.8rem', color: '#60a5fa', marginBottom: '0.5rem' }}>Meal Attendance Multipliers</h5>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '0.65rem', marginBottom: '1.25rem' }}>
+            <h5 style={{ fontSize: '0.8rem', color: '#60a5fa', marginBottom: '0.5rem' }}>Meal Attendance Multipliers (Main Shifts)</h5>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
               <div className="form-group">
-                <label className="form-label">Breakfast Unit</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  className="form-input"
-                  value={bWeight}
-                  onChange={(e) => setBWeight(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Lunch Unit</label>
+                <label className="form-label">Lunch Unit (দুপুরের মিল)</label>
                 <input
                   type="number"
                   step="0.1"
@@ -664,7 +652,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Dinner Unit</label>
+                <label className="form-label">Dinner Unit (রাতের মিল)</label>
                 <input
                   type="number"
                   step="0.1"
