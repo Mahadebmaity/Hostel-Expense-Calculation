@@ -493,13 +493,17 @@ body {
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 380px) {
   body {
     font-size: 13px;
   }
 
+  nav {
+    padding: 0.5rem 0.65rem !important;
+  }
+
   .btn {
-    padding: 0.35rem 0.6rem !important;
+    padding: 0.35rem 0.55rem !important;
     font-size: 0.72rem !important;
   }
 
@@ -507,3 +511,4 @@ body {
     padding: 0.85rem !important;
   }
 }
+
