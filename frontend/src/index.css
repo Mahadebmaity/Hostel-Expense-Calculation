@@ -277,7 +277,14 @@ body {
   background: rgba(255, 255, 255, 0.25);
 }
 
-/* 📱 MOBILE RESPONSIVE MEDIA QUERIES */
+/* 📱 COMPREHENSIVE MOBILE & DEVICE RESPONSIVE STYLES */
+
+@media (max-width: 992px) {
+  .metric-cards-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.85rem !important;
+  }
+}
 
 @media (max-width: 840px) {
   nav {
@@ -293,6 +300,10 @@ body {
 }
 
 @media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
   nav {
     padding: 0.75rem 0.85rem !important;
     flex-direction: column !important;
@@ -306,11 +317,11 @@ body {
     align-items: center !important;
     width: 100% !important;
     flex-wrap: wrap !important;
-    gap: 0.4rem !important;
+    gap: 0.5rem !important;
   }
 
   nav select {
-    max-width: 160px !important;
+    max-width: 150px !important;
   }
 
   .glass-panel {
@@ -321,15 +332,16 @@ body {
 
   .modal-backdrop {
     padding: 0.5rem !important;
-    align-items: flex-end !important;
+    align-items: center !important;
   }
 
   .modal-content {
     padding: 1.15rem !important;
+    max-width: 100% !important;
     width: 100% !important;
-    max-height: 85vh !important;
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
+    max-height: 90vh !important;
+    border-radius: 16px !important;
+    box-sizing: border-box !important;
   }
 
   /* Prevent auto-zoom on iOS inputs */
@@ -344,15 +356,16 @@ body {
   }
 
   .metric-cards-grid .glass-panel {
-    padding: 0.85rem !important;
+    padding: 0.85rem 0.75rem !important;
   }
 
   .metric-cards-grid h2 {
-    font-size: 1.25rem !important;
+    font-size: 1.2rem !important;
   }
 
-  /* Multi-column form layouts adapt to 1 column */
-  form div[style*="grid-template-columns"] {
+  /* Form grids adapt smoothly */
+  form div[style*="grid-template-columns"],
+  div[style*="gridTemplateColumns"] {
     grid-template-columns: 1fr !important;
     gap: 0.65rem !important;
   }
@@ -371,29 +384,32 @@ body {
   }
 
   .tabs-nav-bar .btn {
-    padding: 0.4rem 0.75rem !important;
+    padding: 0.45rem 0.75rem !important;
     font-size: 0.76rem !important;
+    flex-shrink: 0;
   }
 
   /* Table touch responsiveness */
   table {
     font-size: 0.75rem !important;
-    min-width: 540px !important;
+    min-width: 520px !important;
   }
 
   th, td {
-    padding: 0.5rem 0.55rem !important;
+    padding: 0.5rem 0.45rem !important;
   }
 
-  /* Touch counters styling */
+  /* Touch counters & buttons styling */
   button {
     touch-action: manipulation;
+    min-height: 34px;
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .metric-cards-grid {
     grid-template-columns: 1fr !important;
+    gap: 0.65rem !important;
   }
 
   nav h1 {
@@ -403,5 +419,25 @@ body {
   .btn {
     padding: 0.45rem 0.75rem !important;
     font-size: 0.78rem !important;
+  }
+
+  .modal-content {
+    padding: 1rem !important;
+    max-height: 92vh !important;
+  }
+}
+
+@media (max-width: 360px) {
+  body {
+    font-size: 13px;
+  }
+
+  .btn {
+    padding: 0.35rem 0.6rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  .modal-content {
+    padding: 0.85rem !important;
   }
 }
