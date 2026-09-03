@@ -252,6 +252,16 @@ def add_group_member(
         elif not (member_in.name or "").strip() and current_user:
             target_user = current_user
 
+        # Enforce strictly 1 single MANAGER in the group
+        target_role = (member_in.role or "MEMBER").upper()
+        if target_role == "MANAGER":
+            existing_managers = db.query(GroupMember).filter(
+                GroupMember.group_id == group_id,
+                GroupMember.role == "MANAGER"
+            ).all()
+            for em in existing_managers:
+                em.role = "MEMBER"
+
         # Check for duplicate member
         if target_user:
             existing = db.query(GroupMember).filter(
@@ -269,7 +279,7 @@ def add_group_member(
                 phone=target_user.phone or member_in.phone,
                 upi_id=target_user.upi_id or member_in.upi_id,
                 is_virtual="false",
-                role=member_in.role or "MEMBER",
+                role=target_role,
                 initial_deposit=float(member_in.initial_deposit or 0.0),
                 marketing_amount=float(member_in.marketing_amount or 0.0),
                 marketing_days=float(member_in.marketing_days or 0.0)
@@ -285,7 +295,7 @@ def add_group_member(
                 phone=member_in.phone.strip() if member_in.phone else None,
                 upi_id=member_in.upi_id.strip() if member_in.upi_id else None,
                 is_virtual="true",
-                role=member_in.role or "MEMBER",
+                role=target_role,
                 initial_deposit=float(member_in.initial_deposit or 0.0),
                 marketing_amount=float(member_in.marketing_amount or 0.0),
                 marketing_days=float(member_in.marketing_days or 0.0)
@@ -373,7 +383,17 @@ def update_group_member(
         if target_membership.user and not target_membership.user.upi_id:
             target_membership.user.upi_id = clean_upi
     if member_in.role is not None:
-        target_membership.role = member_in.role
+        new_role = member_in.role.upper()
+        if new_role == "MANAGER":
+            # Demote any other existing MANAGER in this group to MEMBER
+            other_managers = db.query(GroupMember).filter(
+                GroupMember.group_id == group_id,
+                GroupMember.id != target_membership.id,
+                GroupMember.role == "MANAGER"
+            ).all()
+            for om in other_managers:
+                om.role = "MEMBER"
+        target_membership.role = new_role
     if member_in.initial_deposit is not None:
         target_membership.initial_deposit = float(member_in.initial_deposit)
     if member_in.marketing_amount is not None:

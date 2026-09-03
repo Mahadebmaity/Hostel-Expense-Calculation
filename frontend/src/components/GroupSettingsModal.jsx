@@ -347,7 +347,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                     onChange={(e) => setInviteRole(e.target.value)}
                   >
                     <option value="MEMBER">Member</option>
-                    <option value="MANAGER">Manager</option>
+                    <option value="MANAGER">⭐ Manager (Single Active)</option>
                     <option value="ADMIN">Admin</option>
                   </select>
                 </div>
@@ -513,7 +513,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                             style={{ fontSize: '0.75rem', padding: '0.3rem 0.5rem', width: '100%' }}
                           />
                         </div>
-                        <div style={{ width: '100px' }}>
+                        <div style={{ width: '130px' }}>
                           <select
                             value={editingRoleValue}
                             onChange={(e) => setEditingRoleValue(e.target.value)}
@@ -521,7 +521,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                             style={{ fontSize: '0.75rem', padding: '0.3rem 0.4rem', width: '100%' }}
                           >
                             <option value="MEMBER">Member</option>
-                            <option value="MANAGER">Manager</option>
+                            <option value="MANAGER">⭐ Manager (Single Active)</option>
                             <option value="ADMIN">Admin</option>
                           </select>
                         </div>

@@ -472,7 +472,7 @@ export default function Dashboard() {
                     onChange={(e) => setQuickMemberRole(e.target.value)}
                   >
                     <option value="MEMBER">Member</option>
-                    <option value="MANAGER">Manager</option>
+                    <option value="MANAGER">⭐ Manager (Single Active)</option>
                     <option value="ADMIN">Admin</option>
                   </select>
                 </div>
