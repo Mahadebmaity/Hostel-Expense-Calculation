@@ -56,6 +56,7 @@ export default function Dashboard() {
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupType, setNewGroupType] = useState('MESS');
   const [newGroupDeposit, setNewGroupDeposit] = useState('');
+  const [includeAdminInCalculation, setIncludeAdminInCalculation] = useState(true);
   const [creatingGroup, setCreatingGroup] = useState(false);
 
   // 1. Fetch user groups & restore last active group per user account
@@ -127,10 +128,12 @@ export default function Dashboard() {
       const created = await api.createGroup({
         name: cleanName,
         group_type: newGroupType,
-        initial_deposit: parseFloat(newGroupDeposit) || 0.0
+        initial_deposit: includeAdminInCalculation ? (parseFloat(newGroupDeposit) || 0.0) : 0.0,
+        include_creator_as_member: includeAdminInCalculation
       });
       setNewGroupName('');
       setNewGroupDeposit('');
+      setIncludeAdminInCalculation(true);
       setShowNewGroupModal(false);
       await loadGroups(created.id);
     } catch (err) {
@@ -566,18 +569,49 @@ export default function Dashboard() {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Your Initial Advance Deposit (Optional)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  placeholder="e.g. 1000"
-                  className="form-input"
-                  value={newGroupDeposit}
-                  onChange={(e) => setNewGroupDeposit(e.target.value)}
-                />
+              {/* Creator Calculation Participation Toggle */}
+              <div style={{
+                background: includeAdminInCalculation ? 'rgba(59, 130, 246, 0.08)' : 'rgba(245, 158, 11, 0.08)',
+                border: `1px solid ${includeAdminInCalculation ? 'rgba(59, 130, 246, 0.25)' : 'rgba(245, 158, 11, 0.3)'}`,
+                borderRadius: '10px',
+                padding: '0.85rem',
+                marginBottom: '1rem',
+                transition: 'all 0.2s ease'
+              }}>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={includeAdminInCalculation}
+                    onChange={(e) => setIncludeAdminInCalculation(e.target.checked)}
+                    style={{ marginTop: '0.2rem', width: '16px', height: '16px', accentColor: '#3b82f6', cursor: 'pointer' }}
+                  />
+                  <div>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', display: 'block' }}>
+                      Include me ({user?.name || 'Admin'}) in calculation roster
+                    </span>
+                    <span style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginTop: '0.2rem', lineHeight: '1.35' }}>
+                      {includeAdminInCalculation 
+                        ? '✓ আপনি এই গ্রুপের মিল/খরচের হিসাবে অংশ নেবেন (বর্ডার/মেম্বার হিসেবে আপনার নিজস্ব মিল ও ব্যালেন্স শিট থাকবে)।' 
+                        : '⚡ আপনি শুধু এক্সটারনাল অ্যাডমিন/ম্যানেজার/মালিক হিসেবে গ্রুপটি পরিচালনা করবেন (মিল বা খরচের হিসাবে আপনার নাম থাকবে না)।'}
+                    </span>
+                  </div>
+                </label>
               </div>
+
+              {includeAdminInCalculation && (
+                <div className="form-group">
+                  <label className="form-label">Your Initial Advance Deposit (Optional)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    placeholder="e.g. 1000"
+                    className="form-input"
+                    value={newGroupDeposit}
+                    onChange={(e) => setNewGroupDeposit(e.target.value)}
+                  />
+                </div>
+              )}
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
                 <button type="button" onClick={() => setShowNewGroupModal(false)} className="btn btn-secondary">

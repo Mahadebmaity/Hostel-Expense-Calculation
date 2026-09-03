@@ -68,6 +68,7 @@ class GroupBase(BaseModel):
 
 class GroupCreate(GroupBase):
     initial_deposit: float = 0.0
+    include_creator_as_member: bool = True
 
 class GroupUpdate(BaseModel):
     name: Optional[str] = None

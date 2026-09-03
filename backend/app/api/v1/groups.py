@@ -57,21 +57,22 @@ def create_group(
     db.commit()
     db.refresh(new_group)
 
-    # Add creator as ADMIN member
-    creator_member = GroupMember(
-        group_id=new_group.id,
-        user_id=current_user.id,
-        name=current_user.name,
-        email=current_user.email,
-        phone=current_user.phone,
-        upi_id=current_user.upi_id,
-        is_virtual="false",
-        role="ADMIN",
-        initial_deposit=group_in.initial_deposit
-    )
-    db.add(creator_member)
-    db.commit()
-    db.refresh(new_group)
+    # Add creator as ADMIN member if requested
+    if getattr(group_in, 'include_creator_as_member', True):
+        creator_member = GroupMember(
+            group_id=new_group.id,
+            user_id=current_user.id,
+            name=current_user.name,
+            email=current_user.email,
+            phone=current_user.phone,
+            upi_id=current_user.upi_id,
+            is_virtual="false",
+            role="ADMIN",
+            initial_deposit=group_in.initial_deposit
+        )
+        db.add(creator_member)
+        db.commit()
+        db.refresh(new_group)
 
     return new_group
 
@@ -248,6 +249,8 @@ def add_group_member(
         target_user = None
         if member_in.email:
             target_user = db.query(User).filter(User.email == member_in.email.strip().lower()).first()
+        elif not (member_in.name or "").strip() and current_user:
+            target_user = current_user
 
         # Check for duplicate member
         if target_user:
