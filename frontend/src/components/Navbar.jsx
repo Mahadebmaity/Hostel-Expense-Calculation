@@ -286,7 +286,7 @@ export default function Navbar({
               border: '1px solid rgba(245, 158, 11, 0.5)',
               borderRadius: '10px',
               padding: '0.35rem 0.65rem',
-              color: '#fef3c7',
+              color: 'var(--text-primary)',
               cursor: 'pointer',
               fontSize: '0.76rem',
               fontWeight: 700,

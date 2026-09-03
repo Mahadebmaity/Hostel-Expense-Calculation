@@ -210,15 +210,15 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
       >
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc', margin: 0, wordBreak: 'break-word' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, wordBreak: 'break-word' }}>
             ⚙️ {group.name} Settings
           </h3>
           <button 
             onClick={onClose} 
             style={{ 
-              background: 'rgba(255, 255, 255, 0.06)', 
-              border: '1px solid rgba(255, 255, 255, 0.1)', 
-              color: '#94a3b8', 
+              background: 'var(--bg-surface)', 
+              border: '1px solid var(--border-glass)', 
+              color: 'var(--text-muted)', 
               cursor: 'pointer', 
               fontSize: '1.1rem', 
               width: '36px',
@@ -239,7 +239,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
           display: 'flex', 
           gap: '0.5rem', 
           marginBottom: '1.25rem', 
-          borderBottom: '1px solid rgba(255,255,255,0.08)', 
+          borderBottom: '1px solid var(--border-glass)', 
           paddingBottom: '0.6rem',
           flexWrap: 'wrap'
         }}>
@@ -288,7 +288,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
             {/* External Admin Alert Banner if creator is not in calculation */}
             {isCreator && !isCurrentUserMember && (
               <div style={{
-                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(15, 23, 42, 0.7))',
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), var(--bg-surface))',
                 border: '1px solid rgba(245, 158, 11, 0.35)',
                 borderRadius: '12px',
                 padding: '0.85rem 1rem',
@@ -303,11 +303,11 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: '#fbbf24', fontWeight: 700, fontSize: '0.84rem' }}>
                     <Shield size={16} /> Managing as External Admin (Not in calculation roster)
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: '#cbd5e1', marginTop: '0.25rem', lineHeight: '1.4' }}>
-                    <div style={{ color: '#e2e8f0' }}>
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '0.25rem', lineHeight: '1.4' }}>
+                    <div style={{ color: 'var(--text-primary)' }}>
                       • English: You are managing this group as an external Admin/Owner without participating in calculations.
                     </div>
-                    <div style={{ color: '#94a3b8', marginTop: '0.15rem' }}>
+                    <div style={{ color: 'var(--text-muted)', marginTop: '0.15rem' }}>
                       • বাংলা: আপনি বর্তমানে মিল/খরচের হিসাবের বাইরে থেকে গ্রুপ পরিচালনা করছেন। প্রয়োজনে নিজেকে হিসাবে যুক্ত করতে পারেন।
                     </div>
                   </div>
@@ -324,9 +324,9 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
             )}
 
             {/* Quick Add Member Form */}
-            <form onSubmit={handleAddMember} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1rem', borderRadius: '12px', marginBottom: '1.25rem', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <form onSubmit={handleAddMember} style={{ background: 'var(--bg-surface)', padding: '1rem', borderRadius: '12px', marginBottom: '1.25rem', border: '1px solid var(--border-glass)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.4rem' }}>
-                <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.4rem', margin: 0 }}>
+                <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem', margin: 0 }}>
                   <UserPlus size={16} color="#3b82f6" /> Quick Add Member (No account required)
                 </h4>
                 <span className="badge badge-settled" style={{ fontSize: '0.65rem' }}>Instant Calculation</span>
@@ -434,13 +434,13 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                 const hasUpi = !!(m.upi_id || m.user?.upi_id);
 
                 return (
-                  <div key={m.id || m.user_id} style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  <div key={m.id || m.user_id} style={{ background: 'var(--bg-surface)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
-                          <strong style={{ fontSize: '0.88rem', color: '#f8fafc' }}>{displayName}</strong>
+                          <strong style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{displayName}</strong>
                           {isVirtual ? (
-                            <span style={{ fontSize: '0.65rem', background: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                            <span style={{ fontSize: '0.65rem', background: 'rgba(148, 163, 184, 0.15)', color: 'var(--text-muted)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
                               Virtual
                             </span>
                           ) : (
@@ -550,11 +550,11 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
 
         {/* 2. DEPOSITS & MARKETING TAB */}
         {activeTab === 'deposits' && (
-          <form onSubmit={handleUpdateDeposit} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1.1rem', borderRadius: '12px' }}>
-            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.4rem' }}>
+          <form onSubmit={handleUpdateDeposit} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-glass)', padding: '1.1rem', borderRadius: '12px' }}>
+            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>
               💰 Manage Candidate Deposit & Marketing (Sabji / Fish)
             </h4>
-            <p style={{ fontSize: '0.73rem', color: '#94a3b8', marginBottom: '1rem', lineHeight: '1.3' }}>
+            <p style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: '1.3' }}>
               • <strong>Advance Deposit</strong>: Advance money given to Manager.<br/>
               • <strong>Bazar Marketing</strong>: Money spent on Bazar by candidate (added directly to Meal Charge calculation).
             </p>
@@ -573,7 +573,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                 ))}
               </select>
             </div>
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.65rem', marginBottom: '1rem' }}>
               <div className="form-group">
                 <label className="form-label">Action</label>
@@ -629,11 +629,11 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
 
         {/* 3. RULES & WEIGHTS TAB */}
         {activeTab === 'rules' && (
-          <form onSubmit={handleSaveSettings} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1.1rem', borderRadius: '12px' }}>
-            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.4rem' }}>
+          <form onSubmit={handleSaveSettings} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-glass)', padding: '1.1rem', borderRadius: '12px' }}>
+            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>
               ⚖️ Mess Meal Rules & Guest Meal Rates
             </h4>
-            <p style={{ fontSize: '0.73rem', color: '#94a3b8', marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
               Define meal weights for candidates and standard guest meal prices (Veg, Fish, Meat, Egg).
             </p>
 
@@ -730,7 +730,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
               <AlertTriangle size={20} />
               <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>Delete Group & Clean All Records</h4>
             </div>
-            <p style={{ fontSize: '0.78rem', color: '#cbd5e1', marginBottom: '1rem', lineHeight: '1.4' }}>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '1rem', lineHeight: '1.4' }}>
               Deleting <strong>{group.name}</strong> will permanently erase all candidate deposits, meal attendance sheets, expenses, settlement calculations, and monthly scoreboards linked to this group.
             </p>
 

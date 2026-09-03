@@ -167,7 +167,7 @@ export default function SettlementEngine({
               <strong style={{ color: '#fbbf24', fontSize: '0.9rem' }}>
                 Viewing Archived Score Board: {selectedArchive.title}
               </strong>
-              <span style={{ fontSize: '0.75rem', color: '#cbd5e1', marginLeft: '0.5rem' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginLeft: '0.5rem' }}>
                 (Saved on {new Date(selectedArchive.created_at).toLocaleDateString()})
               </span>
             </div>
@@ -252,10 +252,10 @@ export default function SettlementEngine({
             marginBottom: '1.5rem'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase' }}>
                 📁 Saved Monthly Score Boards (Khatabook History)
               </span>
-              <button onClick={() => setShowArchiveDrawer(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '0.8rem', cursor: 'pointer' }}>
+              <button onClick={() => setShowArchiveDrawer(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '0.8rem', cursor: 'pointer' }}>
                 Close ✕
               </button>
             </div>
@@ -268,8 +268,8 @@ export default function SettlementEngine({
                     key={sb.id}
                     onClick={() => setSelectedArchive(sb)}
                     style={{
-                      background: isSelected ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.04)',
-                      border: `1px solid ${isSelected ? 'rgba(59, 130, 246, 0.5)' : 'rgba(255, 255, 255, 0.08)'}`,
+                      background: isSelected ? 'rgba(59, 130, 246, 0.2)' : 'var(--bg-surface)',
+                      border: `1px solid ${isSelected ? 'rgba(59, 130, 246, 0.5)' : 'var(--border-glass)'}`,
                       borderRadius: '10px',
                       padding: '0.75rem',
                       cursor: 'pointer',
@@ -279,7 +279,7 @@ export default function SettlementEngine({
                     }}
                   >
                     <div>
-                      <strong style={{ fontSize: '0.88rem', color: isSelected ? '#93c5fd' : '#f8fafc' }}>
+                      <strong style={{ fontSize: '0.88rem', color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)' }}>
                         {sb.title}
                       </strong>
                       <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '0.15rem' }}>
@@ -339,7 +339,7 @@ export default function SettlementEngine({
                   <h5 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#fef3c7' }}>
                     Manager UPI ID Missing ({managerMember.name || managerMember.user?.name || 'Mess Manager'})
                   </h5>
-                  <p style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                     The mess manager must add their UPI ID so candidates can settle dues and pay mess funds instantly via QR.
                   </p>
                 </div>
@@ -380,20 +380,20 @@ export default function SettlementEngine({
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
             {/* Card A: Establishment Sheet */}
             <div style={{
-              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9))',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-glass)',
               borderRadius: '14px',
               padding: '1.25rem'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                 <div>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#93c5fd', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--accent-primary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     <Flame size={14} color="#60a5fa" /> Establishment Charges (Fixed)
                   </span>
-                  <p style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Divided equally per candidate</p>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Divided equally per candidate</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#f8fafc' }}>
+                  <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                     {curr}{displayData.total_establishment?.toFixed(2) || '0.00'}
                   </span>
                 </div>
@@ -402,9 +402,9 @@ export default function SettlementEngine({
               {/* Items Breakdown list */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.85rem', fontSize: '0.78rem' }}>
                 {displayData.establishment_breakdown?.slice(0, 6).map((item, idx) => (
-                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', color: '#cbd5e1' }}>
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
                     <span>• {item.title}</span>
-                    <strong style={{ color: '#f8fafc' }}>{curr}{item.amount.toFixed(0)}/-</strong>
+                    <strong style={{ color: 'var(--text-primary)' }}>{curr}{item.amount.toFixed(0)}/-</strong>
                   </div>
                 ))}
               </div>
@@ -420,7 +420,7 @@ export default function SettlementEngine({
                 alignItems: 'center',
                 fontSize: '0.82rem'
               }}>
-                <span style={{ color: '#93c5fd' }}>
+                <span style={{ color: 'var(--accent-primary)' }}>
                   {curr}{displayData.total_establishment?.toFixed(0)} ÷ {memberBalances.length} Candidates:
                 </span>
                 <strong style={{ color: '#fbbf24', fontSize: '0.95rem' }}>
@@ -431,8 +431,8 @@ export default function SettlementEngine({
 
             {/* Card B: Variable Mealcharge & Meal Rate Pool */}
             <div style={{
-              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9))',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-glass)',
               borderRadius: '14px',
               padding: '1.25rem'
             }}>
@@ -441,7 +441,7 @@ export default function SettlementEngine({
                   <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     <Utensils size={14} color="#fbbf24" /> Mealcharge & Marketing Pool
                   </span>
-                  <p style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Marketing + Rice + Potato + Grocery - Guest</p>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Marketing + Rice + Potato + Grocery - Guest</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#fbbf24' }}>
@@ -453,9 +453,9 @@ export default function SettlementEngine({
               {/* Meal pool Items */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.85rem', fontSize: '0.78rem' }}>
                 {displayData.meal_pool_breakdown?.slice(0, 5).map((item, idx) => (
-                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', color: '#cbd5e1' }}>
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
                     <span>• {item.title}</span>
-                    <strong style={{ color: '#f8fafc' }}>{curr}{item.amount.toFixed(0)}/-</strong>
+                    <strong style={{ color: 'var(--text-primary)' }}>{curr}{item.amount.toFixed(0)}/-</strong>
                   </div>
                 ))}
                 {displayData.guest_deduction_total > 0 && (
@@ -490,10 +490,10 @@ export default function SettlementEngine({
 
         {/* 2. TRADITIONAL SCORE BOARD TABLE (Matching Handwritten Notebook) */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
-          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
             <span>📋 {isMess ? 'Candidate Monthly Score Board (Khatabook)' : 'Member Balances & Breakdown'}</span>
           </h4>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
             Total Collected: <strong style={{ color: '#34d399' }}>{curr}{displayData.total_collected?.toFixed(0)}</strong> • Due: <strong style={{ color: '#f87171' }}>{curr}{displayData.total_due?.toFixed(0)}</strong>
           </span>
         </div>
@@ -501,26 +501,26 @@ export default function SettlementEngine({
         <div style={{ overflowX: 'auto', marginBottom: '2rem' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
             <thead>
-              <tr style={{ background: 'rgba(15, 23, 42, 0.95)', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                <th style={{ padding: '0.75rem', textAlign: 'center', color: '#94a3b8', width: '40px' }}>Sl</th>
-                <th style={{ padding: '0.75rem', textAlign: 'left', color: '#94a3b8' }}>Candidate</th>
+              <tr style={{ background: 'var(--bg-surface-elevated)', borderBottom: '1px solid var(--border-glass)' }}>
+                <th style={{ padding: '0.75rem', textAlign: 'center', color: 'var(--text-secondary)', width: '40px' }}>Sl</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left', color: 'var(--text-secondary)' }}>Candidate</th>
                 {isMess ? (
                   <>
-                    <th style={{ padding: '0.75rem', textAlign: 'left', color: '#94a3b8' }}>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', color: 'var(--text-secondary)' }}>
                       Formula: (Meals × Rate) + Est
                     </th>
-                    <th style={{ padding: '0.75rem', textAlign: 'right', color: '#94a3b8' }}>Guest Meals</th>
-                    <th style={{ padding: '0.75rem', textAlign: 'right', color: '#94a3b8' }}>Total Bill</th>
-                    <th style={{ padding: '0.75rem', textAlign: 'right', color: '#94a3b8' }}>Paid (Deposit + Bazar)</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Guest Meals</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Total Bill</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Paid (Deposit + Bazar)</th>
                   </>
                 ) : (
                   <>
-                    <th style={{ padding: '0.75rem', textAlign: 'right', color: '#94a3b8' }}>Total Share Due</th>
-                    <th style={{ padding: '0.75rem', textAlign: 'right', color: '#94a3b8' }}>Total Paid</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Total Share Due</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Total Paid</th>
                   </>
                 )}
-                <th style={{ padding: '0.75rem', textAlign: 'right', color: '#94a3b8' }}>Net Status</th>
-                <th style={{ padding: '0.75rem', textAlign: 'center', color: '#94a3b8', width: '90px' }}>Action</th>
+                <th style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Net Status</th>
+                <th style={{ padding: '0.75rem', textAlign: 'center', color: 'var(--text-secondary)', width: '90px' }}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -533,20 +533,20 @@ export default function SettlementEngine({
                   <tr 
                     key={mb.member_id || mb.user_id || idx} 
                     style={{ 
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-                      background: isMyRecord ? 'rgba(59, 130, 246, 0.06)' : 'transparent'
+                      borderBottom: '1px solid var(--border-glass)',
+                      background: isMyRecord ? 'rgba(59, 130, 246, 0.08)' : 'transparent'
                     }}
                   >
-                    <td style={{ padding: '0.75rem', textAlign: 'center', color: '#64748b', fontWeight: 600 }}>
+                    <td style={{ padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)', fontWeight: 600 }}>
                       {idx + 1}
                     </td>
 
                     <td style={{ padding: '0.75rem', fontWeight: 600 }}>
-                      <div style={{ color: isMyRecord ? '#93c5fd' : '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <div style={{ color: isMyRecord ? 'var(--accent-primary)' : 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                         <span>{mb.name}</span>
-                        {isMyRecord && <span style={{ fontSize: '0.65rem', color: '#60a5fa' }}>(You)</span>}
+                        {isMyRecord && <span style={{ fontSize: '0.65rem', color: 'var(--accent-primary)' }}>(You)</span>}
                       </div>
-                      <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
                         {mb.role} {mb.is_virtual ? '• Virtual' : ''} {mb.marketing_amount > 0 ? `• Mkt: ${curr}${mb.marketing_amount.toFixed(0)} (${mb.marketing_days || 0}d)` : ''}
                       </div>
                     </td>
@@ -554,25 +554,25 @@ export default function SettlementEngine({
                     {isMess ? (
                       <>
                         {/* Formula column */}
-                        <td style={{ padding: '0.75rem', fontFamily: 'monospace', color: '#cbd5e1', fontSize: '0.8rem' }}>
+                        <td style={{ padding: '0.75rem', fontFamily: 'monospace', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
                           ({displayData.meal_rate?.toFixed(2)} × {mb.total_meal_units || 0}) + {displayData.establishment_per_head?.toFixed(2)} = <strong>{mb.total_due?.toFixed(0)}</strong>
                         </td>
 
                         {/* Guest Meals */}
-                        <td style={{ padding: '0.75rem', textAlign: 'right', color: mb.guest_cost > 0 ? '#fbbf24' : '#64748b' }}>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', color: mb.guest_cost > 0 ? '#fbbf24' : 'var(--text-muted)' }}>
                           {mb.guest_cost > 0 ? `+${curr}${mb.guest_cost?.toFixed(0)}` : '—'}
                         </td>
 
                         {/* Total Bill */}
-                        <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 700, color: '#f8fafc' }}>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>
                           {curr}{mb.total_due?.toFixed(2) || '0.00'}
                         </td>
 
                         {/* Total Paid (Deposit + Marketing) */}
-                        <td style={{ padding: '0.75rem', textAlign: 'right', color: '#34d399', fontWeight: 700 }}>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', color: '#10b981', fontWeight: 700 }}>
                           <div>{curr}{mb.total_paid?.toFixed(2) || '0.00'}</div>
                           {mb.marketing_amount > 0 && (
-                            <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 400 }}>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 400 }}>
                               Dep: {curr}{mb.initial_deposit || 0} + Mkt: {curr}{mb.marketing_amount}
                             </div>
                           )}
@@ -580,10 +580,10 @@ export default function SettlementEngine({
                       </>
                     ) : (
                       <>
-                        <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 700, color: '#f8fafc' }}>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>
                           {curr}{mb.total_due?.toFixed(2) || '0.00'}
                         </td>
-                        <td style={{ padding: '0.75rem', textAlign: 'right', color: '#34d399', fontWeight: 700 }}>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', color: '#10b981', fontWeight: 700 }}>
                           {curr}{mb.total_paid?.toFixed(2) || '0.00'}
                         </td>
                       </>
@@ -635,7 +635,7 @@ export default function SettlementEngine({
         </div>
 
         {/* 3. SIMPLIFIED TRANSACTION CARDS (Peer-to-Peer Minimized Settlements) */}
-        <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+        <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
           <span>💳 Minimum Cashflow Settlement Matrix</span>
           <span className="badge badge-category" style={{ fontSize: '0.68rem' }}>Optimal Peer Transfers</span>
         </h4>
@@ -644,7 +644,7 @@ export default function SettlementEngine({
           <div style={{ textAlign: 'center', padding: '1.5rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.15)' }}>
             <CheckCircle size={28} color="#34d399" style={{ marginBottom: '0.35rem' }} />
             <p style={{ fontSize: '0.9rem', fontWeight: 600, color: '#34d399' }}>All Mess & Group Accounts Settled!</p>
-            <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>No pending transfers required.</p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No pending transfers required.</p>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', gap: '0.85rem' }}>
@@ -657,9 +657,9 @@ export default function SettlementEngine({
                   key={idx}
                   style={{
                     background: isMyDebt 
-                      ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(15, 23, 42, 0.7))'
-                      : (isMyCredit ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(15, 23, 42, 0.7))' : 'rgba(15, 23, 42, 0.5)'),
-                    border: `1px solid ${isMyDebt ? 'rgba(239, 68, 68, 0.3)' : (isMyCredit ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.06)')}`,
+                      ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), var(--bg-surface))'
+                      : (isMyCredit ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), var(--bg-surface))' : 'var(--bg-surface)'),
+                    border: `1px solid ${isMyDebt ? 'rgba(239, 68, 68, 0.3)' : (isMyCredit ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-glass)')}`,
                     borderRadius: '14px',
                     padding: '1.1rem',
                     display: 'flex',
@@ -670,21 +670,21 @@ export default function SettlementEngine({
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <strong style={{ color: isMyDebt ? '#f87171' : '#f8fafc', fontSize: '0.9rem' }}>
+                      <strong style={{ color: isMyDebt ? '#f87171' : 'var(--text-primary)', fontSize: '0.9rem' }}>
                         {isMyDebt ? 'You' : tx.payer_name}
                       </strong>
-                      <ArrowRight size={15} color="#94a3b8" />
-                      <strong style={{ color: isMyCredit ? '#34d399' : '#f8fafc', fontSize: '0.9rem' }}>
+                      <ArrowRight size={15} color="var(--text-muted)" />
+                      <strong style={{ color: isMyCredit ? '#10b981' : 'var(--text-primary)', fontSize: '0.9rem' }}>
                         {isMyCredit ? 'You' : tx.payee_name}
                       </strong>
                     </div>
-                    <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc' }}>
+                    <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                       {curr}{tx.amount.toFixed(2)}
                     </span>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                       {tx.payee_upi_id ? `Payee: ${tx.payee_upi_id}` : 'Pay via UPI'}
                     </span>
                     

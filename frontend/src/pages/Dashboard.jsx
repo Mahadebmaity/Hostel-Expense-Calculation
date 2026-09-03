@@ -376,7 +376,7 @@ export default function Dashboard() {
                     fontSize: '0.82rem',
                     background: activeTab === 'admin' ? 'linear-gradient(135deg, #8b5cf6, #ec4899)' : 'rgba(139, 92, 246, 0.12)',
                     borderColor: 'rgba(139, 92, 246, 0.4)',
-                    color: '#f8fafc',
+                    color: activeTab === 'admin' ? '#ffffff' : 'var(--text-primary)',
                     marginLeft: 'auto'
                   }}
                 >
@@ -593,25 +593,25 @@ export default function Dashboard() {
                     style={{ marginTop: '0.2rem', width: '16px', height: '16px', accentColor: '#3b82f6', cursor: 'pointer' }}
                   />
                   <div>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', display: 'block' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
                       Include me ({user?.name || 'Admin'}) in calculation roster
                     </span>
                     
                     {includeAdminInCalculation ? (
-                      <div style={{ fontSize: '0.74rem', color: '#cbd5e1', marginTop: '0.25rem', lineHeight: '1.4' }}>
-                        <div style={{ color: '#93c5fd', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '0.25rem', lineHeight: '1.4' }}>
+                        <div style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>
                           ✓ English: You will participate as an active member with your own meal & expense ledger.
                         </div>
-                        <div style={{ color: '#94a3b8', marginTop: '0.15rem' }}>
+                        <div style={{ color: 'var(--text-muted)', marginTop: '0.15rem' }}>
                           ✓ বাংলা: আপনি এই গ্রুপের মিল/খরচের হিসাবে অংশ নেবেন (বর্ডার হিসেবে নিজস্ব ব্যালেন্স শিট থাকবে)।
                         </div>
                       </div>
                     ) : (
-                      <div style={{ fontSize: '0.74rem', color: '#cbd5e1', marginTop: '0.25rem', lineHeight: '1.4' }}>
-                        <div style={{ color: '#fcd34d', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '0.25rem', lineHeight: '1.4' }}>
+                        <div style={{ color: 'var(--accent-warning)', fontWeight: 600 }}>
                           ⚡ English: Manage as an External Admin / Warden / Owner without participating in meals or expenses.
                         </div>
-                        <div style={{ color: '#94a3b8', marginTop: '0.15rem' }}>
+                        <div style={{ color: 'var(--text-muted)', marginTop: '0.15rem' }}>
                           ⚡ বাংলা: আপনি শুধু এক্সটারনাল অ্যাডমিন/মালিক হিসেবে গ্রুপ পরিচালনা করবেন (হিসাবে আপনার নাম থাকবে না)।
                         </div>
                       </div>

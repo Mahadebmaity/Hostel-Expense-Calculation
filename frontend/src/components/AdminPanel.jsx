@@ -135,7 +135,7 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                 System Administration & Users Directory
               </h2>
               <span style={{
@@ -150,7 +150,7 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
                 SUPERADMIN ACCESS
               </span>
             </div>
-            <p style={{ color: '#94a3b8', fontSize: '0.83rem', marginTop: '0.2rem' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.83rem', marginTop: '0.2rem' }}>
               Real-time audit of all registered accounts, platform spending metrics, and full group management.
             </p>
           </div>
@@ -169,60 +169,60 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
         <div className="glass-panel" style={{ padding: '1.25rem', borderLeft: '4px solid #3b82f6' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Total Registered Users</span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Total Registered Users</span>
             <div style={{ padding: '0.4rem', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa' }}>
               <Users size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#f8fafc' }}>
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>
             {stats?.total_users || 0}
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.35rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
             Across all hostel & group rooms
           </div>
         </div>
 
         <div className="glass-panel" style={{ padding: '1.25rem', borderLeft: '4px solid #10b981' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Total Active Groups</span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Total Active Groups</span>
             <div style={{ padding: '0.4rem', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399' }}>
               <Building2 size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#f8fafc' }}>
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>
             {stats?.total_groups || 0}
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.35rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
             Mess, Flatmate & Trip hubs
           </div>
         </div>
 
         <div className="glass-panel" style={{ padding: '1.25rem', borderLeft: '4px solid #f59e0b' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Total Expenses Processed</span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Total Expenses Processed</span>
             <div style={{ padding: '0.4rem', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' }}>
               <CreditCard size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#f8fafc' }}>
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>
             ₹{stats?.total_expenses_amount?.toLocaleString('en-IN') || '0.00'}
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.35rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
             {stats?.total_expenses_count || 0} recorded invoices & receipts
           </div>
         </div>
 
         <div className="glass-panel" style={{ padding: '1.25rem', borderLeft: '4px solid #ec4899' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Total Mess Meals</span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Total Mess Meals</span>
             <div style={{ padding: '0.4rem', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6' }}>
               <Utensils size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#f8fafc' }}>
-            {stats?.total_meals_units || 0} <span style={{ fontSize: '0.9rem', color: '#94a3b8' }}>units</span>
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+            {stats?.total_meals_units || 0} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>units</span>
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.35rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
             {stats?.total_meal_records || 0} daily attendance entries
           </div>
         </div>
@@ -233,11 +233,11 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <Building2 size={18} color="#60a5fa" />
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               All System Groups ({groups.length})
             </h3>
           </div>
-          <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
             Click to inspect any mess or hostel group
           </span>
         </div>
@@ -251,8 +251,8 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
                 style={{
                   padding: '1rem',
                   borderRadius: '12px',
-                  background: isSelected ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                  border: isSelected ? '1px solid #3b82f6' : '1px solid rgba(255, 255, 255, 0.08)',
+                  background: isSelected ? 'rgba(59, 130, 246, 0.15)' : 'var(--bg-surface)',
+                  border: isSelected ? '1px solid #3b82f6' : '1px solid var(--border-glass)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -264,9 +264,9 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
                     <span style={{ fontSize: '1rem' }}>
                       {grp.group_type === 'MESS' ? '🏨' : grp.group_type === 'TRIP' ? '✈️' : '🏠'}
                     </span>
-                    <strong style={{ fontSize: '0.92rem', color: '#f8fafc' }}>{grp.name}</strong>
+                    <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>{grp.name}</strong>
                   </div>
-                  <div style={{ display: 'flex', gap: '0.6rem', fontSize: '0.75rem', color: '#94a3b8' }}>
+                  <div style={{ display: 'flex', gap: '0.6rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                     <span>Type: <strong>{grp.group_type}</strong></span>
                     <span>•</span>
                     <span>Currency: <strong>{grp.currency}</strong></span>
@@ -324,10 +324,10 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
           marginBottom: '1.25rem'
         }}>
           <div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Users size={19} color="#c084fc" /> Registered Users Directory ({filteredUsers.length})
             </h3>
-            <p style={{ color: '#94a3b8', fontSize: '0.78rem', marginTop: '0.2rem' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: '0.2rem' }}>
               View who has signed up, their login emails, contact details, and their linked mess groups.
             </p>
           </div>
@@ -335,7 +335,7 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
             {/* Search Input */}
             <div style={{ position: 'relative', width: '240px' }}>
-              <Search size={14} color="#94a3b8" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
+              <Search size={14} color="var(--text-muted)" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
                 placeholder="Search user, email, UPI..."
@@ -347,7 +347,7 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
             </div>
 
             {/* Role Filter */}
-            <div style={{ display: 'flex', background: 'rgba(15, 23, 42, 0.8)', padding: '0.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ display: 'flex', background: 'var(--bg-surface)', padding: '0.2rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
               {['ALL', 'ADMIN', 'USER'].map((role) => (
                 <button
                   key={role}
@@ -359,7 +359,7 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
                     fontSize: '0.75rem',
                     fontWeight: 600,
                     background: roleFilter === role ? '#3b82f6' : 'transparent',
-                    color: roleFilter === role ? '#ffffff' : '#94a3b8',
+                    color: roleFilter === role ? '#ffffff' : 'var(--text-secondary)',
                     cursor: 'pointer'
                   }}
                 >
@@ -374,7 +374,7 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#94a3b8', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+              <tr style={{ borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
                 <th style={{ padding: '0.75rem 1rem' }}>User Profile</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Contact & UPI</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Platform Role</th>
@@ -387,13 +387,13 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
             <tbody>
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+                  <td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                     No users matching search query.
                   </td>
                 </tr>
               ) : (
                 filteredUsers.map((u) => (
-                  <tr key={u.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', transition: 'background 0.2s' }}>
+                  <tr key={u.id} style={{ borderBottom: '1px solid var(--border-glass)', transition: 'background 0.2s' }}>
                     {/* User Profile */}
                     <td style={{ padding: '0.85rem 1rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -413,8 +413,8 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
                           {u.name ? u.name[0].toUpperCase() : 'U'}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 700, color: '#f8fafc' }}>{u.name}</div>
-                          <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{u.email}</div>
+                          <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{u.name}</div>
+                          <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{u.email}</div>
                         </div>
                       </div>
                     </td>
@@ -423,12 +423,12 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
                     <td style={{ padding: '0.85rem 1rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                         {u.phone ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#cbd5e1', fontSize: '0.75rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
                             <Phone size={12} color="#60a5fa" />
                             <span>{u.phone}</span>
                           </div>
                         ) : (
-                          <span style={{ color: '#64748b', fontSize: '0.75rem' }}>No phone</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>No phone</span>
                         )}
 
                         {u.upi_id ? (
@@ -437,7 +437,7 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
                             <span>{u.upi_id}</span>
                           </div>
                         ) : (
-                          <span style={{ color: '#64748b', fontSize: '0.75rem' }}>No UPI</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>No UPI</span>
                         )}
                       </div>
                     </td>
@@ -461,8 +461,9 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
                         </span>
                       ) : (
                         <span style={{
-                          background: 'rgba(255, 255, 255, 0.06)',
-                          color: '#94a3b8',
+                          background: 'var(--bg-surface)',
+                          border: '1px solid var(--border-glass)',
+                          color: 'var(--text-muted)',
                           borderRadius: '12px',
                           padding: '0.2rem 0.55rem',
                           fontSize: '0.72rem',
@@ -474,7 +475,7 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
                     </td>
 
                     {/* Joined Date */}
-                    <td style={{ padding: '0.85rem 1rem', color: '#94a3b8', fontSize: '0.75rem' }}>
+                    <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                         <Calendar size={12} />
                         <span>{u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB') : 'N/A'}</span>
@@ -511,7 +512,7 @@ export default function AdminPanel({ onSelectGroup, currentGroupId, onGroupDelet
                     <td style={{ padding: '0.85rem 1rem' }}>
                       <div style={{ fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                         <span style={{ color: '#34d399' }}>Paid: ₹{u.total_expenses_paid?.toLocaleString('en-IN') || '0.00'}</span>
-                        <span style={{ color: '#94a3b8' }}>Meals: {u.total_meals_consumed || 0} units</span>
+                        <span style={{ color: 'var(--text-muted)' }}>Meals: {u.total_meals_consumed || 0} units</span>
                       </div>
                     </td>
 

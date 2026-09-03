@@ -166,7 +166,7 @@ export default function WorkflowGuide({
     },
     TRIP: {
       color: '#06b6d4',
-      bgGradient: 'linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(15, 23, 42, 0.75))',
+      bgGradient: 'linear-gradient(135deg, rgba(6, 182, 212, 0.12), var(--bg-surface))',
       borderColor: 'rgba(6, 182, 212, 0.35)',
       BN: {
         badge: '✈️ ট্যুর ও ট্রাভেল স্প্লিটার গাইড',
@@ -475,16 +475,16 @@ export default function WorkflowGuide({
               <span style={{ 
                 fontSize: '0.68rem', 
                 background: 'rgba(255, 255, 255, 0.06)', 
-                color: '#cbd5e1', 
+                color: 'var(--text-secondary)', 
                 padding: '0.15rem 0.5rem', 
                 borderRadius: '6px',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
+                border: '1px solid var(--border-glass)'
               }}>
                 {activeContent.tag}
               </span>
             </div>
             {!isExpanded && (
-              <p style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '0.15rem', margin: 0 }}>
+              <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.15rem', margin: 0 }}>
                 {activeContent.description}
               </p>
             )}
@@ -728,17 +728,17 @@ export default function WorkflowGuide({
                 <AlertCircle size={28} color="#fbbf24" />
               </div>
 
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.4rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>
                 {lang === 'BN' ? '⚠️ আগে ১ম ধাপ (Step 1) সম্পন্ন করুন' : '⚠️ Please Complete Step 1 First'}
               </h3>
 
-              <div style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5', marginBottom: '1.25rem' }}>
-                <div style={{ marginBottom: '0.5rem', color: '#93c5fd', fontWeight: 600 }}>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '1.25rem' }}>
+                <div style={{ marginBottom: '0.5rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
                   {lang === 'BN' 
                     ? 'আপনার এই গ্রুপে বর্তমানে কোনো মেম্বার/বর্ডার যোগ করা নেই।' 
                     : 'There are currently no members in this group.'}
                 </div>
-                <div style={{ color: '#94a3b8' }}>
+                <div style={{ color: 'var(--text-muted)' }}>
                   {lang === 'BN'
                     ? 'মিল রেকর্ড (Meal Tracker) বা ব্যালেন্স শিট (Scoreboard) দেখার আগে অনুগ্রহ করে মেম্বারদের নাম ও ডিপোজিট যোগ করুন।'
                     : 'Before tracking daily meals or viewing the score board, please add members/boarders to the group roster.'}

@@ -158,38 +158,66 @@ export default function DemoCenterModal({ isOpen, onClose, initialType = 'MESS' 
           width: '100%', 
           maxHeight: '92vh',
           padding: '1.5rem',
-          background: '#0f172a',
-          border: '1px solid rgba(255, 255, 255, 0.12)'
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-glass)'
         }}
       >
         {/* Modal Top Bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.85rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{ padding: '0.5rem', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Sparkles size={20} color="#ffffff" />
-            </div>
-            <div>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+        <div style={{ marginBottom: '1.25rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.85rem' }}>
+          {/* Top Row: Icon + Title in One Line + Close Button */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '0.45rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0 }}>
+              <div style={{ padding: '0.4rem', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Sparkles size={18} color="#ffffff" />
+              </div>
+              <h2 style={{
+                fontSize: 'clamp(0.85rem, 3.2vw, 1.15rem)',
+                fontWeight: 800,
+                color: 'var(--text-primary)',
+                margin: 0,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}>
                 {lang === 'BN' ? '✨ লাইভ ডেমো হিসাব ও PDF প্রিভিউ' : '✨ Live Demo Calculations & PDF Preview'}
               </h2>
-              <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>
-                {lang === 'BN' ? '৪টি ভিন্ন ভিন্ন গ্রুপের বাস্তব হিসাব ও প্রস্তুতকৃত অডিট PDF দেখুন' : 'Inspect 4 authentic calculation models and download tailored sample PDF reports'}
-              </p>
             </div>
+
+            <button
+              onClick={onClose}
+              className="btn-secondary"
+              aria-label="Close"
+              style={{
+                padding: '0.35rem 0.5rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                border: 'none',
+                background: 'var(--bg-surface)',
+                color: 'var(--text-muted)',
+                flexShrink: 0
+              }}
+            >
+              <X size={18} />
+            </button>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            {/* Lang Switcher */}
-            <div style={{ display: 'flex', background: 'rgba(0,0,0,0.4)', borderRadius: '8px', padding: '0.2rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+          {/* Bottom Row: Subtitle + Language Version Switcher */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', margin: 0, flex: 1, minWidth: '180px' }}>
+              {lang === 'BN' ? '৪টি ভিন্ন ভিন্ন গ্রুপের বাস্তব হিসাব ও প্রস্তুতকৃত অডিট PDF দেখুন' : 'Inspect 4 authentic calculation models and download tailored sample PDF reports'}
+            </p>
+
+            {/* Language Version Switcher */}
+            <div style={{ display: 'flex', background: 'var(--bg-surface)', borderRadius: '8px', padding: '0.2rem', border: '1px solid var(--border-glass)', flexShrink: 0 }}>
               <button
                 type="button"
                 onClick={() => setLang('BN')}
                 style={{
                   background: lang === 'BN' ? '#3b82f6' : 'transparent',
-                  color: lang === 'BN' ? '#fff' : '#94a3b8',
+                  color: lang === 'BN' ? '#fff' : 'var(--text-secondary)',
                   border: 'none',
                   borderRadius: '6px',
-                  padding: '0.2rem 0.5rem',
+                  padding: '0.2rem 0.55rem',
                   fontSize: '0.72rem',
                   fontWeight: 700,
                   cursor: 'pointer'
@@ -202,10 +230,10 @@ export default function DemoCenterModal({ isOpen, onClose, initialType = 'MESS' 
                 onClick={() => setLang('EN')}
                 style={{
                   background: lang === 'EN' ? '#3b82f6' : 'transparent',
-                  color: lang === 'EN' ? '#fff' : '#94a3b8',
+                  color: lang === 'EN' ? '#fff' : 'var(--text-secondary)',
                   border: 'none',
                   borderRadius: '6px',
-                  padding: '0.2rem 0.5rem',
+                  padding: '0.2rem 0.55rem',
                   fontSize: '0.72rem',
                   fontWeight: 700,
                   cursor: 'pointer'
@@ -214,10 +242,6 @@ export default function DemoCenterModal({ isOpen, onClose, initialType = 'MESS' 
                 English 🇬🇧
               </button>
             </div>
-
-            <button onClick={onClose} className="btn-secondary" style={{ padding: '0.35rem 0.5rem', borderRadius: '8px', cursor: 'pointer', border: 'none', background: 'rgba(255,255,255,0.06)', color: '#94a3b8' }}>
-              <X size={18} />
-            </button>
           </div>
         </div>
 
@@ -239,9 +263,9 @@ export default function DemoCenterModal({ isOpen, onClose, initialType = 'MESS' 
                 gap: '0.4rem',
                 padding: '0.65rem 0.75rem',
                 borderRadius: '10px',
-                border: activeType === tab.type ? `2px solid ${demoScenarios[tab.type].color}` : '1px solid rgba(255,255,255,0.08)',
-                background: activeType === tab.type ? 'rgba(30, 41, 59, 0.9)' : 'rgba(15, 23, 42, 0.6)',
-                color: activeType === tab.type ? '#f8fafc' : '#94a3b8',
+                border: activeType === tab.type ? `2px solid ${demoScenarios[tab.type].color}` : '1px solid var(--border-glass)',
+                background: activeType === tab.type ? 'rgba(59, 130, 246, 0.2)' : 'var(--bg-surface)',
+                color: activeType === tab.type ? 'var(--text-primary)' : 'var(--text-secondary)',
                 fontWeight: activeType === tab.type ? 800 : 500,
                 fontSize: '0.82rem',
                 cursor: 'pointer',
@@ -266,10 +290,10 @@ export default function DemoCenterModal({ isOpen, onClose, initialType = 'MESS' 
           {/* Header & PDF Button */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.85rem', marginBottom: '1rem' }}>
             <div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
                 {current.title}
               </h3>
-              <p style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '0.2rem', margin: 0 }}>
+              <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginTop: '0.2rem', margin: 0 }}>
                 {current.subtitle}
               </p>
             </div>
@@ -297,13 +321,13 @@ export default function DemoCenterModal({ isOpen, onClose, initialType = 'MESS' 
 
           {/* Scenario Story */}
           <div style={{
-            background: 'rgba(0, 0, 0, 0.4)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-glass)',
             borderRadius: '10px',
             padding: '0.75rem 0.95rem',
             marginBottom: '1rem',
             fontSize: '0.78rem',
-            color: '#e2e8f0',
+            color: 'var(--text-primary)',
             lineHeight: '1.45'
           }}>
             {current.scenarioStory}
@@ -312,8 +336,8 @@ export default function DemoCenterModal({ isOpen, onClose, initialType = 'MESS' 
           {/* Summary Key Metrics Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.65rem', marginBottom: '1.15rem' }}>
             {current.summaryMetrics.map((met, i) => (
-              <div key={i} style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.8rem' }}>
-                <span style={{ fontSize: '0.68rem', color: '#94a3b8', display: 'block' }}>{met.label}</span>
+              <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-glass)', borderRadius: '10px', padding: '0.65rem 0.8rem' }}>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>{met.label}</span>
                 <strong style={{ fontSize: '1rem', color: met.color, fontWeight: 800 }}>{met.value}</strong>
               </div>
             ))}
@@ -321,50 +345,50 @@ export default function DemoCenterModal({ isOpen, onClose, initialType = 'MESS' 
 
           {/* Balance Sheet / Calculation Table */}
           <div style={{ marginBottom: '1.15rem' }}>
-            <h4 style={{ fontSize: '0.84rem', fontWeight: 700, color: '#93c5fd', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <h4 style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
               <span>📋 {lang === 'BN' ? 'ব্যালেন্স শিট ও সদস্যদের হিসাব তালিকা' : 'Member Ledger & Balances'}</span>
             </h4>
             
-            <div style={{ overflowX: 'auto', background: 'rgba(15, 23, 42, 0.8)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ overflowX: 'auto', background: 'var(--bg-surface)', borderRadius: '10px', border: '1px solid var(--border-glass)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.76rem' }}>
                 <thead>
-                  <tr style={{ background: 'rgba(0, 0, 0, 0.5)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <th style={{ padding: '0.55rem', textAlign: 'left', color: '#94a3b8' }}>{lang === 'BN' ? 'সদস্যের নাম' : 'Member Name'}</th>
+                  <tr style={{ background: 'rgba(0, 0, 0, 0.2)', borderBottom: '1px solid var(--border-glass)' }}>
+                    <th style={{ padding: '0.55rem', textAlign: 'left', color: 'var(--text-secondary)' }}>{lang === 'BN' ? 'সদস্যের নাম' : 'Member Name'}</th>
                     {activeType === 'MESS' ? (
                       <>
-                        <th style={{ padding: '0.55rem', textAlign: 'right', color: '#94a3b8' }}>{lang === 'BN' ? 'ডিপোজিট' : 'Deposit'}</th>
-                        <th style={{ padding: '0.55rem', textAlign: 'right', color: '#94a3b8' }}>{lang === 'BN' ? 'বাজার খরচ' : 'Bazar Paid'}</th>
-                        <th style={{ padding: '0.55rem', textAlign: 'center', color: '#94a3b8' }}>{lang === 'BN' ? 'মিল' : 'Meals'}</th>
-                        <th style={{ padding: '0.55rem', textAlign: 'right', color: '#94a3b8' }}>{lang === 'BN' ? 'মোট বিল' : 'Total Due'}</th>
-                        <th style={{ padding: '0.55rem', textAlign: 'right', color: '#94a3b8' }}>{lang === 'BN' ? 'মোট দেওয়া' : 'Total Paid'}</th>
+                        <th style={{ padding: '0.55rem', textAlign: 'right', color: 'var(--text-secondary)' }}>{lang === 'BN' ? 'ডিপোজিট' : 'Deposit'}</th>
+                        <th style={{ padding: '0.55rem', textAlign: 'right', color: '#34d399' }}>{lang === 'BN' ? 'বাজার খরচ' : 'Bazar Paid'}</th>
+                        <th style={{ padding: '0.55rem', textAlign: 'center', color: '#fbbf24' }}>{lang === 'BN' ? 'মিল' : 'Meals'}</th>
+                        <th style={{ padding: '0.55rem', textAlign: 'right', color: 'var(--text-secondary)' }}>{lang === 'BN' ? 'মোট বিল' : 'Total Due'}</th>
+                        <th style={{ padding: '0.55rem', textAlign: 'right', color: 'var(--accent-primary)' }}>{lang === 'BN' ? 'মোট দেওয়া' : 'Total Paid'}</th>
                       </>
                     ) : (
                       <>
-                        <th style={{ padding: '0.55rem', textAlign: 'right', color: '#94a3b8' }}>{lang === 'BN' ? 'প্রকৃত খরচ' : 'Spent'}</th>
-                        <th style={{ padding: '0.55rem', textAlign: 'right', color: '#94a3b8' }}>{lang === 'BN' ? 'শেয়ার' : 'Share'}</th>
+                        <th style={{ padding: '0.55rem', textAlign: 'right', color: '#34d399', fontWeight: 700 }}>{lang === 'BN' ? 'প্রকৃত খরচ' : 'Spent'}</th>
+                        <th style={{ padding: '0.55rem', textAlign: 'right', color: 'var(--text-secondary)' }}>{lang === 'BN' ? 'শেয়ার' : 'Share'}</th>
                       </>
                     )}
-                    <th style={{ padding: '0.55rem', textAlign: 'right', color: '#94a3b8' }}>{lang === 'BN' ? 'নেট স্ট্যাটাস' : 'Net Balance'}</th>
+                    <th style={{ padding: '0.55rem', textAlign: 'right', color: 'var(--text-secondary)' }}>{lang === 'BN' ? 'নেট স্ট্যাটাস' : 'Net Balance'}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {current.members.map((m, idx) => {
                     const isPositive = m.net.startsWith('+');
                     return (
-                      <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                        <td style={{ padding: '0.55rem', fontWeight: 600, color: '#f8fafc' }}>{m.name}</td>
+                      <tr key={idx} style={{ borderBottom: '1px solid var(--border-glass)' }}>
+                        <td style={{ padding: '0.55rem', fontWeight: 600, color: 'var(--text-primary)' }}>{m.name}</td>
                         {activeType === 'MESS' ? (
                           <>
-                            <td style={{ padding: '0.55rem', textAlign: 'right', color: '#cbd5e1' }}>{m.deposit}</td>
+                            <td style={{ padding: '0.55rem', textAlign: 'right', color: 'var(--text-secondary)' }}>{m.deposit}</td>
                             <td style={{ padding: '0.55rem', textAlign: 'right', color: '#34d399' }}>{m.mkt}</td>
                             <td style={{ padding: '0.55rem', textAlign: 'center', color: '#fbbf24', fontWeight: 700 }}>{m.meals}</td>
-                            <td style={{ padding: '0.55rem', textAlign: 'right', color: '#cbd5e1' }}>{m.due}</td>
-                            <td style={{ padding: '0.55rem', textAlign: 'right', color: '#60a5fa', fontWeight: 700 }}>{m.paid}</td>
+                            <td style={{ padding: '0.55rem', textAlign: 'right', color: 'var(--text-secondary)' }}>{m.due}</td>
+                            <td style={{ padding: '0.55rem', textAlign: 'right', color: 'var(--accent-primary)', fontWeight: 700 }}>{m.paid}</td>
                           </>
                         ) : (
                           <>
                             <td style={{ padding: '0.55rem', textAlign: 'right', color: '#34d399', fontWeight: 700 }}>{m.spent}</td>
-                            <td style={{ padding: '0.55rem', textAlign: 'right', color: '#cbd5e1' }}>{m.share}</td>
+                            <td style={{ padding: '0.55rem', textAlign: 'right', color: 'var(--text-secondary)' }}>{m.share}</td>
                           </>
                         )}
                         <td style={{ padding: '0.55rem', textAlign: 'right', fontWeight: 800, color: isPositive ? '#34d399' : '#f87171' }}>
@@ -386,12 +410,12 @@ export default function DemoCenterModal({ isOpen, onClose, initialType = 'MESS' 
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.55rem' }}>
               {current.settlementPlan.map((p, i) => (
-                <div key={i} style={{ background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '10px', padding: '0.65rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '10px', padding: '0.65rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontSize: '0.78rem', color: '#f8fafc', fontWeight: 700 }}>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-primary)', fontWeight: 700 }}>
                       <span style={{ color: '#f87171' }}>{p.payer}</span> ➔ <span style={{ color: '#34d399' }}>{p.payee}</span>
                     </div>
-                    <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>UPI: {p.upi} • {p.method}</span>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>UPI: {p.upi} • {p.method}</span>
                   </div>
                   <strong style={{ fontSize: '0.95rem', color: '#fbbf24', fontWeight: 800 }}>{p.amount}</strong>
                 </div>

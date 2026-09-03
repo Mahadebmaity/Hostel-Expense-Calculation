@@ -43,12 +43,12 @@ export default function AnalyticsCharts({ analytics, currency = 'INR' }) {
         </div>
         <div>
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Expense Category Analytics</h3>
-          <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Visual breakdown of shared expenditures</p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Visual breakdown of shared expenditures</p>
         </div>
       </div>
 
       {total_spent === 0 ? (
-        <p style={{ fontSize: '0.85rem', color: '#64748b', textAlign: 'center', padding: '1.5rem' }}>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1.5rem' }}>
           No expenses recorded to generate analytics.
         </p>
       ) : (
@@ -58,15 +58,15 @@ export default function AnalyticsCharts({ analytics, currency = 'INR' }) {
             {segments.map(seg => (
               <div key={seg.cat}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                  <span style={{ color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <span style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: seg.color }}></span>
                     {seg.cat}
                   </span>
-                  <span style={{ color: '#94a3b8' }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>
                     {curr}{seg.amount.toFixed(2)} ({seg.percent.toFixed(1)}%)
                   </span>
                 </div>
-                <div style={{ height: '6px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ height: '6px', background: 'var(--border-glass)', borderRadius: '4px', overflow: 'hidden' }}>
                   <div style={{ width: `${seg.percent}%`, height: '100%', background: seg.color, borderRadius: '4px' }}></div>
                 </div>
               </div>
@@ -75,13 +75,13 @@ export default function AnalyticsCharts({ analytics, currency = 'INR' }) {
 
           {/* Center Summary Card */}
           <div style={{
-            background: 'rgba(15, 23, 42, 0.6)',
+            background: 'var(--bg-surface)',
             borderRadius: '16px',
             padding: '1.5rem',
             textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.08)'
+            border: '1px solid var(--border-glass)'
           }}>
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Total Cumulative Spend</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Cumulative Spend</p>
             <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#60a5fa', margin: '0.35rem 0' }}>
               {curr}{total_spent.toFixed(2)}
             </h2>

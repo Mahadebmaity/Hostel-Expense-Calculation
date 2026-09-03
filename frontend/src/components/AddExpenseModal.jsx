@@ -554,7 +554,7 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
           {/* Establishment Charges vs Meal Pool Explicit Selector (For Mess) */}
           {isMess && (
             <div style={{ marginBottom: '1.25rem' }}>
-              <label className="form-label" style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.45rem', display: 'block' }}>
+              <label className="form-label" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.45rem', display: 'block' }}>
                 How should this expense be divided in Mess Khatabook?
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
@@ -566,14 +566,14 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                   style={{
                     padding: '0.85rem 1rem',
                     borderRadius: '12px',
-                    border: `2px solid ${isFixedCost ? '#3b82f6' : 'rgba(255,255,255,0.08)'}`,
-                    background: isFixedCost ? 'rgba(59, 130, 246, 0.18)' : 'rgba(15, 23, 42, 0.6)',
+                    border: `2px solid ${isFixedCost ? '#3b82f6' : 'var(--border-glass)'}`,
+                    background: isFixedCost ? 'rgba(59, 130, 246, 0.18)' : 'var(--bg-surface)',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
-                    <span style={{ fontWeight: 800, fontSize: '0.85rem', color: isFixedCost ? '#93c5fd' : '#f8fafc' }}>
+                    <span style={{ fontWeight: 800, fontSize: '0.85rem', color: isFixedCost ? 'var(--accent-primary)' : 'var(--text-primary)' }}>
                       🔥 Establishment Charge
                     </span>
                     <input
@@ -584,7 +584,7 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                       style={{ accentColor: '#3b82f6' }}
                     />
                   </div>
-                  <p style={{ fontSize: '0.71rem', color: '#94a3b8', margin: 0, leading: '1.2' }}>
+                  <p style={{ fontSize: '0.71rem', color: 'var(--text-muted)', margin: 0, leading: '1.2' }}>
                     Fixed cost divided equally per candidate (Cook Masi, Gas, Rent, Electricity, Egg, Feast).
                   </p>
                 </div>
@@ -597,14 +597,14 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                   style={{
                     padding: '0.85rem 1rem',
                     borderRadius: '12px',
-                    border: `2px solid ${!isFixedCost ? '#10b981' : 'rgba(255,255,255,0.08)'}`,
-                    background: !isFixedCost ? 'rgba(16, 185, 129, 0.18)' : 'rgba(15, 23, 42, 0.6)',
+                    border: `2px solid ${!isFixedCost ? '#10b981' : 'var(--border-glass)'}`,
+                    background: !isFixedCost ? 'rgba(16, 185, 129, 0.18)' : 'var(--bg-surface)',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
-                    <span style={{ fontWeight: 800, fontSize: '0.85rem', color: !isFixedCost ? '#6ee7b7' : '#f8fafc' }}>
+                    <span style={{ fontWeight: 800, fontSize: '0.85rem', color: !isFixedCost ? '#10b981' : 'var(--text-primary)' }}>
                       🥬 Meal & Marketing Pool
                     </span>
                     <input
@@ -615,7 +615,7 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                       style={{ accentColor: '#10b981' }}
                     />
                   </div>
-                  <p style={{ fontSize: '0.71rem', color: '#94a3b8', margin: 0, leading: '1.2' }}>
+                  <p style={{ fontSize: '0.71rem', color: 'var(--text-muted)', margin: 0, leading: '1.2' }}>
                     Variable meal pool divided by meal counts (Sabji Marketing, Rice, Potato, Grocery).
                   </p>
                 </div>
@@ -750,17 +750,17 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
 
               {/* Dynamic Split Sub-Panel */}
               <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
+                background: 'var(--bg-surface)',
                 padding: '1rem',
                 borderRadius: '14px',
-                border: '1px solid rgba(255, 255, 255, 0.08)'
+                border: '1px solid var(--border-glass)'
               }}>
                 {splitType === 'MEAL_BASED' && (
-                  <div style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                     <p style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#34d399', fontWeight: 700, marginBottom: '0.35rem' }}>
                       <CheckCircle2 size={16} /> Dynamic Meal-Rate Bazar Pool
                     </p>
-                    <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
                       Added into the collective meal fund. Subtracted by guest meal collections, then divided by all members' meal counts.
                     </p>
                   </div>
@@ -768,7 +768,7 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
 
                 {splitType === 'EQUAL' && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Equal split among all members:</span>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Equal split among all members:</span>
                     <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#60a5fa' }}>
                       {numTotalAmount > 0 ? `${curr}${(numTotalAmount / (members.length || 1)).toFixed(2)} / member` : `—`}
                     </span>
@@ -778,10 +778,10 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                 {splitType === 'EQUAL_CUSTOM' && (
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
-                      <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Select participating members:</span>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Select participating members:</span>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button type="button" onClick={() => handleToggleSelectAll(true)} style={{ background: 'none', border: 'none', color: '#60a5fa', fontSize: '0.72rem', cursor: 'pointer', textDecoration: 'underline' }}>All</button>
-                        <button type="button" onClick={() => handleToggleSelectAll(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '0.72rem', cursor: 'pointer', textDecoration: 'underline' }}>None</button>
+                        <button type="button" onClick={() => handleToggleSelectAll(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.72rem', cursor: 'pointer', textDecoration: 'underline' }}>None</button>
                       </div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '160px', overflowY: 'auto' }}>
@@ -802,17 +802,17 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                               alignItems: 'center',
                               padding: '0.45rem 0.65rem',
                               borderRadius: '8px',
-                              background: isChecked ? 'rgba(59, 130, 246, 0.12)' : 'rgba(255, 255, 255, 0.03)',
-                              border: `1px solid ${isChecked ? 'rgba(59, 130, 246, 0.3)' : 'transparent'}`,
+                              background: isChecked ? 'rgba(59, 130, 246, 0.12)' : 'var(--bg-surface)',
+                              border: `1px solid ${isChecked ? 'rgba(59, 130, 246, 0.3)' : 'var(--border-glass)'}`,
                               cursor: 'pointer'
                             }}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                               <input type="checkbox" checked={isChecked} onChange={() => {}} style={{ accentColor: '#3b82f6' }} />
-                              <span style={{ fontSize: '0.8rem', color: isChecked ? '#f8fafc' : '#94a3b8' }}>{mName}</span>
+                              <span style={{ fontSize: '0.8rem', color: isChecked ? 'var(--text-primary)' : 'var(--text-muted)' }}>{mName}</span>
                             </div>
                             {isChecked && numTotalAmount > 0 && (
-                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#60a5fa' }}>{curr}{perHead}</span>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--accent-primary)' }}>{curr}{perHead}</span>
                             )}
                           </div>
                         );
@@ -834,7 +834,7 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                       fontSize: '0.75rem'
                     }}>
                       <span style={{ color: splitAnalysis.isValid ? '#34d399' : '#fbbf24', fontWeight: 600 }}>{splitAnalysis.message}</span>
-                      <span style={{ fontWeight: 800, color: '#f8fafc' }}>Allocated: {curr}{splitAnalysis.allocated || 0}</span>
+                      <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>Allocated: {curr}{splitAnalysis.allocated || 0}</span>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', maxHeight: '160px', overflowY: 'auto' }}>
@@ -844,10 +844,10 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                         const mName = m.name || m.user?.name || m.email;
 
                         return (
-                          <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', padding: '0.35rem 0.5rem', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '8px' }}>
-                            <span style={{ fontSize: '0.8rem', color: '#cbd5e1', flex: 1 }}>{mName}</span>
+                          <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', padding: '0.35rem 0.5rem', background: 'var(--bg-surface)', border: '1px solid var(--border-glass)', borderRadius: '8px' }}>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', flex: 1 }}>{mName}</span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>{curr}</span>
+                              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{curr}</span>
                               <input
                                 type="number"
                                 step="0.01"
@@ -886,7 +886,7 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                       fontSize: '0.75rem'
                     }}>
                       <span style={{ color: splitAnalysis.isValid ? '#34d399' : '#fbbf24', fontWeight: 600 }}>{splitAnalysis.message}</span>
-                      <span style={{ fontWeight: 800, color: '#f8fafc' }}>Total: {splitAnalysis.totalPct || 0}%</span>
+                      <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>Total: {splitAnalysis.totalPct || 0}%</span>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', maxHeight: '160px', overflowY: 'auto' }}>
@@ -897,8 +897,8 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                         const calcShare = numTotalAmount > 0 && pctVal ? ((numTotalAmount * (parseFloat(pctVal) || 0)) / 100).toFixed(2) : null;
 
                         return (
-                          <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', padding: '0.35rem 0.5rem', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '8px' }}>
-                            <span style={{ fontSize: '0.8rem', color: '#cbd5e1', flex: 1 }}>{mName}</span>
+                          <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', padding: '0.35rem 0.5rem', background: 'var(--bg-surface)', border: '1px solid var(--border-glass)', borderRadius: '8px' }}>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', flex: 1 }}>{mName}</span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                                 <input

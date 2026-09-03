@@ -87,21 +87,21 @@ export default function AuthPage() {
             Simplify Hostel & Group Expenses in <span style={{ background: 'linear-gradient(90deg, #60a5fa, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Seconds</span>.
           </h1>
 
-          <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
             No more manual calculations or ledger disputes. Automatically calculate daily meal rates, split utility bills, settle up with UPI QR codes, and export audit PDF sheets.
           </p>
 
           {/* Feature Bullets */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: '#cbd5e1', fontSize: '0.88rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
               <div style={{ padding: '0.3rem', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399' }}>✓</div>
               <span><strong>Dynamic Meal Rate</strong> (Variable Grocery ÷ Total Meals)</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: '#cbd5e1', fontSize: '0.88rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
               <div style={{ padding: '0.3rem', borderRadius: '6px', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa' }}>✓</div>
               <span><strong>Min-Cashflow Graph Solver</strong> (Fewer debt transactions)</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: '#cbd5e1', fontSize: '0.88rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
               <div style={{ padding: '0.3rem', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24' }}>✓</div>
               <span><strong>Instant UPI QR & Deep Links</strong> for GPay & PhonePe</span>
             </div>
@@ -110,7 +110,7 @@ export default function AuthPage() {
 
         {/* Right Side: Glassmorphism Auth Card */}
         <div className="glass-panel" style={{ padding: '2rem' }}>
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', background: 'rgba(15, 23, 42, 0.8)', padding: '0.25rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', background: 'var(--bg-surface)', padding: '0.25rem', borderRadius: '10px', border: '1px solid var(--border-glass)' }}>
             <button
               onClick={() => { setIsLogin(true); setError(''); }}
               style={{
@@ -119,7 +119,7 @@ export default function AuthPage() {
                 border: 'none',
                 borderRadius: '8px',
                 background: isLogin ? '#3b82f6' : 'transparent',
-                color: '#fff',
+                color: isLogin ? '#fff' : 'var(--text-secondary)',
                 fontWeight: 600,
                 fontSize: '0.85rem',
                 cursor: 'pointer'
@@ -135,7 +135,7 @@ export default function AuthPage() {
                 border: 'none',
                 borderRadius: '8px',
                 background: !isLogin ? '#3b82f6' : 'transparent',
-                color: '#fff',
+                color: !isLogin ? '#fff' : 'var(--text-secondary)',
                 fontWeight: 600,
                 fontSize: '0.85rem',
                 cursor: 'pointer'

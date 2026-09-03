@@ -266,12 +266,12 @@ export default function MessMealTracker({ group, onMealUpdated }) {
             <strong style={{ fontSize: '0.88rem', color: '#93c5fd' }}>
               Monthly Candidate Meal Counts & Guest Billing
             </strong>
-            <p style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+            <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
               Directly enter the total meals eaten by each candidate this month (e.g. 54, 55, 40) and any guest meals hosted.
             </p>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Total Candidates: </span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Total Candidates: </span>
             <strong style={{ color: '#fbbf24', fontSize: '0.95rem' }}>{members.length}</strong>
           </div>
         </div>
@@ -293,7 +293,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
             <strong style={{ fontSize: '0.85rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
               ⚙️ Guest Meal Price Settings ({curr})
             </strong>
-            <p style={{ fontSize: '0.72rem', color: '#94a3b8', margin: 0 }}>
+            <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: 0 }}>
               Admin can change rates here. Guest charges calculate automatically below.
             </p>
           </div>
@@ -309,7 +309,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                   const val = parseFloat(e.target.value) || 0;
                   setGuestRates(r => ({ ...r, veg: val }));
                 }}
-                style={{ width: '48px', padding: '0.25rem', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(52, 211, 153, 0.5)', borderRadius: '6px', color: '#34d399', fontSize: '0.8rem', textAlign: 'center', fontWeight: 700 }}
+                style={{ width: '48px', padding: '0.25rem', background: 'var(--bg-surface-elevated)', border: '1px solid rgba(52, 211, 153, 0.5)', borderRadius: '6px', color: '#34d399', fontSize: '0.8rem', textAlign: 'center', fontWeight: 700 }}
               />
             </div>
 
@@ -323,7 +323,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                   const val = parseFloat(e.target.value) || 0;
                   setGuestRates(r => ({ ...r, fish: val }));
                 }}
-                style={{ width: '48px', padding: '0.25rem', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(96, 165, 250, 0.5)', borderRadius: '6px', color: '#60a5fa', fontSize: '0.8rem', textAlign: 'center', fontWeight: 700 }}
+                style={{ width: '48px', padding: '0.25rem', background: 'var(--bg-surface-elevated)', border: '1px solid rgba(96, 165, 250, 0.5)', borderRadius: '6px', color: '#60a5fa', fontSize: '0.8rem', textAlign: 'center', fontWeight: 700 }}
               />
             </div>
 
@@ -337,7 +337,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                   const val = parseFloat(e.target.value) || 0;
                   setGuestRates(r => ({ ...r, meat: val }));
                 }}
-                style={{ width: '48px', padding: '0.25rem', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(248, 113, 113, 0.5)', borderRadius: '6px', color: '#f87171', fontSize: '0.8rem', textAlign: 'center', fontWeight: 700 }}
+                style={{ width: '48px', padding: '0.25rem', background: 'var(--bg-surface-elevated)', border: '1px solid rgba(248, 113, 113, 0.5)', borderRadius: '6px', color: '#f87171', fontSize: '0.8rem', textAlign: 'center', fontWeight: 700 }}
               />
             </div>
 
@@ -351,7 +351,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                   const val = parseFloat(e.target.value) || 0;
                   setGuestRates(r => ({ ...r, egg: val }));
                 }}
-                style={{ width: '48px', padding: '0.25rem', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(251, 191, 36, 0.5)', borderRadius: '6px', color: '#fbbf24', fontSize: '0.8rem', textAlign: 'center', fontWeight: 700 }}
+                style={{ width: '48px', padding: '0.25rem', background: 'var(--bg-surface-elevated)', border: '1px solid rgba(251, 191, 36, 0.5)', borderRadius: '6px', color: '#fbbf24', fontSize: '0.8rem', textAlign: 'center', fontWeight: 700 }}
               />
             </div>
 
@@ -381,9 +381,23 @@ export default function MessMealTracker({ group, onMealUpdated }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '1.5rem' }}>
           {members.map((member, idx) => {
             const key = member.id || member.user_id;
-            const entry = monthlyEntries[key] || { total_meals: 45.0, guest_veg: 0, guest_fish: 0, guest_meat: 0, guest_egg: 0, guest_charge: 0, is_manual_charge: false };
-            const memberDisplayName = member.name || member.user?.name || member.email;
-            const computedCharge = entry.is_manual_charge ? (entry.guest_charge || 0) : calcAutoCharge(entry, guestRates);
+            const entry = monthlyEntries[key] || {
+              member_id: member.id,
+              user_id: member.user_id,
+              total_meals: 45.0,
+              guest_veg: 0,
+              guest_fish: 0,
+              guest_meat: 0,
+              guest_egg: 0,
+              guest_charge: 0,
+              is_manual_charge: false
+            };
+
+            const computedCharge = entry.is_manual_charge 
+              ? (parseFloat(entry.guest_charge) || 0) 
+              : calcAutoCharge(entry, guestRates);
+
+            const memberDisplayName = member.name || member.user?.name || member.email || `Member ${idx + 1}`;
 
             return (
               <div
@@ -394,22 +408,22 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                   justifyContent: 'space-between',
                   flexWrap: 'wrap',
                   gap: '0.75rem',
-                  background: 'rgba(15, 23, 42, 0.6)',
+                  background: 'var(--bg-surface)',
                   padding: '0.75rem 1rem',
                   borderRadius: '12px',
-                  border: '1px solid rgba(255, 255, 255, 0.05)'
+                  border: '1px solid var(--border-glass)'
                 }}
               >
                 {/* Candidate Name & Role */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: '160px' }}>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: '#94a3b8' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--bg-surface-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                     {idx + 1}
                   </span>
                   <div>
-                    <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#f8fafc' }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                       {memberDisplayName}
                     </span>
-                    <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
                       {member.role} {member.is_virtual === 'true' ? '• Virtual' : ''}
                     </div>
                   </div>
@@ -417,15 +431,15 @@ export default function MessMealTracker({ group, onMealUpdated }) {
 
                 {/* Total Member Meals Input */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <label style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Member Meals:</label>
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.4)', borderRadius: '8px', padding: '0.15rem' }}>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Member Meals:</label>
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-glass)', borderRadius: '8px', padding: '0.15rem' }}>
                     <button
                       type="button"
                       onClick={() => setMonthlyEntries(prev => ({
                         ...prev,
                         [key]: { ...entry, total_meals: Math.max(0, parseFloat(entry.total_meals || 0) - 1) }
                       }))}
-                      style={{ width: '26px', height: '26px', background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
+                      style={{ width: '26px', height: '26px', background: 'var(--bg-surface)', border: '1px solid var(--border-glass)', borderRadius: '4px', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 700 }}
                     >
                       -
                     </button>
@@ -442,7 +456,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                         width: '55px',
                         background: 'transparent',
                         border: 'none',
-                        color: '#fbbf24',
+                        color: 'var(--accent-warning)',
                         textAlign: 'center',
                         fontSize: '0.95rem',
                         fontWeight: 800,
@@ -455,7 +469,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                         ...prev,
                         [key]: { ...entry, total_meals: parseFloat(entry.total_meals || 0) + 1 }
                       }))}
-                      style={{ width: '26px', height: '26px', background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
+                      style={{ width: '26px', height: '26px', background: 'var(--bg-surface)', border: '1px solid var(--border-glass)', borderRadius: '4px', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 700 }}
                     >
                       +
                     </button>
@@ -472,7 +486,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                       value={entry.guest_veg || ''}
                       placeholder="0"
                       onChange={(e) => updateGuestCount(key, 'guest_veg', e.target.value)}
-                      style={{ width: '38px', padding: '0.2rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', color: '#f8fafc', fontSize: '0.75rem', textAlign: 'center' }}
+                      style={{ width: '38px', padding: '0.2rem', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-glass)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.75rem', textAlign: 'center' }}
                     />
                   </div>
 
@@ -484,7 +498,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                       value={entry.guest_fish || ''}
                       placeholder="0"
                       onChange={(e) => updateGuestCount(key, 'guest_fish', e.target.value)}
-                      style={{ width: '38px', padding: '0.2rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', color: '#f8fafc', fontSize: '0.75rem', textAlign: 'center' }}
+                      style={{ width: '38px', padding: '0.2rem', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-glass)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.75rem', textAlign: 'center' }}
                     />
                   </div>
 
@@ -496,7 +510,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                       value={entry.guest_meat || ''}
                       placeholder="0"
                       onChange={(e) => updateGuestCount(key, 'guest_meat', e.target.value)}
-                      style={{ width: '38px', padding: '0.2rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', color: '#f8fafc', fontSize: '0.75rem', textAlign: 'center' }}
+                      style={{ width: '38px', padding: '0.2rem', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-glass)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.75rem', textAlign: 'center' }}
                     />
                   </div>
 
@@ -508,7 +522,7 @@ export default function MessMealTracker({ group, onMealUpdated }) {
                       value={entry.guest_egg || ''}
                       placeholder="0"
                       onChange={(e) => updateGuestCount(key, 'guest_egg', e.target.value)}
-                      style={{ width: '38px', padding: '0.2rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', color: '#f8fafc', fontSize: '0.75rem', textAlign: 'center' }}
+                      style={{ width: '38px', padding: '0.2rem', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-glass)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.75rem', textAlign: 'center' }}
                     />
                   </div>
 

@@ -290,7 +290,7 @@ export default function ExpenseList({
 
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                        <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f8fafc' }}>
+                        <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                           {exp.title}
                         </h4>
                         
@@ -309,8 +309,8 @@ export default function ExpenseList({
                           {badge.icon} {badge.label}
                         </span>
                       </div>
-                      <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.15rem' }}>
-                        Paid by <strong style={{ color: isPayer ? '#60a5fa' : '#cbd5e1' }}>{isPayer ? 'You' : getPayerName(exp)}</strong> • {exp.expense_date} • <span style={{ textTransform: 'capitalize' }}>{exp.category.toLowerCase().replace('_', ' ')}</span>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                        Paid by <strong style={{ color: isPayer ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>{isPayer ? 'You' : getPayerName(exp)}</strong> • {exp.expense_date} • <span style={{ textTransform: 'capitalize' }}>{exp.category.toLowerCase().replace('_', ' ')}</span>
                       </p>
                     </div>
                   </div>
@@ -318,7 +318,7 @@ export default function ExpenseList({
                   {/* Right: Amount & Actions */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc' }}>
+                      <span style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                         {curr}{exp.amount.toFixed(2)}
                       </span>
                     </div>
@@ -328,9 +328,9 @@ export default function ExpenseList({
                       <button
                         onClick={() => setExpandedExpenseId(isExpanded ? null : exp.id)}
                         style={{
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: '#94a3b8',
+                          background: 'var(--bg-surface)',
+                          border: '1px solid var(--border-glass)',
+                          color: 'var(--text-secondary)',
                           borderRadius: '6px',
                           padding: '0.35rem',
                           cursor: 'pointer',
@@ -358,13 +358,13 @@ export default function ExpenseList({
                 {isExpanded && hasCustomSplits && (
                   <div style={{
                     padding: '0.75rem 1.15rem',
-                    background: 'rgba(10, 15, 26, 0.6)',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                    background: 'var(--bg-secondary)',
+                    borderTop: '1px solid var(--border-glass)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '0.35rem'
                   }}>
-                    <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
                       Individual Share Breakdown:
                     </span>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -377,15 +377,15 @@ export default function ExpenseList({
                             gap: '0.4rem',
                             padding: '0.3rem 0.6rem',
                             borderRadius: '6px',
-                            background: 'rgba(255, 255, 255, 0.04)',
-                            border: '1px solid rgba(255, 255, 255, 0.06)',
+                            background: 'var(--bg-surface)',
+                            border: '1px solid var(--border-glass)',
                             fontSize: '0.76rem'
                           }}
                         >
-                          <span style={{ color: '#cbd5e1' }}>{getMemberDisplayName(sp)}:</span>
-                          <strong style={{ color: '#60a5fa' }}>{curr}{sp.share_amount?.toFixed(2)}</strong>
+                          <span style={{ color: 'var(--text-secondary)' }}>{getMemberDisplayName(sp)}:</span>
+                          <strong style={{ color: 'var(--accent-primary)' }}>{curr}{sp.share_amount?.toFixed(2)}</strong>
                           {sp.percentage > 0 && (
-                            <span style={{ color: '#94a3b8', fontSize: '0.68rem' }}>({sp.percentage}%)</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>({sp.percentage}%)</span>
                           )}
                         </div>
                       ))}

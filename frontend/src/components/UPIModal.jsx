@@ -158,19 +158,19 @@ export default function UPIModal({ transaction, group, onClose, onMarkSettled, o
       <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px', textAlign: 'center' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
             <Smartphone size={20} color="#3b82f6" /> Instant UPI Payment
           </h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
         </div>
 
         {/* Payment Amount Display */}
-        <div style={{ background: 'rgba(15, 23, 42, 0.7)', borderRadius: '12px', padding: '1rem', marginBottom: '1.25rem', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-          <p style={{ fontSize: '0.78rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Amount to Pay</p>
+        <div style={{ background: 'var(--bg-surface)', borderRadius: '12px', padding: '1rem', marginBottom: '1.25rem', border: '1px solid var(--border-glass)' }}>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Amount to Pay</p>
           <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#34d399', margin: '0.25rem 0' }}>
             {curr}{transaction.amount.toFixed(2)}
           </h2>
-          <p style={{ fontSize: '0.85rem', color: '#f8fafc' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>
             To <strong>{transaction.payee_name}</strong>
           </p>
         </div>
@@ -191,7 +191,7 @@ export default function UPIModal({ transaction, group, onClose, onMarkSettled, o
                 {currentUpiId ? `Update UPI ID for ${transaction.payee_name}` : `Add UPI ID for ${transaction.payee_name}`}
               </strong>
             </div>
-            <p style={{ fontSize: '0.75rem', color: '#cbd5e1', marginBottom: '0.75rem' }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
               Enter the payee/manager's UPI ID to generate an instant QR Code & direct UPI payment link:
             </p>
 
@@ -219,9 +219,9 @@ export default function UPIModal({ transaction, group, onClose, onMarkSettled, o
                     type="button"
                     onClick={() => handleApplyHandle(h)}
                     style={{
-                      background: 'rgba(255, 255, 255, 0.06)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#94a3b8',
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-glass)',
+                      color: 'var(--text-secondary)',
                       borderRadius: '6px',
                       padding: '0.2rem 0.45rem',
                       fontSize: '0.72rem',
@@ -279,7 +279,7 @@ export default function UPIModal({ transaction, group, onClose, onMarkSettled, o
                     style={{ width: '180px', height: '180px', display: 'block' }}
                   />
                 </div>
-                <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.65rem', marginBottom: '0.75rem' }}>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.65rem', marginBottom: '0.75rem' }}>
                   Scan using Google Pay, PhonePe, Paytm, or BHIM
                 </p>
 
@@ -292,7 +292,7 @@ export default function UPIModal({ transaction, group, onClose, onMarkSettled, o
                       flex: 1,
                       background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.35))',
                       border: '1px solid rgba(59, 130, 246, 0.45)',
-                      color: '#93c5fd',
+                      color: 'var(--accent-primary)',
                       padding: '0.55rem 0.85rem',
                       borderRadius: '10px',
                       fontSize: '0.82rem',
@@ -322,9 +322,9 @@ export default function UPIModal({ transaction, group, onClose, onMarkSettled, o
                     className="btn"
                     title="Download QR Image"
                     style={{
-                      background: 'rgba(255, 255, 255, 0.06)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#cbd5e1',
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-glass)',
+                      color: 'var(--text-secondary)',
                       padding: '0.55rem 0.85rem',
                       borderRadius: '10px',
                       fontSize: '0.82rem',
@@ -370,21 +370,21 @@ export default function UPIModal({ transaction, group, onClose, onMarkSettled, o
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-glass)',
                 borderRadius: '10px',
                 padding: '0.6rem 0.85rem',
                 marginBottom: '1.25rem',
                 fontSize: '0.82rem'
               }}>
-                <span style={{ color: '#cbd5e1', fontFamily: 'var(--font-mono)' }}>{currentUpiId}</span>
+                <span style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{currentUpiId}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <button
                     onClick={copyUpiId}
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#60a5fa',
+                      color: 'var(--accent-primary)',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -405,7 +405,7 @@ export default function UPIModal({ transaction, group, onClose, onMarkSettled, o
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#94a3b8',
+                      color: 'var(--text-muted)',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
