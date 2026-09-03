@@ -459,7 +459,27 @@ def generate_group_pdf_report(data: Dict[str, Any], simplified_settlements: List
         subtitle_style
     ))
 
-    doc.build(story)
+    def draw_watermark_and_footer(canvas, doc):
+        canvas.saveState()
+        # 1. Elegant diagonal website name watermark
+        canvas.setFont("Helvetica-Bold", 46)
+        canvas.setFillColor(colors.HexColor("#0f172a"), alpha=0.04)
+        canvas.translate(doc.pagesize[0] / 2.0, doc.pagesize[1] / 2.0)
+        canvas.rotate(32)
+        canvas.drawCentredString(0, 15, "MESS & EXPENSE SPLITTER")
+        canvas.setFont("Helvetica", 15)
+        canvas.drawCentredString(0, -18, "HOSTEL • TOURS • FLATMATES • EXPENSE MANAGER")
+        canvas.restoreState()
+
+        # 2. Bottom footer timestamp and page counter
+        canvas.saveState()
+        canvas.setFont("Helvetica", 8)
+        canvas.setFillColor(colors.HexColor("#64748b"))
+        canvas.drawString(24, 12, f"Mess & Expense Splitter • Khatabook Audit Statement • {datetime.now().strftime('%d %b %Y, %I:%M %p')}")
+        canvas.drawRightString(doc.pagesize[0] - 24, 12, f"Page {canvas.getPageNumber()} • Official Report")
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=draw_watermark_and_footer, onLaterPages=draw_watermark_and_footer)
     return buffer.getvalue()
 
 # Backward compatibility alias
