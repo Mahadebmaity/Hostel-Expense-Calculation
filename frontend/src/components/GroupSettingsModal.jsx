@@ -255,7 +255,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
             className={`btn ${activeTab === 'deposits' ? 'btn-primary' : 'btn-secondary'}`}
             style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0 }}
           >
-            {group.group_type === 'MESS' ? 'Manage Marketing & Deposits' : 'Manage Advance Deposits'}
+            {group.group_type === 'TRIP' ? 'Manage Advance Deposits' : 'Manage Marketing & Deposits'}
           </button>
           {group.group_type === 'MESS' && (
             <button
@@ -373,7 +373,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                     onChange={(e) => setInviteDeposit(e.target.value)}
                   />
                 </div>
-                {group.group_type === 'MESS' && (
+                {group.group_type !== 'TRIP' && (
                   <>
                     <div>
                       <label style={{ fontSize: '0.72rem', color: '#34d399', display: 'block', marginBottom: '0.2rem' }}>Bazar Spent ({curr})</label>
@@ -464,7 +464,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                           </span>
                         </div>
                         <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: '0.15rem' }}>
-                          Deposit: {curr}{m.initial_deposit?.toFixed(0) || 0} {group.group_type === 'MESS' && mktAmt > 0 ? `• Marketing: ${curr}${mktAmt.toFixed(0)} (${mktDays}d)` : ''}
+                          Deposit: {curr}{m.initial_deposit?.toFixed(0) || 0} {group.group_type !== 'TRIP' && mktAmt > 0 ? `• Marketing: ${curr}${mktAmt.toFixed(0)} (${mktDays}d)` : ''}
                         </div>
                       </div>
 
@@ -563,30 +563,26 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
         {activeTab === 'deposits' && (
           <form onSubmit={handleUpdateDeposit} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-glass)', padding: '1.1rem', borderRadius: '12px' }}>
             <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>
-              {group.group_type === 'MESS' 
-                ? '💰 Manage Candidate Deposit & Marketing (Sabji / Fish)' 
-                : (group.group_type === 'TRIP' 
-                    ? '💰 Manage Traveler Advance Pool Deposits' 
-                    : (group.group_type === 'FLATMATES' 
-                        ? '💰 Manage Roommate Advance Deposits' 
-                        : '💰 Manage Member Advance Deposits'))}
+              {group.group_type === 'TRIP' 
+                ? '💰 Manage Traveler Advance Pool Deposits' 
+                : '💰 Manage Deposit & Marketing (Sabji / Fish / Groceries)'}
             </h4>
             <p style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: '1.3' }}>
-              {group.group_type === 'MESS' ? (
+              {group.group_type === 'TRIP' ? (
                 <>
-                  • <strong>Advance Deposit</strong>: Advance money given to Manager.<br/>
-                  • <strong>Bazar Marketing</strong>: Money spent on Bazar by candidate (added directly to Meal Charge calculation).
+                  • <strong>Advance Deposit</strong>: Pooled advance fund contributed by this member for group expenses and bookings.
                 </>
               ) : (
                 <>
-                  • <strong>Advance Deposit</strong>: Pooled advance fund contributed by this member for group expenses and bookings.
+                  • <strong>Advance Deposit</strong>: Advance money given to Manager.<br/>
+                  • <strong>Bazar Marketing</strong>: Money spent on Bazar by candidate/roommate (added directly to calculation).
                 </>
               )}
             </p>
 
             <div className="form-group" style={{ marginBottom: '0.85rem' }}>
               <label className="form-label">
-                {group.group_type === 'MESS' ? 'Select Candidate / Member' : 'Select Member'}
+                {group.group_type === 'TRIP' ? 'Select Member' : 'Select Candidate / Member'}
               </label>
               <select
                 className="form-select"
@@ -595,9 +591,9 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
               >
                 {group.members?.map(m => (
                   <option key={m.id || m.user_id} value={m.id || m.user_id}>
-                    {m.name || m.user?.name || m.email} ({group.group_type === 'MESS' 
-                      ? `Deposit: ${curr}${m.initial_deposit} | Marketing: ${curr}${m.marketing_amount || 0}` 
-                      : `Advance Deposit: ${curr}${m.initial_deposit || 0}`})
+                    {m.name || m.user?.name || m.email} ({group.group_type === 'TRIP' 
+                      ? `Advance Deposit: ${curr}${m.initial_deposit || 0}` 
+                      : `Deposit: ${curr}${m.initial_deposit} | Marketing: ${curr}${m.marketing_amount || 0}`})
                   </option>
                 ))}
               </select>
@@ -626,7 +622,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                   onChange={(e) => setDepositAmount(e.target.value)}
                 />
               </div>
-              {group.group_type === 'MESS' && (
+              {group.group_type !== 'TRIP' && (
                 <>
                   <div className="form-group">
                     <label className="form-label" style={{ color: '#34d399' }}>Bazar Spent ({curr})</label>
@@ -655,7 +651,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
             </div>
 
             <button type="submit" disabled={updatingDeposit} className="btn btn-primary" style={{ width: '100%' }}>
-              {updatingDeposit ? 'Updating...' : (group.group_type === 'MESS' ? 'Save Deposit & Marketing Records' : 'Save Advance Deposit Records')}
+              {updatingDeposit ? 'Updating...' : (group.group_type === 'TRIP' ? 'Save Advance Deposit Records' : 'Save Deposit & Marketing Records')}
             </button>
           </form>
         )}
