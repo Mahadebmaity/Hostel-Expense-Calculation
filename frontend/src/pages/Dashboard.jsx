@@ -43,8 +43,14 @@ export default function Dashboard() {
   // Modals
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showGroupSettings, setShowGroupSettings] = useState(false);
+  const [groupSettingsTab, setGroupSettingsTab] = useState('members');
   const [showNewGroupModal, setShowNewGroupModal] = useState(false);
   const [showQuickAddMemberModal, setShowQuickAddMemberModal] = useState(false);
+
+  const openGroupSettings = (tab = 'members') => {
+    setGroupSettingsTab(tab);
+    setShowGroupSettings(true);
+  };
 
   // Quick Add Member Form
   const [quickMemberName, setQuickMemberName] = useState('');
@@ -195,7 +201,7 @@ export default function Dashboard() {
           }
         }}
         onOpenNewGroup={() => setShowNewGroupModal(true)}
-        onOpenSettings={() => setShowGroupSettings(true)}
+        onOpenSettings={() => openGroupSettings('members')}
         onGroupDeleted={() => loadGroups()}
         activeTab={activeTab}
         onSwitchTab={(t) => setActiveTab(t)}
@@ -219,8 +225,14 @@ export default function Dashboard() {
               group={null}
               onSwitchTab={(t) => setActiveTab(t)}
               onOpenAddExpense={() => setShowAddExpense(true)}
-              onOpenAddMember={() => setShowQuickAddMemberModal(true)}
-              onOpenSettings={() => setShowGroupSettings(true)}
+              onOpenAddMember={() => {
+                if (selectedGroup) {
+                  openGroupSettings('members');
+                } else {
+                  setShowNewGroupModal(true);
+                }
+              }}
+              onOpenSettings={() => openGroupSettings('members')}
               onOpenNewGroup={() => setShowNewGroupModal(true)}
             />
             <div className="glass-panel" style={{ padding: '3.5rem 2rem', textAlign: 'center', maxWidth: '500px', margin: '2rem auto' }}>
@@ -256,8 +268,8 @@ export default function Dashboard() {
                 }, 60);
               }}
               onOpenAddExpense={() => setShowAddExpense(true)}
-              onOpenAddMember={() => setShowQuickAddMemberModal(true)}
-              onOpenSettings={() => setShowGroupSettings(true)}
+              onOpenAddMember={() => openGroupSettings('members')}
+              onOpenSettings={() => openGroupSettings('members')}
               onOpenNewGroup={() => setShowNewGroupModal(true)}
             />
 
@@ -287,7 +299,7 @@ export default function Dashboard() {
 
               <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
                 <button
-                  onClick={() => setShowQuickAddMemberModal(true)}
+                  onClick={() => openGroupSettings('members')}
                   className="btn btn-secondary"
                   style={{ fontSize: '0.82rem', padding: '0.45rem 0.85rem' }}
                 >
@@ -301,7 +313,7 @@ export default function Dashboard() {
                   <PlusCircle size={15} /> + Add Expense
                 </button>
                 <button
-                  onClick={() => setShowGroupSettings(true)}
+                  onClick={() => openGroupSettings('members')}
                   className="btn btn-secondary"
                   style={{ padding: '0.45rem 0.7rem' }}
                   title="Group Settings"
@@ -552,6 +564,7 @@ export default function Dashboard() {
           onGroupUpdated={refreshGroupData}
           onGroupDeleted={() => loadGroups()}
           currentUserId={user?.id}
+          initialTab={groupSettingsTab}
         />
       )}
 

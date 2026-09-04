@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { Settings, UserPlus, Trash2, DollarSign, Sliders, Shield, UserCheck, AlertTriangle, Edit3, Check, Smartphone } from 'lucide-react';
 
-export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onGroupDeleted, currentUserId }) {
-  const [activeTab, setActiveTab] = useState('members'); // 'members', 'deposits', 'rules'
+export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onGroupDeleted, currentUserId, initialTab = 'members' }) {
+  const [activeTab, setActiveTab] = useState(initialTab || 'members'); // 'members', 'deposits', 'rules'
+  
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
   
   // Add member
   const [memberName, setMemberName] = useState('');
