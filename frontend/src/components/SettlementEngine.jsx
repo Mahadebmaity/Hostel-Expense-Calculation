@@ -792,32 +792,38 @@ export default function SettlementEngine({
                   </tr>
                 </thead>
                 <tbody>
-                  {displayData.establishment_breakdown?.map((item, idx) => (
-                    <tr key={`est_${idx}`} style={{ borderBottom: '1px solid var(--border-glass)', background: 'rgba(59, 130, 246, 0.03)' }}>
-                      <td style={{ padding: '0.6rem 0.85rem' }}>
-                        <span className="badge badge-category" style={{ fontSize: '0.7rem', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
-                          Fixed Utility
-                        </span>
-                      </td>
-                      <td style={{ padding: '0.6rem 0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</td>
-                      <td style={{ padding: '0.6rem 0.85rem', color: 'var(--text-secondary)' }}>{item.payer_name || 'Group Fund'}</td>
-                      <td style={{ padding: '0.6rem 0.85rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.date || '—'}</td>
-                      <td style={{ padding: '0.6rem 0.85rem', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>{curr}{item.amount.toFixed(2)}</td>
-                    </tr>
-                  ))}
-                  {displayData.meal_pool_breakdown?.map((item, idx) => (
-                    <tr key={`mkt_${idx}`} style={{ borderBottom: '1px solid var(--border-glass)', background: 'rgba(16, 185, 129, 0.03)' }}>
-                      <td style={{ padding: '0.6rem 0.85rem' }}>
-                        <span className="badge badge-category" style={{ fontSize: '0.7rem', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-                          {item.category === 'MARKETING' ? 'Marketing / Bazar' : 'Shared Grocery'}
-                        </span>
-                      </td>
-                      <td style={{ padding: '0.6rem 0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</td>
-                      <td style={{ padding: '0.6rem 0.85rem', color: 'var(--text-secondary)' }}>{item.payer_name || 'Group Fund'}</td>
-                      <td style={{ padding: '0.6rem 0.85rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.date || '—'}</td>
-                      <td style={{ padding: '0.6rem 0.85rem', textAlign: 'right', fontWeight: 700, color: '#10b981' }}>{curr}{item.amount.toFixed(2)}</td>
-                    </tr>
-                  ))}
+                  {displayData.establishment_breakdown?.map((item, idx) => {
+                    const catLabel = (item.category || 'Fixed Utility').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    return (
+                      <tr key={`est_${idx}`} style={{ borderBottom: '1px solid var(--border-glass)', background: 'rgba(59, 130, 246, 0.03)' }}>
+                        <td style={{ padding: '0.6rem 0.85rem' }}>
+                          <span className="badge badge-category" style={{ fontSize: '0.7rem', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
+                            {catLabel}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.6rem 0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</td>
+                        <td style={{ padding: '0.6rem 0.85rem', color: 'var(--text-secondary)' }}>{item.payer_name || 'Group Fund'}</td>
+                        <td style={{ padding: '0.6rem 0.85rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.date || '—'}</td>
+                        <td style={{ padding: '0.6rem 0.85rem', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>{curr}{item.amount.toFixed(2)}</td>
+                      </tr>
+                    );
+                  })}
+                  {displayData.meal_pool_breakdown?.map((item, idx) => {
+                    const catLabel = (item.category === 'MARKETING' ? 'Marketing / Bazar' : (item.category || 'Grocery')).replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    return (
+                      <tr key={`mkt_${idx}`} style={{ borderBottom: '1px solid var(--border-glass)', background: 'rgba(16, 185, 129, 0.03)' }}>
+                        <td style={{ padding: '0.6rem 0.85rem' }}>
+                          <span className="badge badge-category" style={{ fontSize: '0.7rem', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                            {catLabel}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.6rem 0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</td>
+                        <td style={{ padding: '0.6rem 0.85rem', color: 'var(--text-secondary)' }}>{item.payer_name || 'Group Fund'}</td>
+                        <td style={{ padding: '0.6rem 0.85rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.date || '—'}</td>
+                        <td style={{ padding: '0.6rem 0.85rem', textAlign: 'right', fontWeight: 700, color: '#10b981' }}>{curr}{item.amount.toFixed(2)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

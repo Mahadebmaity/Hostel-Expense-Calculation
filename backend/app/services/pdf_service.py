@@ -411,18 +411,20 @@ def generate_group_pdf_report(data: Dict[str, Any], simplified_settlements: List
         breakdown_rows = [mkt_headers]
 
         for item in establishment_items:
-            cat_label = "Fixed (Est)" if group_type == "MESS" else "Fixed / Utility"
+            raw_cat = item.get("category") or ("Fixed (Est)" if group_type == "MESS" else "Fixed Utility")
+            cat_label = raw_cat.replace("_", " ").title()
             breakdown_rows.append([
-                Paragraph(f"<font color='{theme['primary']}'>{cat_label}</font>", cell_style),
+                Paragraph(f"<font color='{theme['primary']}'><b>{cat_label}</b></font>", cell_style),
                 Paragraph(item.get("title", ""), cell_style),
                 Paragraph(item.get("payer_name", "Group Fund"), cell_style),
                 Paragraph(f"{curr_symbol}{item.get('amount', 0.0):,.2f}", cell_style)
             ])
 
         for item in meal_pool_items:
-            cat_label = "Bazar Pool" if group_type == "MESS" else "Shared Bill"
+            raw_cat = item.get("category") or ("Bazar Pool" if group_type == "MESS" else "Grocery")
+            cat_label = raw_cat.replace("_", " ").title()
             breakdown_rows.append([
-                Paragraph(f"<font color='#16a34a'>{cat_label}</font>", cell_style),
+                Paragraph(f"<font color='#16a34a'><b>{cat_label}</b></font>", cell_style),
                 Paragraph(item.get("title", ""), cell_style),
                 Paragraph(item.get("payer_name", "Group Fund"), cell_style),
                 Paragraph(f"{curr_symbol}{item.get('amount', 0.0):,.2f}", cell_style)
