@@ -6,24 +6,40 @@ import {
   Receipt, 
   ArrowUpRight, 
   ArrowDownRight,
-  ShieldCheck
+  ShieldCheck,
+  Coins
 } from 'lucide-react';
 
 export default function MetricCards({ balances, currentUserId }) {
   if (!balances) return null;
 
-  const myRecord = balances.member_balances?.find(m => m.user_id === currentUserId);
+  const myRecord = balances.member_balances?.find(m => 
+    m.user_id === currentUserId || m.member_id === currentUserId || m.id === currentUserId
+  ) || (balances.member_balances?.length === 1 ? balances.member_balances[0] : null);
+
   const myNetBalance = myRecord ? myRecord.net_balance : 0.0;
   const isRefund = myNetBalance >= 0;
-  const curr = balances.currency === 'INR' ? '₹' : balances.currency;
+  const curr = balances.currency === 'INR' ? '₹' : (balances.currency || '₹');
 
   const isMess = balances.group_type === 'MESS';
   const isTrip = balances.group_type === 'TRIP';
 
+  // Total Group Advance collected across all members
+  const totalGroupAdvance = balances.total_advance_deposits ?? (
+    balances.member_balances?.reduce((sum, m) => sum + Number(m.initial_deposit ?? m.deposit_paid ?? m.advance_payment ?? 0), 0) ?? 0
+  );
+  const totalExpenses = balances.total_trip_expense || balances.total_expenses || 0;
+  const advanceRemaining = totalGroupAdvance - totalExpenses;
+
+  // My Deposits & Direct Paid
+  const myDeposit = Number(myRecord?.initial_deposit ?? myRecord?.deposit_paid ?? myRecord?.advance_payment ?? 0);
+  const myDirect = Number(myRecord?.direct_expenses_paid ?? 0);
+  const myTotalPaid = myRecord ? (myRecord.total_paid ?? (myDeposit + myDirect)) : 0.0;
+
   return (
     <div className="metric-cards-grid" style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
       gap: '1rem',
       marginBottom: '1.5rem'
     }}>
@@ -69,7 +85,7 @@ export default function MetricCards({ balances, currentUserId }) {
           </div>
         </div>
         <h2 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-          {curr}{(balances.total_trip_expense || balances.total_expenses || 0).toFixed(2)}
+          {curr}{totalExpenses.toFixed(2)}
         </h2>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
           {isMess 
@@ -80,7 +96,27 @@ export default function MetricCards({ balances, currentUserId }) {
         </p>
       </div>
 
-      {/* 3. Dynamic Meal Rate (If Mess) / Trip Budget (If Trip) / Total Members */}
+      {/* 3. Total Group Advance (Advance Pool) */}
+      <div className="glass-panel" style={{ padding: '1.25rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+            Total Group Advance
+          </span>
+          <div style={{ padding: '0.4rem', borderRadius: '8px', background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4' }}>
+            <Coins size={18} />
+          </div>
+        </div>
+        <h2 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#06b6d4' }}>
+          {curr}{totalGroupAdvance.toFixed(2)}
+        </h2>
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+          {totalExpenses > 0 
+            ? `Pool Balance: ${curr}${advanceRemaining >= 0 ? advanceRemaining.toFixed(0) : 0} remaining`
+            : `Pool from all ${balances.member_balances?.length || 0} members`}
+        </p>
+      </div>
+
+      {/* 4. Dynamic Meal Rate (If Mess) / Trip Budget (If Trip) / Total Members */}
       {isMess ? (
         <div className="glass-panel" style={{ padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
@@ -134,7 +170,7 @@ export default function MetricCards({ balances, currentUserId }) {
         </div>
       )}
 
-      {/* 4. My Deposits / Contributed */}
+      {/* 5. My Deposits / Contributed */}
       <div className="glass-panel" style={{ padding: '1.25rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
           <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
@@ -145,10 +181,10 @@ export default function MetricCards({ balances, currentUserId }) {
           </div>
         </div>
         <h2 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-          {curr}{myRecord?.total_paid?.toFixed(2) || '0.00'}
+          {curr}{myTotalPaid.toFixed(2)}
         </h2>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
-          Deposit: {curr}{myRecord?.deposit_paid?.toFixed(0) || 0} + Direct: {curr}{myRecord?.direct_expenses_paid?.toFixed(0) || 0}
+          Deposit: {curr}{myDeposit.toFixed(0)} + Direct: {curr}{myDirect.toFixed(0)}
         </p>
       </div>
     </div>
