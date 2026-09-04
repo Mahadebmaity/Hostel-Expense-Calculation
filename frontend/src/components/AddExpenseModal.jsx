@@ -76,13 +76,16 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
     fetchGroupMembers();
   }, [group?.id]);
 
+  const [defaultPayerInitialized, setDefaultPayerInitialized] = useState(false);
+
   // Set default paid_by once members are loaded
   useEffect(() => {
-    if (!paidByMemberId && members.length > 0) {
+    if (!defaultPayerInitialized && members.length > 0) {
       const match = members.find(m => m.user_id === currentUser?.id);
-      setPaidByMemberId(match ? match.id : members[0].id);
+      setPaidByMemberId(match ? match.id : 'FUND');
+      setDefaultPayerInitialized(true);
     }
-  }, [currentUser, members, paidByMemberId]);
+  }, [currentUser, members, defaultPayerInitialized]);
 
   // Initialize split maps when members load
   useEffect(() => {
@@ -334,7 +337,8 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
 
     setLoading(true);
     try {
-      const selectedMemberObj = members.find(m => (m.id === paidByMemberId || m.user_id === paidByMemberId));
+      const isFund = paidByMemberId === 'FUND' || !paidByMemberId;
+      const selectedMemberObj = isFund ? null : members.find(m => (m.id === paidByMemberId || m.user_id === paidByMemberId));
 
       const payload = {
         title: title.trim(),
@@ -343,8 +347,8 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
         split_type: isFixedCost ? 'EQUAL' : splitType,
         is_fixed_cost: isFixedCost,
         expense_date: expenseDate,
-        paid_by: selectedMemberObj?.user_id || undefined,
-        paid_by_member_id: selectedMemberObj?.id || paidByMemberId,
+        paid_by: isFund ? undefined : (selectedMemberObj?.user_id || undefined),
+        paid_by_member_id: isFund ? "FUND" : (selectedMemberObj?.id || paidByMemberId),
         splits: splitAnalysis.calculatedSplits || []
       };
 
@@ -537,7 +541,9 @@ export default function AddExpenseModal({ group, onClose, onExpenseAdded }) {
                 value={paidByMemberId}
                 onChange={(e) => setPaidByMemberId(e.target.value)}
               >
-                <option value="">🏦 {isMess ? 'Mess Collective Fund' : 'Group Collective Fund'}</option>
+                <option value="FUND">
+                  🏦 {isMess ? 'Mess Fund / Manager (Advance Pool)' : (isFlat ? 'Flat / Roommate Fund (Advance Pool)' : 'Group / Tour Collective Fund')}
+                </option>
                 {members.map(m => {
                   const mName = m.name || m.user?.name || m.email;
                   const isCur = m.user_id === currentUser?.id;

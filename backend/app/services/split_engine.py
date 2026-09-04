@@ -198,6 +198,19 @@ def calculate_common_balances(
     settlements_paid = {m.id: 0.0 for m in members}
     settlements_received = {m.id: 0.0 for m in members}
 
+    fixed_categories = {
+        "RENT", "WIFI", "ELECTRICITY", "MAID", "MAINTENANCE", "GAS", "WATER",
+        "ESTABLISHMENT", "HOTEL", "ROOM", "FLAT_RENT"
+    }
+
+    establishment_items = []
+    meal_pool_items = []
+    total_establishment = 0.0
+    total_meal_expenses = 0.0
+
+    member_establishment_share = {m.id: 0.0 for m in members}
+    member_grocery_share = {m.id: 0.0 for m in members}
+
     total_expense_sum = 0.0
 
     for exp in expenses:
@@ -213,6 +226,27 @@ def calculate_common_balances(
         if payer_mid:
             direct_paid_by_member[payer_mid] += exp.amount
 
+        # Check if Fixed / Establishment vs Shared / Groceries
+        cat_clean = (exp.category or "").strip().upper()
+        is_fixed = (exp.is_fixed_cost is True) or (exp.is_fixed_cost is None and cat_clean in fixed_categories)
+
+        payer_title = member_map[payer_mid].member_name if payer_mid else ("Mess Fund" if group.group_type == "MESS" else "Group Fund")
+        item_dict = {
+            "id": exp.id,
+            "title": exp.title,
+            "amount": exp.amount,
+            "category": exp.category,
+            "date": str(exp.expense_date),
+            "payer_name": payer_title
+        }
+
+        if is_fixed:
+            total_establishment += exp.amount
+            establishment_items.append(item_dict)
+        else:
+            total_meal_expenses += exp.amount
+            meal_pool_items.append(item_dict)
+
         # 2. Attribute who owes (participants)
         splits = db.query(ExpenseSplit).filter(ExpenseSplit.expense_id == exp.id).all()
         if splits:
@@ -220,11 +254,19 @@ def calculate_common_balances(
                 target_mid = sp.member_id or (user_to_member[sp.user_id].id if sp.user_id in user_to_member else None)
                 if target_mid and target_mid in owed_by_member:
                     owed_by_member[target_mid] += sp.share_amount
+                    if is_fixed:
+                        member_establishment_share[target_mid] += sp.share_amount
+                    else:
+                        member_grocery_share[target_mid] += sp.share_amount
         else:
             # If no explicit split rows exist, divide equally among all members with exact penny distribution
             shares = distribute_pennies(exp.amount, num_members)
             for idx, m in enumerate(members):
                 owed_by_member[m.id] += shares[idx]
+                if is_fixed:
+                    member_establishment_share[m.id] += shares[idx]
+                else:
+                    member_grocery_share[m.id] += shares[idx]
 
     # Process settlements:
     # A settlement is payer paying payee:
@@ -278,8 +320,9 @@ def calculate_common_balances(
             "lunch_count": 0.0,
             "dinner_count": 0.0,
             "total_meal_units": 0.0,
-            "meal_cost": 0.0,
-            "establishment_cost": 0.0,
+            "meal_cost": round(member_grocery_share[m.id], 2),
+            "establishment_cost": round(member_establishment_share[m.id], 2),
+            "bills_paid": round(direct_paid_by_member[m.id], 2),
             "guest_meal_count": 0.0,
             "guest_cost": 0.0,
             "guest_breakdown": [],
@@ -312,9 +355,9 @@ def calculate_common_balances(
         "total_expenses": round(total_expense_sum, 2),
         "trip_budget": round(trip_budget, 2),
         "remaining_budget": round(remaining_budget, 2),
-        "total_establishment": 0.0,
-        "establishment_per_head": 0.0,
-        "total_meal_expenses": 0.0,
+        "total_establishment": round(total_establishment, 2),
+        "establishment_per_head": round(total_establishment / num_members, 2) if num_members > 0 else 0.0,
+        "total_meal_expenses": round(total_meal_expenses, 2),
         "guest_deduction_total": 0.0,
         "net_meal_pool": 0.0,
         "total_meals": 0.0,
@@ -322,8 +365,8 @@ def calculate_common_balances(
         "total_collected": round(total_collected_pool, 2),
         "total_due": round(total_due_pool, 2),
         "total_refund": round(total_refund_pool, 2),
-        "establishment_breakdown": [],
-        "meal_pool_breakdown": [],
+        "establishment_breakdown": establishment_items,
+        "meal_pool_breakdown": meal_pool_items,
         "member_balances": member_balances
     }
 

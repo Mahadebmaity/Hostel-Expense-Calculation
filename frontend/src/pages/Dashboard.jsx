@@ -473,15 +473,29 @@ export default function Dashboard() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
                 <div className="form-group">
                   <label className="form-label">Role</label>
-                  <select
-                    className="form-select"
-                    value={quickMemberRole}
-                    onChange={(e) => setQuickMemberRole(e.target.value)}
-                  >
-                    <option value="MEMBER">Member</option>
-                    <option value="MANAGER">⭐ Manager (Single Active)</option>
-                    <option value="ADMIN">Admin</option>
-                  </select>
+                  {(() => {
+                    const existingManager = selectedGroup?.members?.find(m => m.role === 'MANAGER');
+                    return (
+                      <>
+                        <select
+                          className="form-select"
+                          value={quickMemberRole}
+                          onChange={(e) => setQuickMemberRole(e.target.value)}
+                        >
+                          <option value="MEMBER">Member</option>
+                          <option value="MANAGER" disabled={!!existingManager}>
+                            ⭐ Manager {existingManager ? `(Active: ${existingManager.name || existingManager.user?.name || 'Assigned'})` : '(Single Active)'}
+                          </option>
+                          <option value="ADMIN">Admin</option>
+                        </select>
+                        {existingManager && (
+                          <div style={{ fontSize: '0.68rem', color: '#f59e0b', marginTop: '0.25rem', lineHeight: '1.2' }}>
+                            ℹ️ Manager role is currently assigned to <strong>{existingManager.name || existingManager.user?.name}</strong>. Only 1 manager is allowed per group.
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
 
                 <div className="form-group">

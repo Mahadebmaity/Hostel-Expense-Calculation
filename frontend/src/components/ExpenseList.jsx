@@ -145,13 +145,14 @@ export default function ExpenseList({
     return defaultName;
   };
 
+  const isMess = group?.group_type === 'MESS';
   const getPayerName = (exp) => {
     if (exp.payer_name && exp.payer_name !== 'Member') return exp.payer_name;
     if (exp.payer?.name) return exp.payer.name;
     if (exp.paid_by_member_id || exp.paid_by) {
       return getMemberDisplayName(exp.paid_by_member_id || exp.paid_by, 'Member');
     }
-    return 'Member';
+    return isMess ? 'Mess Fund / Manager' : 'Group Fund';
   };
 
   const filteredExpenses = expenses.filter(exp => {

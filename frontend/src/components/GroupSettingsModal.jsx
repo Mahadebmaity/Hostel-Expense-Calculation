@@ -255,7 +255,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
             className={`btn ${activeTab === 'deposits' ? 'btn-primary' : 'btn-secondary'}`}
             style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0 }}
           >
-            Manage Marketing & Deposits
+            {group.group_type === 'MESS' ? 'Manage Marketing & Deposits' : 'Manage Advance Deposits'}
           </button>
           {group.group_type === 'MESS' && (
             <button
@@ -346,15 +346,22 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                 </div>
                 <div>
                   <label style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>Role</label>
-                  <select
-                    className="form-select"
-                    value={memberRole}
-                    onChange={(e) => setInviteRole(e.target.value)}
-                  >
-                    <option value="MEMBER">Member</option>
-                    <option value="MANAGER">⭐ Manager (Single Active)</option>
-                    <option value="ADMIN">Admin</option>
-                  </select>
+                  {(() => {
+                    const existingManager = group.members?.find(m => m.role === 'MANAGER');
+                    return (
+                      <select
+                        className="form-select"
+                        value={memberRole}
+                        onChange={(e) => setInviteRole(e.target.value)}
+                      >
+                        <option value="MEMBER">Member</option>
+                        <option value="MANAGER" disabled={!!existingManager}>
+                          ⭐ Manager {existingManager ? `(Active: ${existingManager.name || existingManager.user?.name || 'Assigned'})` : '(Single Active)'}
+                        </option>
+                        <option value="ADMIN">Admin</option>
+                      </select>
+                    );
+                  })()}
                 </div>
                 <div>
                   <label style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>Advance ({curr})</label>
@@ -366,26 +373,30 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                     onChange={(e) => setInviteDeposit(e.target.value)}
                   />
                 </div>
-                <div>
-                  <label style={{ fontSize: '0.72rem', color: '#34d399', display: 'block', marginBottom: '0.2rem' }}>Bazar Spent ({curr})</label>
-                  <input
-                    type="number"
-                    placeholder="1500"
-                    className="form-input"
-                    value={memberMktAmt}
-                    onChange={(e) => setMemberMktAmt(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.72rem', color: '#fbbf24', display: 'block', marginBottom: '0.2rem' }}>Mkt Days</label>
-                  <input
-                    type="number"
-                    placeholder="2"
-                    className="form-input"
-                    value={memberMktDays}
-                    onChange={(e) => setMemberMktDays(e.target.value)}
-                  />
-                </div>
+                {group.group_type === 'MESS' && (
+                  <>
+                    <div>
+                      <label style={{ fontSize: '0.72rem', color: '#34d399', display: 'block', marginBottom: '0.2rem' }}>Bazar Spent ({curr})</label>
+                      <input
+                        type="number"
+                        placeholder="1500"
+                        className="form-input"
+                        value={memberMktAmt}
+                        onChange={(e) => setMemberMktAmt(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.72rem', color: '#fbbf24', display: 'block', marginBottom: '0.2rem' }}>Mkt Days</label>
+                      <input
+                        type="number"
+                        placeholder="2"
+                        className="form-input"
+                        value={memberMktDays}
+                        onChange={(e) => setMemberMktDays(e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.65rem', marginBottom: '0.75rem' }}>
@@ -453,7 +464,7 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                           </span>
                         </div>
                         <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: '0.15rem' }}>
-                          Deposit: {curr}{m.initial_deposit?.toFixed(0) || 0} {mktAmt > 0 ? `• Marketing: ${curr}${mktAmt.toFixed(0)} (${mktDays}d)` : ''}
+                          Deposit: {curr}{m.initial_deposit?.toFixed(0) || 0} {group.group_type === 'MESS' && mktAmt > 0 ? `• Marketing: ${curr}${mktAmt.toFixed(0)} (${mktDays}d)` : ''}
                         </div>
                       </div>
 
@@ -552,15 +563,31 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
         {activeTab === 'deposits' && (
           <form onSubmit={handleUpdateDeposit} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-glass)', padding: '1.1rem', borderRadius: '12px' }}>
             <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>
-              💰 Manage Candidate Deposit & Marketing (Sabji / Fish)
+              {group.group_type === 'MESS' 
+                ? '💰 Manage Candidate Deposit & Marketing (Sabji / Fish)' 
+                : (group.group_type === 'TRIP' 
+                    ? '💰 Manage Traveler Advance Pool Deposits' 
+                    : (group.group_type === 'FLATMATES' 
+                        ? '💰 Manage Roommate Advance Deposits' 
+                        : '💰 Manage Member Advance Deposits'))}
             </h4>
             <p style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: '1.3' }}>
-              • <strong>Advance Deposit</strong>: Advance money given to Manager.<br/>
-              • <strong>Bazar Marketing</strong>: Money spent on Bazar by candidate (added directly to Meal Charge calculation).
+              {group.group_type === 'MESS' ? (
+                <>
+                  • <strong>Advance Deposit</strong>: Advance money given to Manager.<br/>
+                  • <strong>Bazar Marketing</strong>: Money spent on Bazar by candidate (added directly to Meal Charge calculation).
+                </>
+              ) : (
+                <>
+                  • <strong>Advance Deposit</strong>: Pooled advance fund contributed by this member for group expenses and bookings.
+                </>
+              )}
             </p>
 
             <div className="form-group" style={{ marginBottom: '0.85rem' }}>
-              <label className="form-label">Select Candidate / Member</label>
+              <label className="form-label">
+                {group.group_type === 'MESS' ? 'Select Candidate / Member' : 'Select Member'}
+              </label>
               <select
                 className="form-select"
                 value={depositMemberId}
@@ -568,7 +595,9 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
               >
                 {group.members?.map(m => (
                   <option key={m.id || m.user_id} value={m.id || m.user_id}>
-                    {m.name || m.user?.name || m.email} (Deposit: {curr}{m.initial_deposit} | Marketing: {curr}{m.marketing_amount || 0})
+                    {m.name || m.user?.name || m.email} ({group.group_type === 'MESS' 
+                      ? `Deposit: ${curr}${m.initial_deposit} | Marketing: ${curr}${m.marketing_amount || 0}` 
+                      : `Advance Deposit: ${curr}${m.initial_deposit || 0}`})
                   </option>
                 ))}
               </select>
@@ -597,32 +626,36 @@ export default function GroupSettingsModal({ group, onClose, onGroupUpdated, onG
                   onChange={(e) => setDepositAmount(e.target.value)}
                 />
               </div>
-              <div className="form-group">
-                <label className="form-label" style={{ color: '#34d399' }}>Bazar Spent ({curr})</label>
-                <input
-                  type="number"
-                  min="0"
-                  className="form-input"
-                  placeholder="e.g. 1500"
-                  value={depositMktAmt}
-                  onChange={(e) => setDepositMktAmt(e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label" style={{ color: '#fbbf24' }}>Mkt Days</label>
-                <input
-                  type="number"
-                  min="0"
-                  className="form-input"
-                  placeholder="e.g. 2"
-                  value={depositMktDays}
-                  onChange={(e) => setDepositMktDays(e.target.value)}
-                />
-              </div>
+              {group.group_type === 'MESS' && (
+                <>
+                  <div className="form-group">
+                    <label className="form-label" style={{ color: '#34d399' }}>Bazar Spent ({curr})</label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="form-input"
+                      placeholder="e.g. 1500"
+                      value={depositMktAmt}
+                      onChange={(e) => setDepositMktAmt(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ color: '#fbbf24' }}>Mkt Days</label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="form-input"
+                      placeholder="e.g. 2"
+                      value={depositMktDays}
+                      onChange={(e) => setDepositMktDays(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             <button type="submit" disabled={updatingDeposit} className="btn btn-primary" style={{ width: '100%' }}>
-              {updatingDeposit ? 'Updating...' : 'Save Deposit & Marketing Records'}
+              {updatingDeposit ? 'Updating...' : (group.group_type === 'MESS' ? 'Save Deposit & Marketing Records' : 'Save Advance Deposit Records')}
             </button>
           </form>
         )}

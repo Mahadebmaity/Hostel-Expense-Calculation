@@ -325,34 +325,37 @@ def generate_group_pdf_report(data: Dict[str, Any], simplified_settlements: List
                 Paragraph(bal_text, bal_paragraph_style),
             ]
         elif group_type == "TRIP":
+            paid_bills = mb.get('direct_expenses_paid', mb.get('marketing_amount', 0.0))
             row = [
                 Paragraph(f"{idx}", cell_style),
                 Paragraph(f"<b>{mb.get('name', '')}</b>", cell_bold),
                 Paragraph(f"{mb.get('role', 'Member')}", cell_style),
                 Paragraph(f"<b>{curr_symbol}{mb.get('total_due', 0.0):.2f}</b>", cell_style),
-                Paragraph(f"{curr_symbol}{mb.get('marketing_amount', 0.0):.2f}", cell_style),
+                Paragraph(f"{curr_symbol}{paid_bills:.2f}", cell_style),
                 Paragraph(f"{curr_symbol}{mb.get('initial_deposit', 0.0):.2f}", cell_style),
                 Paragraph(f"<b>{curr_symbol}{mb.get('total_paid', 0.0):.2f}</b>", cell_bold),
                 Paragraph(bal_text, bal_paragraph_style),
             ]
         elif group_type == "FLATMATES":
+            paid_bills = mb.get('direct_expenses_paid', mb.get('marketing_amount', 0.0))
             row = [
                 Paragraph(f"{idx}", cell_style),
                 Paragraph(f"<b>{mb.get('name', '')}</b>", cell_bold),
                 Paragraph(f"{mb.get('role', 'Member')}", cell_style),
                 Paragraph(f"{curr_symbol}{mb.get('establishment_cost', 0.0):.2f}", cell_style),
                 Paragraph(f"{curr_symbol}{mb.get('meal_cost', 0.0):.2f}", cell_style),
-                Paragraph(f"{curr_symbol}{mb.get('marketing_amount', 0.0):.2f}", cell_style),
+                Paragraph(f"{curr_symbol}{paid_bills:.2f}", cell_style),
                 Paragraph(f"<b>{curr_symbol}{mb.get('total_paid', 0.0):.2f}</b>", cell_bold),
                 Paragraph(f"<b>{curr_symbol}{mb.get('total_due', 0.0):.2f}</b>", cell_bold),
                 Paragraph(bal_text, bal_paragraph_style),
             ]
         else: # PERSONAL / FRIENDS
+            paid_bills = mb.get('direct_expenses_paid', mb.get('marketing_amount', 0.0))
             row = [
                 Paragraph(f"{idx}", cell_style),
                 Paragraph(f"<b>{mb.get('name', '')}</b>", cell_bold),
                 Paragraph(f"<b>{curr_symbol}{mb.get('total_due', 0.0):.2f}</b>", cell_style),
-                Paragraph(f"{curr_symbol}{mb.get('marketing_amount', 0.0):.2f}", cell_style),
+                Paragraph(f"{curr_symbol}{paid_bills:.2f}", cell_style),
                 Paragraph(f"{curr_symbol}{mb.get('initial_deposit', 0.0):.2f}", cell_style),
                 Paragraph(f"<b>{curr_symbol}{mb.get('total_paid', 0.0):.2f}</b>", cell_bold),
                 Paragraph(bal_text, bal_paragraph_style),

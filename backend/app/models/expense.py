@@ -45,7 +45,9 @@ class Expense(Base):
             return self.payer_member.member_name
         if self.payer and self.payer.name:
             return self.payer.name
-        return "Member"
+        if self.group and self.group.group_type == "MESS":
+            return "Mess Fund / Manager"
+        return "Group Fund"
 
     @payer_name.setter
     def payer_name(self, val: str):

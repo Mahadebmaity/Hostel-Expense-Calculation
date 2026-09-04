@@ -23,6 +23,14 @@ def resolve_payer(
     member_map: dict,
     user_to_member: dict
 ) -> tuple:
+    fund_keywords = {"FUND", "GROUP_FUND", "MESS_FUND", "MANAGER_FUND", "COLLECTIVE_FUND"}
+    
+    # Check if payer is explicitly set to Fund / Manager collective advance pool
+    if expense_in.paid_by_member_id and str(expense_in.paid_by_member_id).strip().upper() in fund_keywords:
+        return None, None
+    if expense_in.paid_by and str(expense_in.paid_by).strip().upper() in fund_keywords:
+        return None, None
+
     paid_by_uid = current_user.id
     paid_by_mid = None
 
@@ -230,7 +238,7 @@ def create_expense(
         db.refresh(new_expense)
 
     # Attach payer display name
-    payer_display = "Member"
+    payer_display = "Mess Fund / Manager" if (group and group.group_type == "MESS") else "Group Fund"
     if new_expense.payer_member:
         payer_display = new_expense.payer_member.member_name
     elif new_expense.payer:
@@ -250,9 +258,12 @@ def list_group_expenses(
     if category:
         query = query.filter(Expense.category == category)
     
+    grp = db.query(Group).filter(Group.id == group_id).first()
+    default_fund_payer = "Mess Fund / Manager" if (grp and grp.group_type == "MESS") else "Group Fund"
+
     expenses = query.order_by(Expense.expense_date.desc(), Expense.created_at.desc()).all()
     for exp in expenses:
-        p_name = "Member"
+        p_name = default_fund_payer
         if exp.payer_member:
             p_name = exp.payer_member.member_name
         elif exp.payer:
@@ -330,7 +341,7 @@ def update_expense(
     db.commit()
     db.refresh(expense)
 
-    payer_display = "Member"
+    payer_display = "Mess Fund / Manager" if (group and group.group_type == "MESS") else "Group Fund"
     if expense.payer_member:
         payer_display = expense.payer_member.member_name
     elif expense.payer:
