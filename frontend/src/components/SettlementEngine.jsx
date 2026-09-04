@@ -20,7 +20,8 @@ import {
   Clock,
   Trash2,
   Smartphone,
-  AlertTriangle
+  AlertTriangle,
+  Receipt
 } from 'lucide-react';
 import UPIModal from './UPIModal';
 
@@ -375,8 +376,8 @@ export default function SettlementEngine({
           );
         })()}
 
-        {/* 1. MESS FINANCIAL CALCULATION TILES (Establishment + Meal Pool) */}
-        {isMess && (
+        {/* 1. FINANCIAL CALCULATION TILES (Establishment + Shared Grocery / Meal Pool) */}
+        {isMess ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
             {/* Card A: Establishment Sheet */}
             <div style={{
@@ -486,6 +487,116 @@ export default function SettlementEngine({
               </div>
             </div>
           </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
+            {/* Tile A: Rent & Fixed Utilities */}
+            <div style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-glass)',
+              borderRadius: '14px',
+              padding: '1.25rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--accent-primary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Flame size={14} color="#60a5fa" /> Rent & Fixed Utilities (Est)
+                  </span>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Room rent, electricity, wifi, maid & maintenance</p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                    {curr}{displayData.total_establishment?.toFixed(2) || '0.00'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Items list */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.85rem', fontSize: '0.78rem' }}>
+                {displayData.establishment_breakdown?.slice(0, 5).map((item, idx) => (
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+                    <span>• {item.title}</span>
+                    <strong style={{ color: 'var(--text-primary)' }}>{curr}{item.amount.toFixed(0)}/-</strong>
+                  </div>
+                ))}
+                {(!displayData.establishment_breakdown || displayData.establishment_breakdown.length === 0) && (
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>No fixed utilities logged yet</div>
+                )}
+              </div>
+
+              {/* Per-head Formula Divider */}
+              <div style={{
+                background: 'rgba(59, 130, 246, 0.15)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: '8px',
+                padding: '0.5rem 0.75rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '0.82rem'
+              }}>
+                <span style={{ color: 'var(--accent-primary)' }}>
+                  {curr}{displayData.total_establishment?.toFixed(0)} ÷ {memberBalances.length} Members:
+                </span>
+                <strong style={{ color: '#fbbf24', fontSize: '0.95rem' }}>
+                  {curr}{(displayData.establishment_per_head ?? (displayData.total_establishment / (memberBalances.length || 1)))?.toFixed(2)} / member
+                </strong>
+              </div>
+            </div>
+
+            {/* Tile B: Shared Bazar & Groceries */}
+            <div style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-glass)',
+              borderRadius: '14px',
+              padding: '1.25rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#10b981', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Utensils size={14} color="#10b981" /> Shared Bazar, Food & Groceries
+                  </span>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Marketing pool + sabji + meat + groceries</p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#10b981' }}>
+                    {curr}{displayData.total_meal_expenses?.toFixed(2) || '0.00'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Items list */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.85rem', fontSize: '0.78rem' }}>
+                {displayData.meal_pool_breakdown?.slice(0, 5).map((item, idx) => (
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+                    <span>• {item.title}</span>
+                    <strong style={{ color: 'var(--text-primary)' }}>{curr}{item.amount.toFixed(0)}/-</strong>
+                  </div>
+                ))}
+                {(!displayData.meal_pool_breakdown || displayData.meal_pool_breakdown.length === 0) && (
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>No grocery or marketing logged yet</div>
+                )}
+              </div>
+
+              {/* Per-head Formula Divider */}
+              <div style={{
+                background: 'rgba(16, 185, 129, 0.15)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderRadius: '8px',
+                padding: '0.5rem 0.75rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '0.82rem'
+              }}>
+                <span style={{ color: '#34d399' }}>
+                  {curr}{displayData.total_meal_expenses?.toFixed(0)} ÷ {memberBalances.length} Members:
+                </span>
+                <strong style={{ color: '#10b981', fontSize: '0.95rem' }}>
+                  {curr}{(displayData.total_meal_expenses / (memberBalances.length || 1))?.toFixed(2)} / member
+                </strong>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* 2. TRADITIONAL SCORE BOARD TABLE (Matching Handwritten Notebook) */}
@@ -515,7 +626,11 @@ export default function SettlementEngine({
                   </>
                 ) : (
                   <>
+                    <th style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Rent Share</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Bazar Share</th>
                     <th style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Total Share Due</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Advance Dep</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Bazar / Bills Paid</th>
                     <th style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Total Paid</th>
                   </>
                 )}
@@ -580,11 +695,23 @@ export default function SettlementEngine({
                       </>
                     ) : (
                       <>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>
+                          {curr}{mb.establishment_cost?.toFixed(2) || '0.00'}
+                        </td>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>
+                          {curr}{mb.meal_cost?.toFixed(2) || '0.00'}
+                        </td>
                         <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>
                           {curr}{mb.total_due?.toFixed(2) || '0.00'}
                         </td>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>
+                          {curr}{(mb.initial_deposit || 0).toFixed(2)}
+                        </td>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-secondary)' }}>
+                          {curr}{(mb.marketing_amount || mb.direct_expenses_paid || 0).toFixed(2)}
+                        </td>
                         <td style={{ padding: '0.75rem', textAlign: 'right', color: '#10b981', fontWeight: 700 }}>
-                          {curr}{mb.total_paid?.toFixed(2) || '0.00'}
+                          <div>{curr}{mb.total_paid?.toFixed(2) || '0.00'}</div>
                         </td>
                       </>
                     )}
@@ -633,6 +760,69 @@ export default function SettlementEngine({
             </tbody>
           </table>
         </div>
+
+        {/* 3. ITEMIZED EXPENSES BREAKDOWN LOG (Matching PDF Report) */}
+        {((displayData.establishment_breakdown && displayData.establishment_breakdown.length > 0) || 
+          (displayData.meal_pool_breakdown && displayData.meal_pool_breakdown.length > 0)) && (
+          <div style={{ marginBottom: '2.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <Receipt size={16} color="#38bdf8" />
+                <span>🛒 Itemized Bills & Expense Log (বিস্তারিত খরচের হিসাব)</span>
+              </h4>
+              <button 
+                onClick={handleDownloadReport} 
+                className="btn btn-secondary" 
+                style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}
+                disabled={downloadingPdf}
+              >
+                <FileDown size={13} /> {downloadingPdf ? 'Generating PDF...' : 'Download Statement PDF'}
+              </button>
+            </div>
+
+            <div style={{ overflowX: 'auto', border: '1px solid var(--border-glass)', borderRadius: '12px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                <thead>
+                  <tr style={{ background: 'var(--bg-surface-elevated)', borderBottom: '1px solid var(--border-glass)' }}>
+                    <th style={{ padding: '0.65rem 0.85rem', textAlign: 'left', color: 'var(--text-secondary)' }}>Category</th>
+                    <th style={{ padding: '0.65rem 0.85rem', textAlign: 'left', color: 'var(--text-secondary)' }}>Expense Title</th>
+                    <th style={{ padding: '0.65rem 0.85rem', textAlign: 'left', color: 'var(--text-secondary)' }}>Paid By</th>
+                    <th style={{ padding: '0.65rem 0.85rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Date</th>
+                    <th style={{ padding: '0.65rem 0.85rem', textAlign: 'right', color: 'var(--text-secondary)' }}>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayData.establishment_breakdown?.map((item, idx) => (
+                    <tr key={`est_${idx}`} style={{ borderBottom: '1px solid var(--border-glass)', background: 'rgba(59, 130, 246, 0.03)' }}>
+                      <td style={{ padding: '0.6rem 0.85rem' }}>
+                        <span className="badge badge-category" style={{ fontSize: '0.7rem', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
+                          Fixed Utility
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.6rem 0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</td>
+                      <td style={{ padding: '0.6rem 0.85rem', color: 'var(--text-secondary)' }}>{item.payer_name || 'Group Fund'}</td>
+                      <td style={{ padding: '0.6rem 0.85rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.date || '—'}</td>
+                      <td style={{ padding: '0.6rem 0.85rem', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>{curr}{item.amount.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                  {displayData.meal_pool_breakdown?.map((item, idx) => (
+                    <tr key={`mkt_${idx}`} style={{ borderBottom: '1px solid var(--border-glass)', background: 'rgba(16, 185, 129, 0.03)' }}>
+                      <td style={{ padding: '0.6rem 0.85rem' }}>
+                        <span className="badge badge-category" style={{ fontSize: '0.7rem', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                          {item.category === 'MARKETING' ? 'Marketing / Bazar' : 'Shared Grocery'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.6rem 0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</td>
+                      <td style={{ padding: '0.6rem 0.85rem', color: 'var(--text-secondary)' }}>{item.payer_name || 'Group Fund'}</td>
+                      <td style={{ padding: '0.6rem 0.85rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.date || '—'}</td>
+                      <td style={{ padding: '0.6rem 0.85rem', textAlign: 'right', fontWeight: 700, color: '#10b981' }}>{curr}{item.amount.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* 3. SIMPLIFIED TRANSACTION CARDS (Peer-to-Peer Minimized Settlements) */}
         <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>

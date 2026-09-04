@@ -268,6 +268,27 @@ def calculate_common_balances(
                 else:
                     member_grocery_share[m.id] += shares[idx]
 
+    # Attribute member individual marketing contributions (bazar spent)
+    for m in members:
+        mkt_amt = float(getattr(m, 'marketing_amount', 0.0) or 0.0)
+        mkt_days = float(getattr(m, 'marketing_days', 0.0) or 0.0)
+        if mkt_amt > 0:
+            total_expense_sum += mkt_amt
+            total_meal_expenses += mkt_amt
+            meal_pool_items.append({
+                "id": f"mkt_{m.id}",
+                "title": f"{m.member_name} - Marketing / Bazar Spent" + (f" ({mkt_days:.0f} days)" if mkt_days > 0 else ""),
+                "amount": mkt_amt,
+                "category": "MARKETING",
+                "date": str(date.today()),
+                "payer_name": m.member_name
+            })
+            # Divide marketing expense equally among all members
+            mkt_shares = distribute_pennies(mkt_amt, num_members)
+            for idx, mb_other in enumerate(members):
+                owed_by_member[mb_other.id] += mkt_shares[idx]
+                member_grocery_share[mb_other.id] += mkt_shares[idx]
+
     # Process settlements:
     # A settlement is payer paying payee:
     # Payer's effective paid amount increases (they paid money)
@@ -287,7 +308,10 @@ def calculate_common_balances(
     total_collected_pool = 0.0
 
     for idx, m in enumerate(members, start=1):
-        m_paid = round(m.initial_deposit + direct_paid_by_member[m.id] + settlements_paid[m.id], 2)
+        mkt_amt = float(getattr(m, 'marketing_amount', 0.0) or 0.0)
+        mkt_days = float(getattr(m, 'marketing_days', 0.0) or 0.0)
+        direct_paid = round(direct_paid_by_member[m.id], 2)
+        m_paid = round(m.initial_deposit + mkt_amt + direct_paid + settlements_paid[m.id], 2)
         m_owed = round(owed_by_member[m.id] + settlements_received[m.id], 2)
 
         # Core formula: Net Balance = Total Paid - Total Owed
@@ -312,9 +336,10 @@ def calculate_common_balances(
             "initial_deposit": m.initial_deposit,
             "deposit_paid": m.initial_deposit,
             "advance_payment": m.initial_deposit,
-            "marketing_amount": 0.0,
-            "marketing_days": 0.0,
-            "direct_expenses_paid": round(direct_paid_by_member[m.id], 2),
+            "marketing_amount": mkt_amt,
+            "marketing_days": mkt_days,
+            "direct_expenses_paid": direct_paid,
+            "bills_paid": round(mkt_amt + direct_paid, 2),
             "settlements_adjustment": round(settlements_paid[m.id] - settlements_received[m.id], 2),
             "total_paid": m_paid,
             "total_owed": m_owed,
@@ -324,7 +349,6 @@ def calculate_common_balances(
             "total_meal_units": 0.0,
             "meal_cost": round(member_grocery_share[m.id], 2),
             "establishment_cost": round(member_establishment_share[m.id], 2),
-            "bills_paid": round(direct_paid_by_member[m.id], 2),
             "guest_meal_count": 0.0,
             "guest_cost": 0.0,
             "guest_breakdown": [],

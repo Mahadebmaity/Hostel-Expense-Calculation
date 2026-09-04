@@ -181,6 +181,8 @@ def generate_group_pdf_report(data: Dict[str, Any], simplified_settlements: List
             ]
         ]
     elif group_type == "FLATMATES":
+        total_adv_pooled = sum(m.get('initial_deposit', 0.0) for m in data.get('member_balances', []))
+        total_mkt_pooled = sum(m.get('marketing_amount', 0.0) for m in data.get('member_balances', []))
         summary_data = [
             [
                 Paragraph("<b>Total Monthly Expenses</b>", cell_style),
@@ -195,8 +197,16 @@ def generate_group_pdf_report(data: Dict[str, Any], simplified_settlements: List
                 Paragraph(f"{curr_symbol}{data.get('total_establishment', 0.0):,.2f}", cell_style),
                 Paragraph("<b>Shared Groceries & Food</b>", cell_style),
                 Paragraph(f"{curr_symbol}{data.get('total_meal_expenses', 0.0):,.2f}", cell_style),
-                Paragraph("<b>Total Dues to Clear</b>", cell_style),
-                Paragraph(f"<b>{curr_symbol}{data.get('total_due', 0.0):,.0f}</b>", cell_bold)
+                Paragraph("<b>Total Advance Deposited</b>", cell_style),
+                Paragraph(f"{curr_symbol}{total_adv_pooled:,.2f}", cell_style)
+            ],
+            [
+                Paragraph("<b>Bazar / Marketing Spent</b>", cell_style),
+                Paragraph(f"{curr_symbol}{total_mkt_pooled:,.2f}", cell_style),
+                Paragraph("<b>Total Pending Dues</b>", cell_style),
+                Paragraph(f"<b>{curr_symbol}{data.get('total_due', 0.0):,.0f}</b>", cell_bold),
+                Paragraph("<b>Settlement Refund Pool</b>", cell_style),
+                Paragraph(f"<b>{curr_symbol}{data.get('total_refund', 0.0):,.0f}</b>", cell_bold)
             ]
         ]
     else: # PERSONAL / FRIENDS
@@ -267,14 +277,15 @@ def generate_group_pdf_report(data: Dict[str, Any], simplified_settlements: List
             Paragraph("<b>Sl</b>", cell_bold),
             Paragraph("<b>Roommate Name</b>", cell_bold),
             Paragraph("<b>Role</b>", cell_bold),
-            Paragraph("<b>Rent/Est Share</b>", cell_bold),
+            Paragraph("<b>Rent Share</b>", cell_bold),
             Paragraph("<b>Grocery Share</b>", cell_bold),
-            Paragraph("<b>Bills Paid</b>", cell_bold),
+            Paragraph("<b>Total Share (Due)</b>", cell_bold),
+            Paragraph("<b>Advance Dep</b>", cell_bold),
+            Paragraph("<b>Bazar/Bills Paid</b>", cell_bold),
             Paragraph("<b>Total Paid</b>", cell_bold),
-            Paragraph("<b>Total Due</b>", cell_bold),
-            Paragraph("<b>Net Balance Status</b>", cell_bold)
+            Paragraph("<b>Net Balance</b>", cell_bold)
         ]
-        col_widths = [20, 130, 60, 85, 85, 85, 85, 85, 110]
+        col_widths = [20, 115, 55, 75, 75, 75, 75, 80, 80, 95]
     else: # PERSONAL / FRIENDS
         table_title = "📋 Friends Outing Share & Payment Breakdown"
         headers = [
@@ -337,16 +348,18 @@ def generate_group_pdf_report(data: Dict[str, Any], simplified_settlements: List
                 Paragraph(bal_text, bal_paragraph_style),
             ]
         elif group_type == "FLATMATES":
-            paid_bills = mb.get('direct_expenses_paid', mb.get('marketing_amount', 0.0))
+            paid_bills = float(mb.get('direct_expenses_paid', 0.0) or 0.0) + float(mb.get('marketing_amount', 0.0) or 0.0)
+            adv_dep = float(mb.get('initial_deposit', 0.0) or 0.0)
             row = [
                 Paragraph(f"{idx}", cell_style),
                 Paragraph(f"<b>{mb.get('name', '')}</b>", cell_bold),
                 Paragraph(f"{mb.get('role', 'Member')}", cell_style),
                 Paragraph(f"{curr_symbol}{mb.get('establishment_cost', 0.0):.2f}", cell_style),
                 Paragraph(f"{curr_symbol}{mb.get('meal_cost', 0.0):.2f}", cell_style),
+                Paragraph(f"<b>{curr_symbol}{mb.get('total_due', 0.0):.2f}</b>", cell_style),
+                Paragraph(f"{curr_symbol}{adv_dep:.2f}", cell_style),
                 Paragraph(f"{curr_symbol}{paid_bills:.2f}", cell_style),
                 Paragraph(f"<b>{curr_symbol}{mb.get('total_paid', 0.0):.2f}</b>", cell_bold),
-                Paragraph(f"<b>{curr_symbol}{mb.get('total_due', 0.0):.2f}</b>", cell_bold),
                 Paragraph(bal_text, bal_paragraph_style),
             ]
         else: # PERSONAL / FRIENDS
