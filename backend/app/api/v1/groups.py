@@ -496,8 +496,10 @@ def get_group_balances(
 
     # 3. Attach dynamic UPI QR payload for each transaction
     member_upi_map = {}
+    manager_upi = None
+    manager_name = "Mess Manager"
     for m in group.members:
-        upi = m.member_upi_id or m.upi_id
+        upi = m.member_upi_id or m.upi_id or (m.user.upi_id if m.user else None)
         if upi:
             if m.id:
                 member_upi_map[m.id] = upi
@@ -505,11 +507,21 @@ def get_group_balances(
                 member_upi_map[m.user_id] = upi
             if m.name:
                 member_upi_map[m.name.strip().lower()] = upi
+            if (m.role or "").upper() in ["MANAGER", "ADMIN"] and not manager_upi:
+                manager_upi = upi
+                manager_name = m.member_name or "Mess Manager"
+
+    # Fallback to any member UPI if no manager role explicitly has UPI
+    if not manager_upi and member_upi_map:
+        manager_upi = next(iter(member_upi_map.values()))
 
     for tx in simplified:
         payee_upi = tx.get("payee_upi_id")
         if not payee_upi:
             payee_upi = member_upi_map.get(tx.get("payee_id")) or member_upi_map.get(tx.get("payee_name", "").strip().lower())
+            # For MESS groups, dues to virtual members or members without UPI route to the Mess Manager
+            if not payee_upi and group.group_type == "MESS" and manager_upi:
+                payee_upi = manager_upi
             tx["payee_upi_id"] = payee_upi
 
         upi_data = get_upi_payment_payload(

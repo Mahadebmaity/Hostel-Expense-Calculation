@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   QrCode, 
   Copy, 
@@ -20,14 +20,51 @@ export default function UPIModal({ transaction, group, onClose, onMarkSettled, o
   const [marking, setMarking] = useState(false);
   const [shareStatus, setShareStatus] = useState('idle'); // 'idle' | 'shared' | 'downloaded'
 
+  // Helper to detect Manager UPI from group
+  const getMemberUpi = (m) => m?.upi_id || m?.member_upi_id || m?.user?.upi_id || '';
+  const managerMember = 
+    group?.members?.find(m => (m.role || '').toUpperCase() === 'MANAGER') ||
+    group?.members?.find(m => (m.role || '').toUpperCase() === 'ADMIN') ||
+    group?.members?.[0];
+  const detectedManagerUpi = getMemberUpi(managerMember) ||
+    group?.members?.map(getMemberUpi).find(Boolean) ||
+    '';
+
+  const effectivePayeeUpi = transaction.payee_upi_id || (group?.group_type === 'MESS' ? detectedManagerUpi : '');
+
   // Dynamic UPI states
-  const [currentUpiId, setCurrentUpiId] = useState(transaction.payee_upi_id || '');
+  const [currentUpiId, setCurrentUpiId] = useState(effectivePayeeUpi || '');
   const [currentQrBase64, setCurrentQrBase64] = useState(transaction.upi_qr_base64 || '');
   const [currentUpiUri, setCurrentUpiUri] = useState(transaction.upi_uri || '');
-  const [isEditingUpi, setIsEditingUpi] = useState(!transaction.payee_upi_id);
-  const [upiInput, setUpiInput] = useState(transaction.payee_upi_id || '');
+  const [isEditingUpi, setIsEditingUpi] = useState(!effectivePayeeUpi);
+  const [upiInput, setUpiInput] = useState(effectivePayeeUpi || '');
   const [savingUpi, setSavingUpi] = useState(false);
   const [upiError, setUpiError] = useState('');
+
+  // Auto-generate QR code and deep-link if UPI ID is present but QR not pre-generated
+  useEffect(() => {
+    let isMounted = true;
+    if (currentUpiId && !currentQrBase64) {
+      setSavingUpi(true);
+      api.generateUPI({
+        upi_id: currentUpiId,
+        payee_name: transaction.payee_name || (group?.group_type === 'MESS' ? 'Mess Manager' : 'Payee'),
+        amount: transaction.amount || 0,
+        note: `${group?.name || 'Mess'} Settlement`
+      }).then(res => {
+        if (isMounted && res?.upi_qr_base64) {
+          setCurrentQrBase64(res.upi_qr_base64);
+          setCurrentUpiUri(res.upi_uri);
+          setIsEditingUpi(false);
+        }
+      }).catch(err => {
+        console.warn('Auto UPI QR generation failed:', err);
+      }).finally(() => {
+        if (isMounted) setSavingUpi(false);
+      });
+    }
+    return () => { isMounted = false; };
+  }, [currentUpiId, currentQrBase64, transaction.payee_name, transaction.amount, group?.name, group?.group_type]);
 
   const upiHandles = ['@oksbi', '@okhdfc', '@paytm', '@ybl', '@axl', '@ibl'];
 
@@ -210,6 +247,33 @@ export default function UPIModal({ transaction, group, onClose, onMarkSettled, o
                   autoFocus
                 />
               </div>
+
+              {detectedManagerUpi && upiInput !== detectedManagerUpi && (
+                <div style={{ marginBottom: '0.65rem', textAlign: 'left' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUpiInput(detectedManagerUpi);
+                      if (upiError) setUpiError('');
+                    }}
+                    style={{
+                      background: 'rgba(59, 130, 246, 0.15)',
+                      border: '1px solid rgba(59, 130, 246, 0.35)',
+                      color: '#60a5fa',
+                      borderRadius: '8px',
+                      padding: '0.3rem 0.6rem',
+                      fontSize: '0.74rem',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem'
+                    }}
+                  >
+                    ⚡ Use Mess Manager UPI ({detectedManagerUpi})
+                  </button>
+                </div>
+              )}
 
               {/* Quick UPI Handle Pills */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.85rem' }}>

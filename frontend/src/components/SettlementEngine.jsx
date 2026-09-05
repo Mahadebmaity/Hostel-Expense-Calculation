@@ -45,6 +45,24 @@ export default function SettlementEngine({
   const isMess = group?.group_type === 'MESS';
   const curr = group?.currency === 'INR' ? '₹' : (group?.currency || '₹');
 
+  // Helper to extract UPI ID from a member object (direct or via linked user)
+  const getMemberUpi = (m) => {
+    if (!m) return '';
+    return m.upi_id || m.member_upi_id || m.user?.upi_id || '';
+  };
+
+  const managerMember = 
+    group?.members?.find(m => (m.role || '').toUpperCase() === 'MANAGER') ||
+    group?.members?.find(m => (m.role || '').toUpperCase() === 'ADMIN') ||
+    group?.members?.find(m => m.user_id === group.created_by) ||
+    group?.members?.[0];
+
+  const managerUpi = getMemberUpi(managerMember) ||
+    group?.members?.map(getMemberUpi).find(Boolean) ||
+    '';
+
+  const managerName = managerMember?.name || managerMember?.user?.name || managerMember?.member_name || 'Mess Manager';
+
   // Load saved scoreboards for this group
   const loadSavedArchives = async () => {
     if (!group?.id) return;
@@ -308,8 +326,7 @@ export default function SettlementEngine({
 
         {/* Manager UPI Requirement Alert */}
         {(() => {
-          const managerMember = group?.members?.find(m => m.role === 'MANAGER' || m.role === 'ADMIN') || group?.members?.[0];
-          const managerHasUpi = !!(managerMember?.upi_id || managerMember?.user?.upi_id);
+          const managerHasUpi = !!managerUpi;
           if (managerHasUpi || !managerMember) return null;
 
           return (
@@ -729,21 +746,54 @@ export default function SettlementEngine({
                         <button
                           onClick={() => {
                             const payerId = mb.member_id || mb.user_id;
-                            // Find a creditor with positive balance or group manager/admin
-                            const creditor = memberBalances.find(m => (m.member_id !== payerId && m.user_id !== payerId && m.net_balance > 0.01));
-                            const manager = group.members?.find(m => m.role === 'MANAGER' || m.role === 'ADMIN') || group.members?.[0];
-                            const targetPayee = creditor || manager;
-                            const payeeUpi = targetPayee?.upi_id || targetPayee?.user?.upi_id || '';
+                            const isPayerManager = Boolean(
+                              managerMember && (
+                                payerId === managerMember.id || 
+                                payerId === managerMember.user_id ||
+                                (mb.role && mb.role.toUpperCase() === 'MANAGER')
+                              )
+                            );
+
+                            let targetPayeeId = managerMember?.id || managerMember?.user_id || 'manager';
+                            let targetPayeeMemberId = managerMember?.id;
+                            let targetPayeeName = managerName;
+                            let payeeUpi = managerUpi;
+
+                            if (isMess) {
+                              if (isPayerManager) {
+                                // If the manager has a due, they pay the candidate owed a refund
+                                const creditor = memberBalances.find(m => (m.member_id !== payerId && m.user_id !== payerId && m.net_balance > 0.01));
+                                const credMember = group.members?.find(m => m.id === creditor?.member_id || m.user_id === creditor?.user_id);
+                                targetPayeeId = creditor?.member_id || creditor?.user_id || 'member';
+                                targetPayeeMemberId = creditor?.member_id;
+                                targetPayeeName = creditor?.name || 'Candidate (Refund)';
+                                payeeUpi = creditor?.upi_id || getMemberUpi(credMember) || '';
+                              } else {
+                                // Regular candidate with a due pays the Mess Manager / Mess Account
+                                targetPayeeId = managerMember?.id || managerMember?.user_id || 'manager';
+                                targetPayeeMemberId = managerMember?.id;
+                                targetPayeeName = managerName;
+                                payeeUpi = managerUpi;
+                              }
+                            } else {
+                              // Flatmate / Trip peer-to-peer
+                              const creditor = memberBalances.find(m => (m.member_id !== payerId && m.user_id !== payerId && m.net_balance > 0.01));
+                              const credMember = group.members?.find(m => m.id === creditor?.member_id || m.user_id === creditor?.user_id);
+                              targetPayeeId = creditor?.member_id || creditor?.user_id || managerMember?.id || 'manager';
+                              targetPayeeMemberId = creditor?.member_id || managerMember?.id;
+                              targetPayeeName = creditor?.name || managerName;
+                              payeeUpi = creditor?.upi_id || getMemberUpi(credMember) || managerUpi || '';
+                            }
 
                             setActiveUpiTx({
                               payer_id: payerId,
                               payer_name: mb.name,
-                              payee_id: targetPayee?.id || targetPayee?.user_id || 'manager',
-                              payee_member_id: targetPayee?.id,
-                              payee_name: targetPayee?.name || targetPayee?.member_name || group.name,
+                              payee_id: targetPayeeId,
+                              payee_member_id: targetPayeeMemberId,
+                              payee_name: targetPayeeName,
                               payee_upi_id: payeeUpi,
                               amount: Math.abs(bal),
-                              currency: group.currency
+                              currency: group.currency || 'INR'
                             });
                           }}
                           className="btn btn-primary"
@@ -881,11 +931,20 @@ export default function SettlementEngine({
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                      {tx.payee_upi_id ? `Payee: ${tx.payee_upi_id}` : 'Pay via UPI'}
+                      {(tx.payee_upi_id || (isMess ? managerUpi : ''))
+                        ? `Payee: ${tx.payee_upi_id || managerUpi}`
+                        : 'Pay via UPI'}
                     </span>
                     
                     <button
-                      onClick={() => setActiveUpiTx(tx)}
+                      onClick={() => {
+                        const txPayeeUpi = tx.payee_upi_id || (isMess ? managerUpi : '');
+                        setActiveUpiTx({
+                          ...tx,
+                          payee_upi_id: txPayeeUpi,
+                          payee_name: tx.payee_name || (isMess ? managerName : 'Payee')
+                        });
+                      }}
                       className="btn btn-primary"
                       style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
                     >
